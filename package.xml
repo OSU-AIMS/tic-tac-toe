@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+    <name>tic_tac_toe</name>
+    <version>0.0.1</version>
+    <description>
+        <p>PROJECT: "Robotic Tic Tac Toe"</p>
+    </description>
+    <author>LuisMartinez</author>
+    <maintainer email="luiscmartinez18@gmail.com">LuisMartinez</maintainer>
+    <license>Apache 2.0</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <build_depend>moveit_core</build_depend>
+    <build_depend>moveit_ros_planning</build_depend>
+    <build_depend>moveit_ros_planning_interface</build_depend>
+
+    <test_depend>roslaunch</test_depend>
+
+    <exec_depend>mh5l_table</exec_depend>
+    <exec_depend>motoman_mh5_support</exec_depend>
+    <exec_depend>joint_state_publisher</exec_depend>
+    <exec_depend>motoman_driver</exec_depend>
+    <exec_depend>robot_state_publisher</exec_depend>
+    <exec_depend>rviz</exec_depend>
+    <exec_depend>xacro</exec_depend>
+
+    <export>
+        <architecture_independent/>
+    </export>
+</package>
