@@ -19,14 +19,16 @@ class colorFilter:
       #self.original = self.rescaleFrame(frame)
       #self.original = self.cropFrame(frame)
       self.original=frame
-    cv2.imshow('Original',self.original)
+    #cv2.imshow('Original',self.original)
     cv2.moveWindow("Original",0,0)
 
   def cropFrame(self,frame):
+    print('Entered color_filter: cropFrame function')
     #cropped_image = frame[60:250, 200:500]
     return cropped_image
 
   def rescaleFrame(self,frame, scale=1):
+    print('Entered color_filter: rescaleFrame function')
     # Images, Videos and Live Video
     width = int(frame.shape[1] * scale)
     height = int(frame.shape[0] * scale)
@@ -36,9 +38,10 @@ class colorFilter:
     return cv2.resize(frame, dimensions, interpolation=cv2.INTER_AREA)
 
   def deNoise(self,frame): 
+    print('Entered color_filter: deNoise function')
   # reduces noise of an image
     image_denoised = cv2.fastNlMeansDenoising(frame,None,40,7,21)
-    cv2.imshow('Denoised Image',image_denoised)
+    #cv2.imshow('Denoised Image',image_denoised)
     ''' 
     parameters: fastNlMeansDenoising(
     inputArray: Input 8-bit 1-channel, 2-channel, 3-channel or 4-channel image. 
@@ -56,6 +59,7 @@ class colorFilter:
 
 
   def filterBackground(self):
+    print('Entered color_filter: filterBackground function')
     #split image to rgb channels
     b,g,r = cv2.split(self.original)
 

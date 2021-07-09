@@ -8,6 +8,7 @@ import rospy
 import geometry_msgs.msg 
 import cv2
 #import imutils
+#include <opencv2/core.hpp> from docs on PCACompute https://docs.opencv.org/4.2.0/d2/de8/group__core__array.html#ga0ad1147fbcdb256f2e14ae2bfb8c991d
 
 class detectRect(object):
   def __init__(self):
@@ -37,6 +38,7 @@ class detectRect(object):
 
 
   def isSame(self,index, xList, yList, angleList):
+    print('Entered Rectangle_support: isSame function')
     if index>=20:
       j=index-19
     else:
@@ -62,6 +64,7 @@ class detectRect(object):
     # Reorders the four points of the rectangle
   def reorder(self,points):
     try:
+      print('Entered Rectangle_support: reorder function')
       NewPoints = np.zeros_like(points)
       points = points.reshape((4, 2))
       add = points.sum(1)
@@ -76,6 +79,7 @@ class detectRect(object):
 
   # Finds the distance between 2 points (distance formula)
   def findDis(self,pts1, pts2):
+    print('Entered Rectangle_support: findDis function')
     x1 = float(pts1[0])
     x2 = float(pts2[0])
     y1 = float(pts1[1])
@@ -85,6 +89,7 @@ class detectRect(object):
 
   # Draws x-y axis relative to object center and orientation
   def drawAxis(self,img, p_, q_, color, scale):
+    print('Entered Rectangle_support: drawAxis function')
     p = list(p_)
     q = list(q_)
 
@@ -107,6 +112,7 @@ class detectRect(object):
 
   # Gets angle of object
   def getOrientation(self,pts, img): 
+    print('Entered Rectangle_support: getOrientation function')
     sz = len(pts)
     data_pts = np.empty((sz, 2), dtype=np.float64)
     for i in range(data_pts.shape[0]):
@@ -116,6 +122,8 @@ class detectRect(object):
     # Performs PCA analysis
     mean = np.empty((0))
     mean, eigenvectors, eigenvalues = cv2.PCACompute2(data_pts, mean)
+    #eigenvalues, eigenvectors = np.linalg.eig(mean)
+
 
     # Stores the center of the object
     cntr = (int(mean[0, 0]), int(mean[0, 1]))
@@ -132,6 +140,7 @@ class detectRect(object):
 
     #finds contours on image
   def getContours(self,orignal_frame, gray_mask):
+    print('Entered Rectangle_support: getContours function')
 
     imgBlur = cv2.GaussianBlur(gray_mask, (7, 7), 0)
     #cv2.imshow('blur',imgBlur)
@@ -141,15 +150,16 @@ class detectRect(object):
     imgDilate = cv2.dilate(imgCanny, kernel, iterations=3)
     imgThre = cv2.erode(imgDilate, kernel, iterations=2)
 
-    cv2.imshow("img threshold",imgThre)
+    #cv2.imshow("img threshold",imgThre)
     contours, _ = cv2.findContours(imgThre, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     areaList = []
     approxList = []
     bboxList = []
     BiggestContour = []
     BiggestBounding =[]
+    r = 0
     for i in contours:
-
+      
       #find center using moments
       M = cv2.moments(i)
       cX = int((M['m10']/M['m00']))
@@ -164,10 +174,13 @@ class detectRect(object):
       approx = cv2.approxPolyDP(i, 0.04 * peri, True)
 
       if len(approx) == 4:
+        rect_index = append(r)
         bbox = cv2.boundingRect(approx)
         areaList.append(area)
         approxList.append(approx)
         bboxList.append(bbox)
+      r += 1
+
     if len(areaList) != 0:
       SortedAreaList= sorted(areaList, reverse=True)
       #print("sorted area list: ",SortedAreaList)
@@ -240,6 +253,7 @@ class detectRect(object):
   #   return shape
 
   def talker():
+    print('Entered Rectangle_support: talker function')
     #pub = rospy.Publisher('Coordinates/Angle',Pose, queue_size=10)
     # is float64 right for Python 2.7? 
     from geometry_msgs.msg import Pose

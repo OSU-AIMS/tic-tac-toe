@@ -3,7 +3,7 @@
 from rectangle_support import *
 from color_filter import *
 import cv2
-import pyrealsense2 as rs
+#import pyrealsense2 as rs
 import rospy
 import numpy as np
 
@@ -68,8 +68,12 @@ def main():
 		'''
 		#image = cv2.imread("images/black10_Color.png",cv2.IMREAD_GRAYSCALE)
 		#template = cv2.imread("images/background_Color.png",cv2.IMREAD_GRAYSCALE)
-		image = cv2.imread("images/black1_Color.png")
-		template = cv2.imread("images/background_Color.png")
+		
+
+############# print(cv2.__version__) OpenCV version: 4.2.0 ################
+		print('OpenCV version:',cv2.__version__)
+		image = cv2.imread("images/2_Color.png")
+		template = cv2.imread("images/back_Color.png")
 		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
 		template = cv2.morphologyEx(template, cv2.MORPH_ERODE, kernel,iterations = 2)
 		#template is the background image
@@ -88,7 +92,7 @@ def main():
 
 		rospy.sleep(4.5)
 
-		rect = detectRect()
+		rect = detectRect() # class in rectangle_support.py
 
 		# cF = colorFilter('images/black8_Color.png')
 		cF = colorFilter(block)
