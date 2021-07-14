@@ -157,9 +157,9 @@ class detectRect(object):
     bboxList = []
     BiggestContour = []
     BiggestBounding =[]
-    r = 0
+    
     for i in contours:
-      
+      print('loop')
       #find center using moments
       M = cv2.moments(i)
       cX = int((M['m10']/M['m00']))
@@ -174,17 +174,17 @@ class detectRect(object):
       approx = cv2.approxPolyDP(i, 0.04 * peri, True)
 
       if len(approx) == 4:
-        rect_index = append(r)
         bbox = cv2.boundingRect(approx)
         areaList.append(area)
         approxList.append(approx)
         bboxList.append(bbox)
-      r += 1
+      
 
     if len(areaList) != 0:
       SortedAreaList= sorted(areaList, reverse=True)
       #print("sorted area list: ",SortedAreaList)
       BiggestIndex = areaList.index(SortedAreaList[0])
+      #print(BiggestIndex)
       #print('BiggestIndex: ',BiggestIndex)
       BiggestContour = approxList[BiggestIndex]
       BiggestBounding = bboxList[BiggestIndex]
