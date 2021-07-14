@@ -112,7 +112,7 @@ def main():
 		drawingFit = cF.original.copy()
 		# rospy.sleep(5)
 		# Locates center point
-		nPoints= (bigCont)
+		nPoints= rect.reorder(bigCont)
 
 
 		#draw centerpoint

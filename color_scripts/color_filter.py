@@ -10,7 +10,7 @@ class colorFilter:
     if isinstance(frame,str) == True:
       #local image
       image = cv2.imread(frame)
-     #self.original = self.rescaleFrame(image)
+      self.original = self.rescaleFrame(image)
       self.original = self.cropFrame(image)
 
     else:
@@ -19,12 +19,12 @@ class colorFilter:
       #self.original = self.rescaleFrame(frame)
       #self.original = self.cropFrame(frame)
       self.original=frame
-    #cv2.imshow('Original',self.original)
+    cv2.imshow('Original',self.original)
     cv2.moveWindow("Original",0,0)
 
   def cropFrame(self,frame):
     print('Entered color_filter: cropFrame function')
-    #cropped_image = frame[60:250, 200:500]
+    cropped_image = frame[60:250, 200:500]
     return cropped_image
 
   def rescaleFrame(self,frame, scale=1):
