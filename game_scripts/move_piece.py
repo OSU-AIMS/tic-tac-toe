@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import sys
+sys.path.insert(0, '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
+
 import rospy
 from robot_support import *
 
@@ -23,7 +26,7 @@ class anyPosition(object):
   def scanPos(self):
     joint_goal = self.rc.move_group.get_current_joint_values()
 
-    joint_goal[0] = radians(-90)
+    joint_goal[0] = radians(90) #for right side of table
     joint_goal[1] = 0
     joint_goal[2] = 0
     joint_goal[3] = 0

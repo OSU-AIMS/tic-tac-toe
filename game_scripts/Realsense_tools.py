@@ -4,46 +4,50 @@ import sys                                          # System bindings
 import cv2                                          # OpenCV bindings
 import numpy as np
 import rospy
+import pyrealsense2 as rs
+
 
 #this class is for grabbing frame from the Realsense d435i camera plus image tools
 
 class RealsenseTools:
   def __init__(self):
-      Configure depth and color streams
-      pipeline = rs.pipeline()
-      config = rs.config()
+    self.pipeline = rs.pipeline()
+    self.config = rs.config()
 
-      # Get device product line for setting a supporting resolution
-      pipeline_wrapper = rs.pipeline_wrapper(pipeline)
-      pipeline_profile = config.resolve(pipeline_wrapper)
-      device = pipeline_profile.get_device()
-      device_product_line = str(device.get_info(rs.camera_info.product_line))
+    # Get device product line for setting a supporting resolution
+    self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
+    self.pipeline_profile = self.config.resolve(self.pipeline_wrapper)
+    self.device = self.pipeline_profile.get_device()
+    self.device_product_line = str(self.device.get_info(rs.camera_info.product_line))
 
-      config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+    self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
-      if device_product_line == 'L500':
-        config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
-      else:
-        config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-  def grabFrame():
+    if self.device_product_line == 'L500':
+      self.config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
+    else:
+      self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
     # Starts streaming
-    pipeline.start(config)
+    self.pipeline.start(self.config)
+  def grabFrame(self):
+    # Starts streaming
+    #self.pipeline.start(self.config)
     while True:
-      frames = pipeline.wait_for_frames()
+      frames = self.pipeline.wait_for_frames()
       color_frame = frames.get_color_frame()
       if not color_frame:
         continue
       else:
         break
-    return color_frame 
-
     color_image = np.asanyarray(color_frame.get_data())
-    cv2.imshow('test',color_image)
-    print(color_image.shape)
+    # cv2.imshow('test',color_image)
+    #print(color_image.shape)
+    return color_image
+
 
   def cropFrame(self,frame):
-    print('Entered RealsenseTools: cropFrame function')
-    cropped_image = frame[60:250, 200:500]
+    print('Entered RealsenseTools: cropFrame function\n')
+    cropped_image = frame[55:228,335:515] # frame[y,x]
     return cropped_image
 
   def rescaleFrame(self,frame, scale=1):

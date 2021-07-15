@@ -12,8 +12,40 @@ import cv2
 
 class detectXO(object):
   def __init__(self):
-    super(detectRect,self).__init__()
+    super(detectXO,self).__init__()
     
+
+  def getCircle(self,frame):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    blur = cv2.medianBlur(gray, 5)
+
+    rows = blur.shape[0]
+    circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, 1, rows / 8,
+                               param1=100, param2=30,
+                               minRadius=1, maxRadius=30)
+    centerList = []
+
+    if circles is not None:
+      circles = np.uint16(np.around(circles))
+      for i in circles[0, :]:
+        center = (i[0], i[1]) # assuming (i[0]=x, i[1]=y)
+        # circle center
+        cv2.circle(frame, center, 1, (0, 100, 100), 3)
+        # circle outline
+        radius = i[2]
+        cv2.circle(frame, center, radius, (255, 0, 255), 3)
+        centerList.append(center)
+    
+    cv2.imshow("detected circles", frame)
+    # cv2.waitKey(0)
+    #print("Center List:",centerList)
+    # circles outputs (x,y, radius)
+
+
+
+    return centerList
+
+
 
 
 
