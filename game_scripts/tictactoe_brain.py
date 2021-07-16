@@ -22,8 +22,8 @@ class BigBrain():
   def __init__(self):
     #supr(BigBrain,self).__init__()
     self.infinity = np.inf
-    self.HUMAN = +1
-    self.COMP =  -1
+    self.HUMAN = -1
+    self.COMP =  +1
     self.board = [
     [0, 0, 0],
     [0, 0, 0],
@@ -204,6 +204,7 @@ class BigBrain():
     self.board = board
     depth = len(self.empty_cells(self.board))
     if depth == 0 or self.game_over(self.board):
+        print("GAME OVER")
         return
 
     # clean()
@@ -211,8 +212,10 @@ class BigBrain():
     #render(self.board, c_choice, h_choice)
 
     if depth == 9: # if board is blank, randomly choose a spot
+        print('Board is Blank')
         x = choice([0, 1, 2])
         y = choice([0, 1, 2])
+        move = [x,y]
     else: # else apply minimax function
         move = self.minimax(self.board, depth, self.COMP)
         x, y = move[0], move[1]

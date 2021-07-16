@@ -38,17 +38,19 @@ def main():
     [0, 0, 0],
     [0, 0, 0],
   ] # array for code to know which player went whree
-    # Human: +1 (circles)
-    # Computer: -1 (X's)
+    # Human: -1 (circles)
+    # Computer: +1 (X's)
     # board filled with -1 & +1
-
+  blocks = 0
+  blocksX = -.12 #x distance for all x blocks
+  blocksY= [.514,.551,.588,.625,.662] # Y distance in meters for x blocks 
   try:
     gameInProgress = True
     countO = 0
     countX = 1 # if user starts with X -> countX = 1, same with o
     
     while gameInProgress == True:
-      
+      PickP.scanPos()
       raw_input('Press enter after Player move:')
       
       RoboTurn = True
@@ -56,13 +58,21 @@ def main():
         ##scanning
         #robot goes into scannning position
         #robot_toPaper
-        PickP.scanPos()
+        
         img_precrop = imgClass.grabFrame() 
-        cv2.imshow('Precrop',img_precrop)
+        #cv2.imshow('Precrop',img_precrop)
         img = imgClass.cropFrame(img_precrop)
-        cv2.imshow('Cropped Game Board',img)
+        #cv2.imshow('Cropped Game Board',img)
         #rospy.sleep(5)
         centers = dXO.getCircle(img)
+        countO += 1 
+        # while countO != len(centers):
+        #   print('WTF. number of O''s counted ')
+        #   img_precrop = imgClass.grabFrame() 
+        #   img = imgClass.cropFrame(img_precrop)
+        #   centers = dXO.getCircle(img)
+    
+        cv2.imshow('Circles detected',img)
         ''' 
         Top left square: (x,y) Pixels
           - top left corner:(7,13)
@@ -103,54 +113,54 @@ def main():
           if 7 < centers[i][0] < 54 and 13 < centers[i][1] < 60:
             print('aT top left square')
             board[0][0]='O'
-            boardCode[0][0]= +1
+            boardCode[0][0]= -1
 
           elif 62 < centers[i][0] < 109 and 12 <= centers[i][1] < 57:
             print('At top middle')
             board[0][1]='O'
-            boardCode[0][1]= +1
+            boardCode[0][1]= -1
 
           elif 115 < centers[i][0] < 164 and 12 <= centers[i][1] < 57:
             print('At top right')
             board[0][2]='O'
-            boardCode[0][1]= +1
+            boardCode[0][2]= -1
 
           elif 6 < centers[i][0] < 55 and 68 <= centers[i][1] < 111:
             print('At mid left')
             board[1][0]='O'
-            boardCode[1][0]= +1
+            boardCode[1][0]= -1
 
           elif 62 < centers[i][0] <= 108 and 66 < centers[i][1] < 109:
             print('At mid middle')
             board[1][1]='O'
-            boardCode[1][1]= +1
+            boardCode[1][1]= -1
 
           elif 114 < centers[i][0] <= 164 and 64 < centers[i][1] < 109:
             print('At mid right')
             board[1][2]='O'
-            boardCode[1][2]= +1
+            boardCode[1][2]= -1
 
           elif 5 <= centers[i][0] < 56 and 118 <= centers[i][1] < 165:
             print('At bottom left')
             board[2][0]='O'
-            boardCode[2][0]= +1
+            boardCode[2][0]= -1
 
-          elif 63 <= centers[i][0] <= 108 and 19 < centers[i][1] < 165:
+          elif 63 <= centers[i][0] <= 108 and 119 < centers[i][1] < 165:
             print('At bottom middle')
             board[2][1]= 'O'
-            boardCode[2][1]= +1
+            boardCode[2][1]= -1
 
           elif 115 < centers[i][0] <= 167 and 117 < centers[i][1] < 163:
             print('At bottom right')
             board[2][2]='O'
-            boardCode[2][2]= +1
+            boardCode[2][2]= -1
 
 
           else:
             print('not on board')
             # 
 
-         
+        
  
 
         #scan 
@@ -164,23 +174,74 @@ def main():
         # ai_turn parameters:(self,c_choice, h_choice,board):
         move = brain.ai_turn('X','O' , boardCode) #outputs move array based on minimx
         print('MOVE: ',move)
-
+        # if move == None:
+        #   if brain.wins(boardCode, -1):
+        #     print('YOU WIN!')
+        #     exit()
+        #   elif brain.wins(boardCode, +1):
+        #   # print(f'Computer turn [{c_choice}]')        
+        #     print('YOU LOSE!')
+        #     exit()
+        #   else:
+        #     print('DRAW!')
+        #     exit()
+        # else:
         board[move[0]][move[1]]='X'
-        boardCode[move[0]][move[1]]= -1
+        boardCode[move[0]][move[1]]= +1
+        Y = blocksY[blocks]
+        PickP.moveToPickup(blocksX, Y)
+        matrixX= [.023,.08,.137]
+        matrixY= [.58,.513,.456]
+        PickP.moveToBoard(matrixX[move[1]],matrixY[move[0]])
+
+        print('Current State of Physical Board:')
+        print(board[0])
+        print(board[1])
+        print(board[2]) # after robot turn is over  
+        print('Current State of Code Board:')
+        print(boardCode[0])
+        print(boardCode[1])
+        print(boardCode[2])
+
+
+        # #recieve output move and execute robot motion
+         
+        # if boardCode[0][0] == -1:
+        #   PickP.moveToBoard(0.023,.58)
+        # elif boardCode[0][1] == -1:
+        #   PickP.moveToBoard(.08,.58)
+        # elif boardCode[0][2] == -1:
+        #   PickP.moveToBoard(.137,.58)
+        # elif boardCode[1][0] == -1:
+        #   PickP.moveToBoard(.023,.513)
+        # elif boardCode[1][1] == -1:
+        #   PickP.moveToBoard(.08,.513)
+        # elif boardCode[1][2] == -1:
+        #   PickP.moveToBoard(.137,.513)
+        # elif boardCode[2][0] == -1:
+        #   PickP.moveToBoard(.023,.456)
+        # elif boardCode[2][1] == -1:
+        #   PickP.moveToBoard(.08,.456)
+        # elif boardCode[2][2] == -1:
+        #   PickP.moveToBoard(.137,.456)
+        # else:
+        #   print('No AI move.')
+        #   blocks -= 1
+        blocks += 1
+
+          
 
 
 
-        #recieve output move and execute robot motion
 
         #moveManipulator class
         ## grab from O stack and play move  
         cv2.waitKey(0)
         RoboTurn = False
-      print('Current State of Physical Board:',board) # after robot turn is over  
-      print('Current State of Code Board',boardCode)
+      
 
 
-      # gameInProgress = False
+      # gameInProgress = False    
 
 
 

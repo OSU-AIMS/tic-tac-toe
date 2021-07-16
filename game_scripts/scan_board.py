@@ -36,7 +36,7 @@ class detectXO(object):
         cv2.circle(frame, center, radius, (255, 0, 255), 3)
         centerList.append(center)
     
-    cv2.imshow("detected circles", frame)
+    #cv2.imshow("detected circles", frame)
     # cv2.waitKey(0)
     #print("Center List:",centerList)
     # circles outputs (x,y, radius)
