@@ -130,7 +130,8 @@ class detectXO(object):
   def getContours(self,orignal_frame, gray_mask):
     print('Entered Rectangle_support: getContours function')
 
-    imgBlur = cv2.GaussianBlur(gray_mask, (7, 7), 0)
+
+    imgBlur = cv2.GaussianBlur(gray_mask, (3, 3), 0)
     #cv2.imshow('blur',imgBlur)
     imgCanny = cv2.Canny(imgBlur, 100, 200)
 
@@ -142,33 +143,30 @@ class detectXO(object):
     contours, _ = cv2.findContours(imgThre, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     areaList = []
     approxList = []
-    centerListX = []
-    centerListY = []
+    bboxList = []
     BiggestContour = []
-    count = 0
+    BiggestBounding =[]
     
     for i in contours:
       print('loop')
-      
       #find center using moments
       M = cv2.moments(i)
-      centerListX[count] = int((M['m10']/M['m00']))
-      centerListY[count] = int((M['m01']/M['m00']))
+      cX = int((M['m10']/M['m00']))
+      cy = int((M['m01']/M['m00']))
       #print('Contours: ',contours)
 
-      count += 1
       orignal_copy = orignal_frame.copy()
       img_with_contours = cv2.drawContours(orignal_copy, [i], -1, (0, 255, 0),2)
-
+      cv2.imshow('contour loop',img_with_contours)
       area = cv2.contourArea(i)
       peri = cv2.arcLength(i, True)
       approx = cv2.approxPolyDP(i, 0.04 * peri, True)
 
-      if len(approx) >= 6:
-        #bbox = cv2.boundingRect(approx)
+      if len(approx) == 4:
+        bbox = cv2.boundingRect(approx)
         areaList.append(area)
         approxList.append(approx)
-        #bboxList.append(bbox)
+        bboxList.append(bbox)
       
 
     if len(areaList) != 0:
@@ -178,8 +176,63 @@ class detectXO(object):
       #print(BiggestIndex)
       #print('BiggestIndex: ',BiggestIndex)
       BiggestContour = approxList[BiggestIndex]
-      
+      BiggestBounding = bboxList[BiggestIndex]
+
     print(bboxList)
     return img_with_contours, BiggestContour, BiggestBounding ,cX,cy
+
+
+
+    # imgBlur = cv2.GaussianBlur(gray_mask, (7, 7), 0)
+    # #cv2.imshow('blur',imgBlur)
+    # imgCanny = cv2.Canny(imgBlur, 100, 200)
+
+    # kernel = np.ones((3, 3))
+    # imgDilate = cv2.dilate(imgCanny, kernel, iterations=3)
+    # imgThre = cv2.erode(imgDilate, kernel, iterations=2)
+
+    # #cv2.imshow("img threshold",imgThre)
+    # contours, _ = cv2.findContours(imgThre, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # areaList = []
+    # approxList = []
+    # centerListX = []
+    # centerListY = []
+    # BiggestContour = []
+    # count = 0
+    
+    # for i in contours:
+    #   print('loop')
+      
+    #   #find center using moments
+    #   # M = cv2.moments(i)
+    #   # centerListX[count] = int((M['m10']/M['m00']))
+    #   # centerListY[count] = int((M['m01']/M['m00']))
+    #   #print('Contours: ',contours)
+
+    #   count += 1
+    #   orignal_copy = orignal_frame.copy()
+    #   img_with_contours = cv2.drawContours(orignal_copy, [i], -1, (0, 255, 0),2)
+
+    #   area = cv2.contourArea(i)
+    #   peri = cv2.arcLength(i, True)
+    #   approx = cv2.approxPolyDP(i, 0.04 * peri, True)
+
+    #   if len(approx) >= 6:
+    #     #bbox = cv2.boundingRect(approx)
+    #     areaList.append(area)
+    #     approxList.append(approx)
+    #     #bboxList.append(bbox)
+      
+
+    # if len(areaList) != 0:
+    #   SortedAreaList= sorted(areaList, reverse=True)
+    #   #print("sorted area list: ",SortedAreaList)
+    #   BiggestIndex = areaList.index(SortedAreaList[0])
+    #   #print(BiggestIndex)
+    #   #print('BiggestIndex: ',BiggestIndex)
+    #   BiggestContour = approxList[BiggestIndex]
+      
+    # #print(bboxList)
+    # return img_with_contours, BiggestContour, BiggestBounding ,cX,cy
 
   

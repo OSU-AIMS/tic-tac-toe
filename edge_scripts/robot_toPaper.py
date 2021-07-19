@@ -34,7 +34,7 @@ def main():
    ######
     joint_goal = rc.move_group.get_current_joint_values()
 
-    joint_goal[0] = radians(-90)
+    joint_goal[0] = radians(90)
     joint_goal[1] = 0
     joint_goal[2] = 0
     joint_goal[3] = 0

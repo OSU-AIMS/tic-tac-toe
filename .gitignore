@@ -3,3 +3,5 @@
 *.zip
 .idea/
 venv/
+
+game_scripts/play_game.py
