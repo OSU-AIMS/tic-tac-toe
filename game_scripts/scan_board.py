@@ -122,64 +122,61 @@ class detectXO(object):
     p2 = (cntr[0] - 0.02 * eigenvectors[1, 0] * eigenvalues[1, 0],
           cntr[1] - 0.02 * eigenvectors[1, 1] * eigenvalues[1, 0])
     self.drawAxis(img, cntr, p1, (255, 255, 0), 1)
-    self.drawAxis(img, cntr, p2, (0, 0, 255), 5)
+    self.drawAxis(img, cntr, p2, (255, 80, 255), 1)
     angle = math.atan2(eigenvectors[0, 1], eigenvectors[0, 0])  # orientation in radians
-    return angle, cntr, mean
+    return angle
 
     #finds contours on image
-  def getContours(self,orignal_frame, gray_mask):
+  def getContours(self,orignal_frame):
     print('Entered Rectangle_support: getContours function')
 
-
-    imgBlur = cv2.GaussianBlur(gray_mask, (3, 3), 0)
+    img_gray = cv2.cvtColor(orignal_frame.copy(),cv2.COLOR_BGR2GRAY)
+    imgBlur = cv2.GaussianBlur(img_gray, (7, 7), 0)
     #cv2.imshow('blur',imgBlur)
     imgCanny = cv2.Canny(imgBlur, 100, 200)
 
     kernel = np.ones((3, 3))
-    imgDilate = cv2.dilate(imgCanny, kernel, iterations=3)
-    imgThre = cv2.erode(imgDilate, kernel, iterations=2)
+    imgDilate = cv2.dilate(imgCanny, kernel, iterations=1)
+    imgThre = cv2.erode(imgDilate, kernel, iterations=1)
+    cv2.imshow("threshold",imgThre)
 
-    #cv2.imshow("img threshold",imgThre)
+    cv2.imshow("img threshold",imgThre)
     contours, _ = cv2.findContours(imgThre, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    areaList = []
-    approxList = []
-    bboxList = []
-    BiggestContour = []
-    BiggestBounding =[]
-    
-    for i in contours:
-      print('loop')
+    contours_image = cv2.drawContours(orignal_frame.copy(),contours,-1,(0,255,0),1)
+    cv2.imshow('all contours seen',contours_image)
+
+
+    boardCenter= [0,0]
+    boardPoints = [0,0,0,0]
+    boardImage = orignal_frame.copy()
+
+    for c in contours:
       #find center using moments
-      M = cv2.moments(i)
+      M = cv2.moments(c)
       cX = int((M['m10']/M['m00']))
-      cy = int((M['m01']/M['m00']))
+      cY = int((M['m01']/M['m00']))
+
       #print('Contours: ',contours)
+      perimeter = cv2.arcLength(c,True)
 
-      orignal_copy = orignal_frame.copy()
-      img_with_contours = cv2.drawContours(orignal_copy, [i], -1, (0, 255, 0),2)
-      cv2.imshow('contour loop',img_with_contours)
-      area = cv2.contourArea(i)
-      peri = cv2.arcLength(i, True)
-      approx = cv2.approxPolyDP(i, 0.04 * peri, True)
-
-      if len(approx) == 4:
-        bbox = cv2.boundingRect(approx)
-        areaList.append(area)
-        approxList.append(approx)
-        bboxList.append(bbox)
+      #approxPolyDP smoothes and approximates the shape of the contour and outputs a set of vertices
+      approx = cv2.approxPolyDP(c,.03 * perimeter, True)
       
+      if len(approx) == 4:
+        (x,y,width,height) = cv2.boundingRect(approx)
+        aspectRatio = width/float(height)
 
-    if len(areaList) != 0:
-      SortedAreaList= sorted(areaList, reverse=True)
-      #print("sorted area list: ",SortedAreaList)
-      BiggestIndex = areaList.index(SortedAreaList[0])
-      #print(BiggestIndex)
-      #print('BiggestIndex: ',BiggestIndex)
-      BiggestContour = approxList[BiggestIndex]
-      BiggestBounding = bboxList[BiggestIndex]
+        if aspectRatio >= 0.95 and aspectRatio <= 1.05 and 280 > height > 100 and 280>width>100:
+          boardImage = cv2.drawContours(boardImage,[c],-1,(0,0,255),2)
+          cv2.imshow('board',boardImage)
+          
+          boardCenter[0] = cX
+          boardCenter[1] = cY
+          boardPoints = approx
+          print(x,y,width,height)
 
-    print(bboxList)
-    return img_with_contours, BiggestContour, BiggestBounding ,cX,cy
+    
+    return boardImage, boardCenter, boardPoints
 
 
 
@@ -235,4 +232,6 @@ class detectXO(object):
     # #print(bboxList)
     # return img_with_contours, BiggestContour, BiggestBounding ,cX,cy
 
-  
+
+    
+
