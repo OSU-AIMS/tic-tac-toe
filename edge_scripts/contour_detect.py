@@ -38,10 +38,10 @@ def shapeContours(frame):
     #image = cv2.imread('/home/martinez737/ws_pick_camera/src/pick-and-place/Realsense.png')
     image=frame.copy()
     cv2.imshow('test',image)
-    rospy.sleep(3)
     
-    resized = imutils.resize(image,width = 300)
-    ratio = image.shape[0]/float(resized.shape[0])
+    #resized = imutils.resize(image,width = 300)
+    #ratio = image.shape[0]/float(resized.shape[0])
+    ratio = 1
     #grayscale, blur and threshold
     imgGray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     imgBlur = cv2.GaussianBlur(image, (5, 5), 0)
