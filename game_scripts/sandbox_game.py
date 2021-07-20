@@ -129,3 +129,97 @@ if __name__ == '__main__':
 
   main()
 
+#############################################################################################################################
+
+# #!/usr/bin/env python
+
+# """
+# @file hough_lines.py
+# @brief This program demonstrates line finding with the Hough transform
+# """
+# import sys
+# import math
+# import cv2 as cv
+# import numpy as np
+# from Realsense_tools import *
+
+
+# def main(argv):
+#     ## [load]
+#     RL= RealsenseTools()
+#     src= RL.grabFrame()
+
+#     ## [edge_detection]
+#     # Edge detection
+#     #imgBlur = cv.GaussianBlur(src, (1,1), 0)
+#     # cv.imshow('blur',imgBlur)
+#     kernel = np.ones((3,3),np.uint8)
+
+#     dilate = cv2.dilate(src,kernel,iterations = 1)
+#     # dilate = cv2.erode(dilate,kernel,iterations = 4)
+#     # dilate = cv2.dilate(dilate,kernel,iterations = 4)
+#     cv.imshow('erode',dilate)
+#     dst = cv2.Canny(dilate,100, 200, None, 3)
+#     ## [edge_detection]
+
+#     # Copy edges to the images that will display the results in BGR
+#     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
+#     cdstP = np.copy(cdst)
+
+#     ## [hough_lines]
+#     #  Standard Hough Line Transform
+#     lines = cv.HoughLines(dst, 2, np.pi / 180, 250, None, 0, 0)
+#     ## [hough_lines]
+#     ## [draw_lines]
+#     # Draw the lines
+#     if lines is not None:
+#         for i in range(0, len(lines)):
+#             rho = lines[i][0][0]
+#             theta = lines[i][0][1]
+#             a = math.cos(theta)
+#             b = math.sin(theta)
+#             x0 = a * rho
+#             y0 = b * rho
+#             pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+#             pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+
+#             cv.line(cdst, pt1, pt2, (0,0,255), 3, cv.LINE_AA)
+#     ## [draw_lines]
+
+#     ## [hough_lines_p]
+#     # Probabilistic Line Transform
+    
+#     linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 70, None, 100, 20)
+#     print(linesP)
+#     ## [hough_lines_p]
+#     ## [draw_lines_p]
+#     # Draw the lines
+#     if linesP is not None:
+#         for i in range(0, len(linesP)):
+#             l = linesP[i][0]
+#             #print(l)
+#             cv.line(cdstP, (l[0], l[1]), (l[2], l[3]), (0,0,255), 2, cv.LINE_AA)
+#             x1 = l[0]
+#             x2 = l[2]
+#             y1 = l[1]
+#             y2 = l[3]
+#             print((l[3]-l[1])/(l[2]-l[0]))
+#             # if  175 > ((((x2 - x1)**2 + (y2 - y1)**2)**(0.5))) > 160:
+#                 # cv.line(src, (l[0], l[1]), (l[2], l[3]), (255,255,0), 3, cv.LINE_AA)
+               
+
+#     ## [draw_lines_p]
+#     ## [imshow]
+#     # Show results
+#     cv.imshow("Source", src)
+#     cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
+#     cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
+#     ## [imshow]
+#     ## [exit]
+#     # Wait and Exit
+#     cv.waitKey()
+#     return 0
+#     ## [exit]
+
+# if __name__ == "__main__":
+#     main(sys.argv[1:])
