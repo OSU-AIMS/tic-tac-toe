@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.insert(0, '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
+#sys.path.insert(0, '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
+sys.path.insert(0, '/home/aims-zaphod/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
 
 import rospy
 from robot_support import *
