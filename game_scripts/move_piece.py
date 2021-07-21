@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import sys
-#sys.path.insert(0, '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
-sys.path.insert(0, '/home/aims-zaphod/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
+# import sys
+# sys.path.insert(0, '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
+# # sys.path.insert(0, '/home/aims-zaphod/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
 
 import rospy
 from robot_support import *
@@ -21,7 +21,7 @@ class anyPosition(object):
     self.rc.set_accel(0.1)
 
   def moveToPickup(self,x,y):
-    self.rc.send_io(0) #open grippper
+    
     pose_higher = [x,y,0.05,.707,-.707,0,0]
     self.rc.goto_Quant_Orient(pose_higher)
     raw_input('Lower gripper...')
@@ -51,6 +51,7 @@ class anyPosition(object):
     #self.rc.add_object()
 
   def scanPos(self):
+    self.rc.send_io(0) #open grippper
     joint_goal = self.rc.move_group.get_current_joint_values()
 
     joint_goal[0] = radians(90) #for right side of table

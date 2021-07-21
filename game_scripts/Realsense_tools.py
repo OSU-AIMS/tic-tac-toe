@@ -47,7 +47,8 @@ class RealsenseTools:
 
   def cropFrame(self,frame):
     print('Entered RealsenseTools: cropFrame function\n')
-    cropped_image = frame[55:228,335:515] # frame[y,x]
+    #cropped_image = frame[55:228,335:515] # frame[y,x]
+    cropped_image = frame[45:218,315:495 ] # frame[y,x]
     return cropped_image
 
   def rescaleFrame(self,frame, scale=1):
