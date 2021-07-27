@@ -10,5 +10,5 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-install(DIRECTORY edge_scripts volume_scripts
+install(DIRECTORY edge_scripts color_scripts volume_scripts nodes launch urdf
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

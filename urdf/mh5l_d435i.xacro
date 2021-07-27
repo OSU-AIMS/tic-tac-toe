@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+
+<robot name="robot_mh5l_d435i" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- Robot + Camera -->
+    <xacro:include filename="$(find tic_tac_toe)/urdf/mh5l_d435i_macro.xacro" />
+    <xacro:robot_mh5l_d435i prefix=""/>
+
+</robot>
