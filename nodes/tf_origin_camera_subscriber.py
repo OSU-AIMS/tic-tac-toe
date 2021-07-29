@@ -21,7 +21,7 @@ def listener():
         data.transform.rotation.w
         ]
 
-    print(data_list)
+    #print(data_list)
     outputFilePath = workspace + '/' + filename
     np.save(outputFilePath, data_list)
 

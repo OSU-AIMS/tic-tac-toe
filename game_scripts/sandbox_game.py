@@ -12,8 +12,106 @@ from Realsense_tools import *
 import cv2
 from tictactoe_brain import *
 import numpy as np
+import subprocess
 #PickP = anyPosition()
+def timer_wait():
+  try:
+    for remaining in range(3,0,-1):
+      sys.stdout.write("\r")
+      sys.stdout.write("Updating Frames: {:2d} seconds remaining.".format(remaining))
+      sys.stdout.flush()
+      time.sleep(1)
+    sys.stdout.write("\r|                                                    \n")
+  except KeyboardInterrupt:
+    sys.exit()
+
+def generateTransMatrix(matr_rotate, matr_translate):
+  """
+  Convenience Function which accepts two inputs to output a Homogeneous Transformation Matrix
+  Intended to function for 3-dimensions frames ONLY
+  :param matr_rotate: 3x3 Rotational Matrix
+  :param matr_translate: 3x1 Translation Vector (x;y;z)
+  :return Homogeneous Transformation Matrix (4x4)
+  """
+
+  ## If Translation Matrix is List, Convert
+  if type(matr_translate) is list:
+    matr_translate = np.matrix(matr_translate)
+    #print("Changed translation vector from input 'list' to 'np.matrix'")           #TODO Commented out for debugging
+
+  ## Evaluate Inputs. Check if acceptable size.
+  if not matr_rotate.shape == (3, 3):
+    raise Exception("Error Generating Transformation Matrix. Incorrectly sized inputs.")
+  if not matr_translate.size == 3:
+    raise Exception("Error Generating Transformation Matrix. Translation Vector wrong size.")
+
+  ## Reformat Inputs to common shape
+  if matr_translate.shape == (1, 3):
+    matr_translate = np.transpose(matr_translate)
+    #print("Transposed input translation vector")                                   #TODO Commented out for debugging
+
+  ## Build Homogeneous Transformation matrix using reformatted inputs
+  # Currently includes flexibility to different sized inputs. Wasted process time, but flexible for future.
+  # Assigns bottom right corner as value '1'
+  new_transformMatrix = np.zeros((4,4))
+  new_transformMatrix[0:0+matr_rotate.shape[0], 0:0+matr_rotate.shape[1]] = matr_rotate
+  new_transformMatrix[0:0+matr_translate.shape[0], 3:3+matr_translate.shape[1]] = matr_translate
+  new_transformMatrix[new_transformMatrix.shape[0]-1,new_transformMatrix.shape[1]-1] = 1
+
+  ## Return result
+  return new_transformMatrix
+
+def quant_pose_to_tf_matrix(quant_pose):
+  """
+  Covert a quaternion into a full three-dimensional rotation matrix.
+
+  Input
+  :param Q: A 4 element array representing the quaternion (q0,q1,q2,q3) 
+
+  Output
+  :return: A 3x3 element matrix representing the full 3D rotation matrix. 
+           This rotation matrix converts a point in the local reference 
+           frame to a point in the global reference frame.
+  """
+
+  # Extract Translation
+  r03 = quant_pose[0]
+  r13 = quant_pose[1]
+  r23 = quant_pose[2]
+
+
+  # Extract the values from Q
+  q0 = quant_pose[3]
+  q1 = quant_pose[4]
+  q2 = quant_pose[5]
+  q3 = quant_pose[6]
+   
+  # First row of the rotation matrix
+  r00 = 2 * (q0 * q0 + q1 * q1) - 1
+  r01 = 2 * (q1 * q2 - q0 * q3)
+  r02 = 2 * (q1 * q3 + q0 * q2)
+   
+  # Second row of the rotation matrix
+  r10 = 2 * (q1 * q2 + q0 * q3)
+  r11 = 2 * (q0 * q0 + q2 * q2) - 1
+  r12 = 2 * (q2 * q3 - q0 * q1)
+   
+  # Third row of the rotation matrix
+  r20 = 2 * (q1 * q3 - q0 * q2)
+  r21 = 2 * (q2 * q3 + q0 * q1)
+  r22 = 2 * (q0 * q0 + q3 * q3) - 1
+   
+  # 3x3 rotation matrix
+  tf_matrix = np.array([ [r00, r01, r02, r03],
+                         [r10, r11, r12, r13],
+                         [r20, r21, r22, r23],
+                         [  0,   0,   0,  1 ]])
+                          
+  return tf_matrix
+
+
 imgClass = RealsenseTools()
+timer_wait()
 dXO = detectXO()
 #brain = BigBrain()
 def detectBoard():
@@ -27,7 +125,8 @@ def detectBoard():
     boardImage, boardCenter, boardPoints= dXO.getContours(table_frame)
 
     print(boardCenter)
-    
+  cv2.waitKey(0)
+
   return boardImage, boardCenter, boardPoints
 
 def main():
@@ -38,87 +137,36 @@ def main():
     print(np.rad2deg(angle))
     cv2.imshow('board angle',boardImage)
 
-
-    img = imgClass.grabFrame()
-    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    imgBlur = cv2.GaussianBlur(gray, (7, 7), 0)
-    edges= imgBlur.copy()
-    kernel = np.ones((3,3),np.uint8)
-    edges = cv2.dilate(edges,kernel,iterations = 3)
-    kernel = np.ones((5,5),np.uint8)
-    edges = cv2.erode(edges,kernel,iterations = 2)
-    edges = cv2.Canny(edges,100,200,apertureSize = 3)
+    boardCropped = imgClass.croptoBoard(boardImage, boardCenter)
+    cv2.imshow('Cropped Board',boardCropped)
+    cv2.waitKey(0)
     
-    #cv2.imwrite('canny.jpg',edges)
+    scale = .664/640 #(m/pixel)
+    boardTranslation = np.array([[boardCenter[0]*scale],[boardCenter[1]*scale],[0.64]])  ## depth of the table is .64 m
+    boardRotation = np.identity((3))
+    tf_board = generateTransMatrix(boardRotation,boardTranslation) #tf_body2camera, transform from camera 
 
-    lines = cv2.HoughLines(edges,1,np.pi/180,150)
-    cv2.imshow('edges',edges)
-    cv2.waitKey(0)
-    #if not lines.any():
-      #
+    import subprocess
 
-    if filter:
-      rho_threshold = 15
-      theta_threshold = 0.1
+    tf_filename = "tf_camera2world.npy"
+    tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe/nodes/tf_origin_camera_subscriber.py'
+    subprocess.call([tf_listener, '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe', tf_filename])
 
-      # how many lines are similar to a given one
-      similar_lines = {i : [] for i in range(len(lines))}
-      for i in range(len(lines)):
-        for j in range(len(lines)):
-          if i == j:
-            continue
+    tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
+    tf_camera2world = quant_pose_to_tf_matrix(tf_list)
+    #print('tf camera to world:',tf_camera2world)
+    rot_camera_hardcode  = np.array([[0,-1,0],[-1,0,0],[0,0,-1]])
 
-          rho_i,theta_i = lines[i][0]
-          rho_j,theta_j = lines[j][0]
-          if abs(rho_i - rho_j) < rho_threshold and abs(theta_i - theta_j) < theta_threshold:
-            similar_lines[i].append(j)
+    translate            = tf_camera2world[:-1,-1].tolist()
+    tf_camera2world = generateTransMatrix(rot_camera_hardcode, translate)
+    print('camera to robot:')
+    print(np.around(tf_camera2world,2))
 
-      # ordering the INDECES of the lines by how many are similar to them
-      indices = [i for i in range(len(lines))]
-      indices.sort(key=lambda x : len(similar_lines[x]))
+    tf_board2world = np.matmul(tf_camera2world,tf_board)
+    print('board to robot:')
+    print(np.around(tf_board2world,2))
 
-      # line flags is the base for the filtering
-      line_flags = len(lines)*[True]
-      for i in range(len(lines) - 1):
-        if not line_flags[indices[i]]: # if we already disregarded the ith element in the ordered list then we don't care (we will not delete anything based on it and we will never reconsider using this line again)
-          continue
 
-        for j in range(i + 1, len(lines)): # we are only considering those elements that had less similar line
-          if not line_flags[indices[j]]: # and only if we have not disregarded them already
-            continue
-
-          rho_i,theta_i = lines[indices[i]][0]
-          rho_j,theta_j = lines[indices[j]][0]
-          if abs(rho_i - rho_j) < rho_threshold and abs(theta_i - theta_j) < theta_threshold:
-            line_flags[indices[j]] = False # if it is similar and have not been disregarded yet then drop it now
-
-    print('number of Hough lines:', len(lines))
-
-    filtered_lines = []
-
-    if filter:
-      for i in range(len(lines)): # filtering
-        if line_flags[i]:
-          filtered_lines.append(lines[i])
-
-      print('Number of filtered lines:', len(filtered_lines))
-    else:
-      filtered_lines = lines
-
-    for line in filtered_lines:
-      rho,theta = line[0]
-      a = np.cos(theta)
-      b = np.sin(theta)
-      x0 = a*rho
-      y0 = b*rho
-      x1 = int(x0 + 1000*(-b))
-      y1 = int(y0 + 1000*(a))
-      x2 = int(x0 - 1000*(-b))
-      y2 = int(y0 - 1000*(a))
-
-      cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-    cv2.imshow('grid lines',img)
-    cv2.waitKey(0)
   except rospy.ROSInterruptException:
     exit()
   except KeyboardInterrupt:
@@ -128,6 +176,92 @@ def main():
 if __name__ == '__main__':
 
   main()
+
+
+
+
+############# hough lines/grid lines 
+
+    #   img = imgClass.grabFrame()
+    # gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    # imgBlur = cv2.GaussianBlur(gray, (7, 7), 0)
+    # edges= imgBlur.copy()
+    # kernel = np.ones((3,3),np.uint8)
+    # edges = cv2.dilate(edges,kernel,iterations = 3)
+    # kernel = np.ones((5,5),np.uint8)
+    # edges = cv2.erode(edges,kernel,iterations = 2)
+    # edges = cv2.Canny(edges,100,200,apertureSize = 3)
+    
+    # #cv2.imwrite('canny.jpg',edges)
+
+    # lines = cv2.HoughLines(edges,1,np.pi/180,150)
+    # cv2.imshow('edges',edges)
+    # cv2.waitKey(0)
+    # #if not lines.any():
+    #   #
+
+    # if filter:
+    #   rho_threshold = 15
+    #   theta_threshold = 0.1
+
+    #   # how many lines are similar to a given one
+    #   similar_lines = {i : [] for i in range(len(lines))}
+    #   for i in range(len(lines)):
+    #     for j in range(len(lines)):
+    #       if i == j:
+    #         continue
+
+    #       rho_i,theta_i = lines[i][0]
+    #       rho_j,theta_j = lines[j][0]
+    #       if abs(rho_i - rho_j) < rho_threshold and abs(theta_i - theta_j) < theta_threshold:
+    #         similar_lines[i].append(j)
+
+    #   # ordering the INDECES of the lines by how many are similar to them
+    #   indices = [i for i in range(len(lines))]
+    #   indices.sort(key=lambda x : len(similar_lines[x]))
+
+    #   # line flags is the base for the filtering
+    #   line_flags = len(lines)*[True]
+    #   for i in range(len(lines) - 1):
+    #     if not line_flags[indices[i]]: # if we already disregarded the ith element in the ordered list then we don't care (we will not delete anything based on it and we will never reconsider using this line again)
+    #       continue
+
+    #     for j in range(i + 1, len(lines)): # we are only considering those elements that had less similar line
+    #       if not line_flags[indices[j]]: # and only if we have not disregarded them already
+    #         continue
+
+    #       rho_i,theta_i = lines[indices[i]][0]
+    #       rho_j,theta_j = lines[indices[j]][0]
+    #       if abs(rho_i - rho_j) < rho_threshold and abs(theta_i - theta_j) < theta_threshold:
+    #         line_flags[indices[j]] = False # if it is similar and have not been disregarded yet then drop it now
+
+    # print('number of Hough lines:', len(lines))
+
+    # filtered_lines = []
+
+    # if filter:
+    #   for i in range(len(lines)): # filtering
+    #     if line_flags[i]:
+    #       filtered_lines.append(lines[i])
+
+    #   print('Number of filtered lines:', len(filtered_lines))
+    # else:
+    #   filtered_lines = lines
+
+    # for line in filtered_lines:
+    #   rho,theta = line[0]
+    #   a = np.cos(theta)
+    #   b = np.sin(theta)
+    #   x0 = a*rho
+    #   y0 = b*rho
+    #   x1 = int(x0 + 1000*(-b))
+    #   y1 = int(y0 + 1000*(a))
+    #   x2 = int(x0 - 1000*(-b))
+    #   y2 = int(y0 - 1000*(a))
+
+    #   cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+    # cv2.imshow('grid lines',img)
+    # cv2.waitKey(0)
 
 #############################################################################################################################
 
@@ -147,7 +281,7 @@ if __name__ == '__main__':
 # def main(argv):
 #     ## [load]
 #     RL= RealsenseTools()
-#     src= RL.grabFrame()
+#     src= RL.grabFramegleFrame_color()
 
 #     ## [edge_detection]
 #     # Edge detection

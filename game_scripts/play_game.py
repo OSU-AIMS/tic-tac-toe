@@ -76,7 +76,7 @@ def RoboTurn(countO,blocks):
       print('At top middle')
       board[0][1]='O'
       boardCode[0][1]= -1
-      cv2.rectangle(img,(62,109),(12,57),(0,255,0),1)
+      cv2.rectangle(img,(62,12),(109,57),(0,255,0),1)
 
     elif 115 < centers[i][0] < 164 and 12 <= centers[i][1] < 57:
       print('At top right')

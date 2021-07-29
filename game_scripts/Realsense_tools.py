@@ -5,9 +5,20 @@ import cv2                                          # OpenCV bindings
 import numpy as np
 import rospy
 import pyrealsense2 as rs
+import time
 
 
 #this class is for grabbing frame from the Realsense d435i camera plus image tools
+def timer_wait():
+  try:
+    for remaining in range(3,0,-1):
+      sys.stdout.write("\r")
+      sys.stdout.write("Updating Frames: {:2d} seconds remaining.".format(remaining))
+      sys.stdout.flush()
+      time.sleep(1) 
+    sys.stdout.write("\r|                                                    \n")
+  except KeyboardInterrupt:
+    sys.exit()
 
 class RealsenseTools:
   def __init__(self):
@@ -29,6 +40,8 @@ class RealsenseTools:
 
     # Starts streaming
     self.pipeline.start(self.config)
+    # timer_wait()
+
   def grabFrame(self):
     # Starts streaming
     #self.pipeline.start(self.config)
@@ -41,14 +54,16 @@ class RealsenseTools:
         break
     color_image = np.asanyarray(color_frame.get_data())
     # cv2.imshow('test',color_image)
-    #print(color_image.shape)
+    # print(color_image.shape)
+    # cv2.waitKey(0)
     return color_image
 
 
-  def cropFrame(self,frame):
+  def croptoBoard(self,frame,center):
     print('Entered RealsenseTools: cropFrame function\n')
     #cropped_image = frame[55:228,335:515] # frame[y,x]
-    cropped_image = frame[45:218,315:495 ] # frame[y,x]
+    # cropped_image = frame[45:218,315:495 ] # frame[y,x]
+    cropped_image = frame[center[1]-90:center[1]+90,center[0]-90:center[0]+90]
     return cropped_image
 
   def rescaleFrame(self,frame, scale=1):
