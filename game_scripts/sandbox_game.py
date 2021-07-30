@@ -13,7 +13,14 @@ import cv2
 from tictactoe_brain import *
 import numpy as np
 import subprocess
+from robot_support import *
 #PickP = anyPosition()
+imgClass = RealsenseTools()
+timer_wait()
+dXO = detectXO()
+rc = moveManipulator('bot_mh5l_pgn64')
+
+#brain = BigBrain()
 def timer_wait():
   try:
     for remaining in range(3,0,-1):
@@ -110,28 +117,63 @@ def quant_pose_to_tf_matrix(quant_pose):
   return tf_matrix
 
 
-imgClass = RealsenseTools()
-timer_wait()
-dXO = detectXO()
-#brain = BigBrain()
+
 def detectBoard():
   boardCenter=[0,0]
   while boardCenter[0]==0:
     full_frame = imgClass.grabFrame()
 
     # small crop to just table
-    table_frame =full_frame[0:480,0:570] # frame[y,x]
+    table_frame =full_frame[0:480,0:640] # frame[y,x]
 
     boardImage, boardCenter, boardPoints= dXO.getContours(table_frame)
+    scale = .664/640 #(m/pixel)
+    ScaledCenter = [0,0]
+    ScaledCenter[0] = (boardCenter[0]-320)*scale
+    ScaledCenter[1] = (boardCenter[1]-240)*scale
+    print("Center of board relative to center of camera (cm):",ScaledCenter)
 
-    print(boardCenter)
+
+    
   cv2.waitKey(0)
 
-  return boardImage, boardCenter, boardPoints
+  return boardImage, boardCenter, boardPoints, ScaledCenter
+
+def transformToPose(transform):
+  # Location Vector
+  pose_goal=[]
+  point = transform
+  x,y,z = point[:-1,3]
+  x = np.asscalar(x)
+  y = np.asscalar(y)
+  z = np.asscalar(z)
+
+  # Quant Calculation Support Variables
+  # Only find trace for the rotational matrix.
+  t = np.trace(point) - point[3,3]
+  r = np.sqrt(1+t)
+
+  # Primary Diagonal Elements
+  Qxx = point[0,0]
+  Qyy = point[1,1]
+  Qzz = point[2,2]
+
+  # Quant Calculation
+  qx = np.copysign(0.5 * np.sqrt(1 + Qxx - Qyy - Qzz), point[2,1]-point[1,2])
+  qy = np.copysign(0.5 * np.sqrt(1 - Qxx + Qyy - Qzz), point[0,2]-point[2,0])
+  qz = np.copysign(0.5 * np.sqrt(1 - Qxx - Qyy + Qzz), point[1,0]-point[0,1])
+  qw = 0.5*r
+
+  pose_goal=[x, y, z, qx,qy,qz, qw]
+  return pose_goal
+
+
+
+
 
 def main():
   try:
-    boardImage, boardCenter,boardPoints = detectBoard()
+    boardImage, boardCenter,boardPoints, ScaledCenter = detectBoard()
     #centers = dXO.getCircle(img)
     angle = dXO.getOrientation(boardPoints, boardImage)
     print(np.rad2deg(angle))
@@ -141,21 +183,21 @@ def main():
     cv2.imshow('Cropped Board',boardCropped)
     cv2.waitKey(0)
     
-    scale = .664/640 #(m/pixel)
-    boardTranslation = np.array([[boardCenter[0]*scale],[boardCenter[1]*scale],[0.64]])  ## depth of the table is .64 m
+    
+    boardTranslation = np.array([[ScaledCenter[0]],[ScaledCenter[1]],[0.64]])  ## depth of the table is .64 m
     boardRotation = np.identity((3))
     tf_board = generateTransMatrix(boardRotation,boardTranslation) #tf_body2camera, transform from camera 
 
     import subprocess
 
     tf_filename = "tf_camera2world.npy"
-    tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe/nodes/tf_origin_camera_subscriber.py'
-    subprocess.call([tf_listener, '/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe', tf_filename])
+    tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/tf_origin_camera_subscriber.py'
+    subprocess.call([tf_listener, '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe', tf_filename])
 
-    tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
+    tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
     tf_camera2world = quant_pose_to_tf_matrix(tf_list)
     #print('tf camera to world:',tf_camera2world)
-    rot_camera_hardcode  = np.array([[0,-1,0],[-1,0,0],[0,0,-1]])
+    rot_camera_hardcode  = np.array([[1,0,0],[0,-1,0],[0,0,-1]])
 
     translate            = tf_camera2world[:-1,-1].tolist()
     tf_camera2world = generateTransMatrix(rot_camera_hardcode, translate)
@@ -166,7 +208,17 @@ def main():
     print('board to robot:')
     print(np.around(tf_board2world,2))
 
+    boardCenterPose = transformToPose(tf_board2world)
+    rc.set_vel(0.1)
+    rc.set_accel(0.1)
+    raw_input('Go to board center')
+    rc.goto_Quant_Orient(boardCenterPose)
+    raw_input('Go to all zeros')
+    rc.goto_all_zeros()
 
+
+
+    
   except rospy.ROSInterruptException:
     exit()
   except KeyboardInterrupt:

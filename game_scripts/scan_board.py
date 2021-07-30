@@ -153,8 +153,8 @@ class detectXO(object):
     for c in contours:
       #find center using moments
       M = cv2.moments(c)
-      cX = int((M['m10']/M['m00']))
-      cY = int((M['m01']/M['m00']))
+      cX = int((M['m10']/(M['m00']+1e-7)))
+      cY = int((M['m01']/(M['m00']+1e-7)))
 
       #print('Contours: ',contours)
       perimeter = cv2.arcLength(c,True)
@@ -173,7 +173,7 @@ class detectXO(object):
           boardCenter[0] = cX
           boardCenter[1] = cY
           boardPoints = approx
-          print(x,y,width,height)
+          #print(x,y,width,height)
 
     
     return boardImage, boardCenter, boardPoints
