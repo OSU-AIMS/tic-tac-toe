@@ -3,12 +3,12 @@
 <robot name="mounted_camera" xmlns:xacro="http://ros.org/wiki/xacro">
 <xacro:macro name="mounted_camera" params="prefix">
 
-    <!-- Robot -->
+    <!-- Mount-->
     <xacro:include filename="$(find tic_tac_toe)/urdf/mount_macro.xacro" />
 
-    <!-- Table -->
+    <!-- Camera -->
     <xacro:include filename="$(find realsense2_description)/urdf/_d435i.urdf.xacro" />
-
+    <xacro:arg name="use_nominal_extrinsics" default="false"/>
     <!-- Build Kinematic Chain using imported components -->
     <xacro:camera_mount prefix=""/>
     <link name="camera_base_link" />

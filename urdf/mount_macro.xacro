@@ -8,7 +8,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://tic_tac_toe/meshes/camera_mount_small.stl"/>
+                <mesh filename="package://tic_tac_toe/meshes/camera_mount.stl"/>
             </geometry>
             <material name="white">
               <color rgba="0.9 0.9 0.9 1" />
@@ -18,7 +18,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://tic_tac_toe/meshes/camera_mount_small.stl"/>
+                <mesh filename="package://tic_tac_toe/meshes/camera_mount.stl"/>
             </geometry>
         </collision>
     </link>
