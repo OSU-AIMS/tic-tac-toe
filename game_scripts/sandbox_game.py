@@ -121,10 +121,11 @@ def quant_pose_to_tf_matrix(quant_pose):
 def detectBoard():
   boardCenter=[0,0]
   while boardCenter[0]==0:
-    full_frame = imgClass.grabFrame()
+    table_frame = imgClass.grabFrame()
+    #cv2.imshow('test',full_frame)
 
     # small crop to just table
-    table_frame =full_frame[0:480,0:640] # frame[y,x]
+    #table_frame =full_frame[0:480,0:640] # frame[y,x]
 
     boardImage, boardCenter, boardPoints= dXO.getContours(table_frame)
     scale = .664/640 #(m/pixel)
@@ -132,10 +133,11 @@ def detectBoard():
     ScaledCenter[0] = (boardCenter[0]-320)*scale
     ScaledCenter[1] = (boardCenter[1]-240)*scale
     print("Center of board relative to center of camera (cm):",ScaledCenter)
+    cv2.waitKey(3)
 
 
     
-  cv2.waitKey(0)
+  
 
   return boardImage, boardCenter, boardPoints, ScaledCenter
 
@@ -176,6 +178,7 @@ def main():
     boardImage, boardCenter,boardPoints, ScaledCenter = detectBoard()
     #centers = dXO.getCircle(img)
     angle = dXO.getOrientation(boardPoints, boardImage)
+    dXO.newOrientation(boardPoints)
     print(np.rad2deg(angle))
     cv2.imshow('board angle',boardImage)
 

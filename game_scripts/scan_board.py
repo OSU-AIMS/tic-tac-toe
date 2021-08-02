@@ -52,7 +52,7 @@ class detectXO(object):
     # Reorders the four points of the rectangle
   def reorder(self,points):
     try:
-      print('Entered Rectangle_support: reorder function')
+     #print('Entered Rectangle_support: reorder function')
       NewPoints = np.zeros_like(points)
       points = points.reshape((4, 2))
       add = points.sum(1)
@@ -77,7 +77,7 @@ class detectXO(object):
 
   # Draws x-y axis relative to object center and orientation
   def drawAxis(self,img, p_, q_, color, scale):
-    print('Entered Rectangle_support: drawAxis function')
+   # print('Entered Rectangle_support: drawAxis function')
     p = list(p_)
     q = list(q_)
 
@@ -100,7 +100,7 @@ class detectXO(object):
 
   # Gets angle of object
   def getOrientation(self,pts, img): 
-    print('Entered Rectangle_support: getOrientation function')
+   # print('Entered Rectangle_support: getOrientation function')
     sz = len(pts)
     data_pts = np.empty((sz, 2), dtype=np.float64)
     for i in range(data_pts.shape[0]):
@@ -127,8 +127,15 @@ class detectXO(object):
     return angle
 
     #finds contours on image
+
+  def newOrientation(self,pts):
+    print("first set?:",pts[0][0][0])
+    # slope1 = pts[1]-pts[2] / 
+    #slope for all 4 lines 
+
+
   def getContours(self,orignal_frame):
-    print('Entered Rectangle_support: getContours function')
+    #print('Entered Rectangle_support: getContours function')
 
     img_gray = cv2.cvtColor(orignal_frame.copy(),cv2.COLOR_BGR2GRAY)
     imgBlur = cv2.GaussianBlur(img_gray, (7, 7), 0)
@@ -138,9 +145,9 @@ class detectXO(object):
     kernel = np.ones((3, 3))
     imgDilate = cv2.dilate(imgCanny, kernel, iterations=1)
     imgThre = cv2.erode(imgDilate, kernel, iterations=1)
-    cv2.imshow("threshold",imgThre)
+    #cv2.imshow("threshold",imgThre)
 
-    cv2.imshow("img threshold",imgThre)
+    #cv2.imshow("img threshold",imgThre)
     contours, _ = cv2.findContours(imgThre, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours_image = cv2.drawContours(orignal_frame.copy(),contours,-1,(0,255,0),1)
     cv2.imshow('all contours seen',contours_image)
@@ -165,15 +172,17 @@ class detectXO(object):
       if len(approx) == 4:
         (x,y,width,height) = cv2.boundingRect(approx)
         aspectRatio = width/float(height)
+        #print(x,y,width,height)
 
-        if aspectRatio >= 0.95 and aspectRatio <= 1.05 and 280 > height > 100 and 280>width>100:
+        if aspectRatio >= 0.95 and aspectRatio <= 1.05 and 350 > height > 200 and 350>width>200: #640 x480 -> 280 > height > 100 and 280>width>100
           boardImage = cv2.drawContours(boardImage,[c],-1,(0,0,255),2)
-          cv2.imshow('board',boardImage)
+          #cv2.imshow('board',boardImage)
           
           boardCenter[0] = cX
           boardCenter[1] = cY
           boardPoints = approx
-          #print(x,y,width,height)
+          print(approx)
+          
 
     
     return boardImage, boardCenter, boardPoints

@@ -36,7 +36,7 @@ class RealsenseTools:
     if self.device_product_line == 'L500':
       self.config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
     else:
-      self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+      self.config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
 
     # Starts streaming
     self.pipeline.start(self.config)

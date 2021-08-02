@@ -18,9 +18,11 @@ class image_converter:
   def callback(self,data):
     try:
       cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+      # cv_image = cv2.resize(cv_image,(640,360),interpolation = cv2.INTER_AREA)
+
     except CvBridgeError as e:
       print(e)
-
+    print(cv_image.shape)
     cv2.imshow("Image window", cv_image)
     cv2.waitKey(3)
 

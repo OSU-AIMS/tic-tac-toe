@@ -32,9 +32,6 @@ boardCode = [
   # board filled with -1 & +1
 
 
-
-
-
 def RoboTurn(countO,blocks):
   blocksX = -.121 #x distance for all x blocks
   blocksY= [.5,.54,.58,.62,.68] # Y distance in meters for x blocks 
