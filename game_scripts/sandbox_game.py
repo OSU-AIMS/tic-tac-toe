@@ -119,8 +119,8 @@ def quant_pose_to_tf_matrix(quant_pose):
 
 
 def detectBoard():
-  boardCenter=[0,0]
-  while boardCenter[0]==0:
+  boardCenter=[640,360]
+  while boardCenter[0]==640:
     table_frame = imgClass.grabFrame()
     #cv2.imshow('test',full_frame)
 
@@ -128,10 +128,13 @@ def detectBoard():
     #table_frame =full_frame[0:480,0:640] # frame[y,x]
 
     boardImage, boardCenter, boardPoints= dXO.getContours(table_frame)
-    scale = .664/640 #(m/pixel)
+    #scale = .664/640 #(m/pixel)
+    scale = .895/1280
     ScaledCenter = [0,0]
-    ScaledCenter[0] = (boardCenter[0]-320)*scale
-    ScaledCenter[1] = (boardCenter[1]-240)*scale
+    # ScaledCenter[0] = (boardCenter[0]-320)*scale
+    # ScaledCenter[1] = (boardCenter[1]-240)*scale
+    ScaledCenter[0] = (boardCenter[0]-640)*scale
+    ScaledCenter[1] = (boardCenter[1]-360)*scale
     print("Center of board relative to center of camera (cm):",ScaledCenter)
     cv2.waitKey(3)
 
@@ -175,49 +178,50 @@ def transformToPose(transform):
 
 def main():
   try:
-    boardImage, boardCenter,boardPoints, ScaledCenter = detectBoard()
-    #centers = dXO.getCircle(img)
-    angle = dXO.getOrientation(boardPoints, boardImage)
-    dXO.newOrientation(boardPoints)
-    print(np.rad2deg(angle))
-    cv2.imshow('board angle',boardImage)
+    while True:
+      boardImage, boardCenter,boardPoints, ScaledCenter = detectBoard()
+      #centers = dXO.getCircle(img)
+      angle = dXO.getOrientation(boardPoints, boardImage)
+      dXO.newOrientation(boardPoints)
+      print(np.rad2deg(angle))
+      cv2.imshow('board angle',boardImage)
 
-    boardCropped = imgClass.croptoBoard(boardImage, boardCenter)
-    cv2.imshow('Cropped Board',boardCropped)
-    cv2.waitKey(0)
-    
-    
-    boardTranslation = np.array([[ScaledCenter[0]],[ScaledCenter[1]],[0.64]])  ## depth of the table is .64 m
-    boardRotation = np.identity((3))
-    tf_board = generateTransMatrix(boardRotation,boardTranslation) #tf_body2camera, transform from camera 
+      boardCropped = imgClass.croptoBoard(boardImage, boardCenter)
+      cv2.imshow('Cropped Board',boardCropped)
+      cv2.waitKey(0)
+      
+      
+      boardTranslation = np.array([[ScaledCenter[0]],[ScaledCenter[1]],[0.64]])  ## depth of the table is .64 m
+      boardRotation = np.identity((3))
+      tf_board = generateTransMatrix(boardRotation,boardTranslation) #tf_body2camera, transform from camera 
 
-    import subprocess
+      import subprocess
 
-    tf_filename = "tf_camera2world.npy"
-    tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/tf_origin_camera_subscriber.py'
-    subprocess.call([tf_listener, '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe', tf_filename])
+      tf_filename = "tf_camera2world.npy"
+      tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/tf_origin_camera_subscriber.py'
+      subprocess.call([tf_listener, '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe', tf_filename])
 
-    tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
-    tf_camera2world = quant_pose_to_tf_matrix(tf_list)
-    #print('tf camera to world:',tf_camera2world)
-    rot_camera_hardcode  = np.array([[1,0,0],[0,-1,0],[0,0,-1]])
+      tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      tf_camera2world = quant_pose_to_tf_matrix(tf_list)
+      #print('tf camera to world:',tf_camera2world)
+      rot_camera_hardcode  = np.array([[1,0,0],[0,-1,0],[0,0,-1]])
 
-    translate            = tf_camera2world[:-1,-1].tolist()
-    tf_camera2world = generateTransMatrix(rot_camera_hardcode, translate)
-    print('camera to robot:')
-    print(np.around(tf_camera2world,2))
+      translate            = tf_camera2world[:-1,-1].tolist()
+      tf_camera2world = generateTransMatrix(rot_camera_hardcode, translate)
+      print('camera to robot:')
+      print(np.around(tf_camera2world,2))
 
-    tf_board2world = np.matmul(tf_camera2world,tf_board)
-    print('board to robot:')
-    print(np.around(tf_board2world,2))
+      tf_board2world = np.matmul(tf_camera2world,tf_board)
+      print('board to robot:')
+      print(np.around(tf_board2world,2))
 
-    boardCenterPose = transformToPose(tf_board2world)
-    rc.set_vel(0.1)
-    rc.set_accel(0.1)
-    raw_input('Go to board center')
-    rc.goto_Quant_Orient(boardCenterPose)
-    raw_input('Go to all zeros')
-    rc.goto_all_zeros()
+      boardCenterPose = transformToPose(tf_board2world)
+      rc.set_vel(0.1)
+      rc.set_accel(0.1)
+      raw_input('Go to board center')
+      rc.goto_Quant_Orient(boardCenterPose)
+      raw_input('Go to all zeros')
+      rc.goto_all_zeros()
 
 
 

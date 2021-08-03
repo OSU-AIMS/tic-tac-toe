@@ -129,9 +129,19 @@ class detectXO(object):
     #finds contours on image
 
   def newOrientation(self,pts):
-    print("first set?:",pts[0][0][0])
-    # slope1 = pts[1]-pts[2] / 
-    #slope for all 4 lines 
+    print('shape of points:',pts.shape)
+    topleft = [pts[0][0][0] , pts[0][0][1]]
+    print('topleft',topleft)
+    topright = [pts[1][0][0] , pts[1][0][1]]
+    print('topright',topright)
+    print('topright y',topright[1])
+    print('topright x',topright[0])
+    slope1_2 = (float(topleft[1])-float(topright[1])) / (float(topleft[0]) - float(topright[0])) 
+    print('slope:',slope1_2)
+    angle = math.degrees(math.atan(slope1_2))
+    print('new slope angle',angle)
+    
+    return angle
 
 
   def getContours(self,orignal_frame):
@@ -148,12 +158,12 @@ class detectXO(object):
     #cv2.imshow("threshold",imgThre)
 
     #cv2.imshow("img threshold",imgThre)
-    contours, _ = cv2.findContours(imgThre, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(imgThre, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours_image = cv2.drawContours(orignal_frame.copy(),contours,-1,(0,255,0),1)
-    cv2.imshow('all contours seen',contours_image)
+    #cv2.imshow('all contours seen',contours_image)
 
 
-    boardCenter= [0,0]
+    boardCenter= [640,360]
     boardPoints = [0,0,0,0]
     boardImage = orignal_frame.copy()
 
@@ -171,7 +181,7 @@ class detectXO(object):
       
       if len(approx) == 4:
         (x,y,width,height) = cv2.boundingRect(approx)
-        aspectRatio = width/float(height)
+        aspectRatio = float(width)/float(height)
         #print(x,y,width,height)
 
         if aspectRatio >= 0.95 and aspectRatio <= 1.05 and 350 > height > 200 and 350>width>200: #640 x480 -> 280 > height > 100 and 280>width>100
@@ -181,7 +191,7 @@ class detectXO(object):
           boardCenter[0] = cX
           boardCenter[1] = cY
           boardPoints = approx
-          print(approx)
+          #print(approx)
           
 
     

@@ -17,16 +17,16 @@ if __name__ == '__main__':
     # ROS Node & Publisher to Topic
     rospy.init_node('tf_origin_to_camera_transform')
     pub = rospy.Publisher('tf_origin_to_camera_transform', TransformStamped, queue_size=10, latch=True)
-    rate = rospy.Rate(1)
+    rate = rospy.Rate(10)
 
-    tfBuffer = tf2_ros.Buffer()
+    tfBuffer = tf2_ros.Buffer(0.1)
     listener = tf2_ros.TransformListener(tfBuffer)
 
     print(">> TF Listener Node Successfully Launched")
 
     while not rospy.is_shutdown():
         try:
-            msg_new = tfBuffer.lookup_transform('base_link', 'camera_link', rospy.Time(0))
+            msg_new = tfBuffer.lookup_transform('base_link', 'camera_color_optical_link', rospy.Time(0))
 
         
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
