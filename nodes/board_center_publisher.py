@@ -65,13 +65,13 @@ class center_finder:
       self.detectBoard(cv_image)
       centers = dXO.getCircle(cv_image)
 
-      print('unordered points:',self.boardPoints)
+      #print('unordered points:',self.boardPoints)
       reorderedPoints= dXO.reorder(self.boardPoints)
-      print('reorderedPoints:',reorderedPoints)
+      #print('reorderedPoints:',reorderedPoints)
       z_angle = dXO.newOrientation(reorderedPoints)
 
       angle = dXO.getOrientation(self.boardPoints, self.boardImage)
-      print('old orientation angle',np.rad2deg(angle))
+      #print('old orientation angle',np.rad2deg(angle))
       cv2.imshow('live board',self.boardImage)
 
 
@@ -164,7 +164,7 @@ class center_finder:
         board_msg.transform.rotation.y = b[2]
         board_msg.transform.rotation.z = b[3]
         self.center_pub.publish(board_msg)
-        #rospy.loginfo(board_msg)
+        rospy.loginfo(board_msg)
       
     except CvBridgeError as e:
       print(e)

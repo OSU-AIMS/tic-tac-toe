@@ -129,17 +129,17 @@ class detectXO(object):
     #finds contours on image
 
   def newOrientation(self,pts):
-    print('shape of points:',pts.shape)
+    #print('shape of points:',pts.shape)
     topleft = [pts[0][0][0] , pts[0][0][1]]
-    print('topleft',topleft)
+    #print('topleft',topleft)
     topright = [pts[1][0][0] , pts[1][0][1]]
-    print('topright',topright)
-    print('topright y',topright[1])
-    print('topright x',topright[0])
+    # print('topright',topright)
+    # print('topright y',topright[1])
+    # print('topright x',topright[0])
     slope1_2 = (float(topleft[1])-float(topright[1])) / (float(topleft[0]) - float(topright[0])) 
-    print('slope:',slope1_2)
+    #print('slope:',slope1_2)
     angle = math.degrees(math.atan(slope1_2))
-    print('new slope angle',angle)
+    #print('new slope angle',angle)
     
     return angle
 
