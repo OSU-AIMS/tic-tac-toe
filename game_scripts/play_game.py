@@ -6,6 +6,12 @@
 # sys.path.insert(0, '/home/ros/tic-tac-toe_ws/src/tic-tac-toe/edge_scripts')
 # from robot_support import *
 
+
+  '''
+This script is being retired as of 8/4/2021. Use play_tictactoe.py to initiative game
+
+  '''
+
 from move_piece import *
 from scan_board import *
 from Realsense_tools import *
@@ -30,6 +36,8 @@ boardCode = [
   # Human: -1 (circles)
   # Computer: +1 (X's)
   # board filled with -1 & +1
+
+
 
 
 def RoboTurn(countO,blocks):
