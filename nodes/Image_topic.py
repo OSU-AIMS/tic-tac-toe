@@ -6,6 +6,8 @@ import cv2
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+import numpy as np
+from PIL import Image
 
 class image_converter:
 
@@ -27,7 +29,13 @@ class image_converter:
     cv2.waitKey(3)
 
     try:
-      self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+      # imgData = (self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+      imgData = cv_image
+      outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/Camera_image_data.png'
+
+      imgData.save('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/Camera_image_data.png')
+
+      #np.save(outputFilePath, imgData)
     except CvBridgeError as e:
       print(e)
 
