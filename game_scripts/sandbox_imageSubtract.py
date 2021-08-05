@@ -2,9 +2,6 @@
 
 #Zaphod: Python version: 2.7.17
 
-
-
-
 ######################################################################################################
 
 
@@ -45,12 +42,12 @@ def main():
     #Scott Labs:4.2
 
     # load images & crop them
-    background_precrop = cv2.imread('images/board_Color.png')
+    background_precrop = cv2.imread('images/board_sample_newRes_Color.png') # will not work well for moving & rotating board
     background_crop = background_precrop[0:300, 10:550] #(y,x)
     # above crop removes floor & focuses on table around paper
     #cv2.imshow('Pre-Crop',background_precrop)
     #cv2.imshow('Should be only table, no ground',background_crop)
-    board_precrop = cv2.imread('images/boardwO_Color.png')
+    board_precrop = cv2.imread('images/game_board_2O_Color.png')
     board_crop = board_precrop[0:300,10:550]
     
     # create grayscale images

@@ -191,9 +191,7 @@ class detectXO(object):
           boardCenter[0] = cX
           boardCenter[1] = cY
           boardPoints = approx
-          #print(approx)
-          
-
+          #print(approx)   
     
     return boardImage, boardCenter, boardPoints
 
