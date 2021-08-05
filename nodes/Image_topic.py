@@ -22,7 +22,7 @@ class image_converter:
 
     except CvBridgeError as e:
       print(e)
-    print(cv_image.shape)
+    #print(cv_image.shape)
     cv2.imshow("Image window", cv_image)
     cv2.waitKey(3)
 

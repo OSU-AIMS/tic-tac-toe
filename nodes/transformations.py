@@ -172,7 +172,7 @@ class transformations:
     Covert a quaternion into a full three-dimensional rotation matrix.
 
     Input
-    :param Q: A 4 element array representing the quaternion (q0,q1,q2,q3) 
+    :param Q: A 4 element array representing the quaternion (q0,q1,q2,q3)(w,x,y,z) 
 
     Output
     :return: A 3x3 element matrix representing the full 3D rotation matrix. 

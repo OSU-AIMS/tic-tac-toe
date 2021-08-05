@@ -79,7 +79,7 @@ class center_finder:
       # print(boardCropped.sh)
       # cv2.imshow('Cropped Board',boardCropped)
       
-      boardTranslation = np.array([[self.ScaledCenter[0]],[self.ScaledCenter[1]],[0.64]])  ## depth of the table is .64 m
+      boardTranslation = np.array([[self.ScaledCenter[0]],[self.ScaledCenter[1]],[0.655]])  ## depth of the table is .64 m
 
       z_orient=z_angle
       boardRotation = np.array([[math.cos(radians(z_orient)),-math.sin(radians(z_orient)),0],
@@ -131,7 +131,7 @@ class center_finder:
         board_msg.transform.translation.y = tf_board2world[1][3]
         board_msg.transform.translation.z = tf_board2world[2][3]
 
-        rot_twist = boardRotation
+        rot_twist = tf_board2world[0:3,0:3]
 
         t= [rot_twist[0,0],rot_twist[0,1],rot_twist[0,2],rot_twist[1,0],rot_twist[1,1],rot_twist[1,2],rot_twist[2,0], rot_twist[2,1], rot_twist[2,2]]
         #matrix to quat

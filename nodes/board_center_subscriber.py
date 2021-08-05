@@ -16,10 +16,10 @@ def listener():
         data.transform.translation.x,
         data.transform.translation.y,
         data.transform.translation.z,
+        data.transform.rotation.w,
         data.transform.rotation.x,
         data.transform.rotation.y,
-        data.transform.rotation.z,
-        data.transform.rotation.w
+        data.transform.rotation.z
         ]
 
     #print(data_list)
@@ -31,9 +31,10 @@ def listener():
 
 if __name__ == '__main__':
     try:
-        while True:
-            listener()
-            time.sleep(0.2)
+        listener()
+        # while True:
+        #     listener()
+        #     time.sleep(0.2)
     except KeyboardInterrupt:
         exit()
 
