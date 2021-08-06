@@ -33,9 +33,8 @@ if __name__ == '__main__':
     # Required Input Arguments: [absolute file path to workspace, output filename]
     # workspace = sys.argv[1]
     # filename  = sys.argv[2]
-
-    listener()
     try:
-        rospy.spin()
+        listener()
+        #Srospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")

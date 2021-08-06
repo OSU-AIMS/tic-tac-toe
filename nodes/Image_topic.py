@@ -4,18 +4,19 @@ import sys
 import rospy
 import cv2
 from std_msgs.msg import String
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image as ImageRos
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 from PIL import Image
+import time
 
 class image_converter:
 
   def __init__(self):
-    self.image_pub = rospy.Publisher("image_topic",Image,queue_size=20)
+    self.image_pub = rospy.Publisher("image_topic",ImageRos,queue_size=20)
 
     self.bridge = CvBridge()
-    self.image_sub = rospy.Subscriber("/camera/color/image_raw",Image,self.callback)
+    self.image_sub = rospy.Subscriber("/camera/color/image_raw",ImageRos,self.callback)
 
   def callback(self,data):
     try:
@@ -29,13 +30,15 @@ class image_converter:
     cv2.waitKey(3)
 
     try:
-      # imgData = (self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+      #imgData = (self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+      #imgData = Image.fromarray(cv_image)
       imgData = cv_image
       outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/Camera_image_data.png'
 
-      imgData.save('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/Camera_image_data.png')
+      #imgData.save('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/Camera_image_data.png')
+      time.sleep(1)
 
-      #np.save(outputFilePath, imgData)
+      np.save(outputFilePath, imgData)
     except CvBridgeError as e:
       print(e)
 

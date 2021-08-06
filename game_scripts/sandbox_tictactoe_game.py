@@ -12,8 +12,9 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import subprocess
 from scipy import ndimage
+from robot_move import *
 
-
+PickP = tictactoeMotion()
 dXO = detectXO()
 brain = BigBrain()
 boardPoints=[]
@@ -32,6 +33,14 @@ boardCode = [
   # Computer: +1 (X's)
   # board filled with -1 & +1
 countO=0
+def findDis(pt1x,pt1y, pt2x,pt2y):
+    # print('Entered Rectangle_support: findDis function')
+    x1 = float(pt1x)
+    x2 = float(pt2x)
+    y1 = float(pt1y)
+    y2 = float(pt2y)
+    dis = ((x2 - x1)**2 + (y2 - y1)**2)**(0.5)
+    return dis
 
 class PlayGame():
 
@@ -42,20 +51,20 @@ class PlayGame():
 
 
   def listener(self):
-    self.image_pub = rospy.Publisher("image_topic",Image,queue_size=20)
+    # self.image_pub = rospy.Publisher("image_topic",Image,queue_size=20)
 
-    self.bridge = CvBridge()
-    data = rospy.wait_for_message("/camera/color/image_raw",Image,timeout=None)
-    cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-    cv2.imshow('test',cv_image)
-    cv2.waitKey(0)
+    # self.bridge = CvBridge()
+    # data = rospy.wait_for_message("/camera/color/image_raw",Image,timeout=None)
+    # cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+    
     #rospy.init_node('board_image_listener', anonymous=True)
     # print('Inside Listener')
     # self.image_sub = rospy.Subscriber("/camera/color/image_raw",Image,self.callback)
-    # tf_filename = 'Camera_image_data.png.npy'
-    # img_data = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
-
-    return cv_image
+    tf_filename = 'Camera_image_data.png.npy'
+    img_data = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+    # cv2.imshow('test',img_data)
+    # cv2.waitKey(0)
+    return img_data
 
 
   def listener_Angle(self):
@@ -109,7 +118,7 @@ class PlayGame():
 
 
   # Detect circles
-  def circle_detect(self,countO,current_board):
+  def circle_detect(self,countO,current_board,blocks):
     centers = []
     print('expected number of Os: ',countO)
 
@@ -137,75 +146,110 @@ class PlayGame():
       
       #print('First array: of circles',centers[0,:])
       #print('First x of 1st array:',centers[1][0])
-      #print('Length of CentersLIst',len(centers))
+      print('CentersLIst',centers)
       #  #length = 5 for max
 
       ## ALL THE NUMBERS HERE WILL CHANGE B/C Board can now move & rotate
       ## Unless you move image to the blue tape corner each time & change the robot motion accordingly
+      tf_filename = 'xList.npy'
+      xList = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+
+      tf_filename = 'yList.npy'
+      yList = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      closest_index=[]
+      closest_square = [0,0,0,0,0,0,0,0,0]
       for i in range(len(centers)):
-        # print('i:',i) # starts at 0
-        if 7 < centers[i][0] < 54 and 13 < centers[i][1] < 60:
-          print('aT top left square')
-          board[0][0]='O'
-          boardCode[0][0]= -1
-          cv2.rectangle(img,(7,13),(54,60),(0,255,0),1)
+        closest = 10000
+        for j in range(len(xList)):
+          #centers x to xList/yList centers for dist
+          
+          distance = findDis(centers[i][0],centers[i][1],xList[j],yList[j])   #findDis params :(pt1x.pt1y, pt2x,pt2y)
+          # print('Distance:',j,distance)
+          if distance < 40 and distance < closest:
+            closest = distance
+            closest_index = j
+            print('distance checker')
+            # closest_square[i]= closest_index
+          else:
+            print('Not on board!')
+        if closest_index is not None:
+          print('inside board assignent ifs')
+          if closest_index == 0:  
+            board[0][0]='O'
+            boardCode[0][0]= -1
+          elif closest_index == 1:  
+            board[0][1]='O'
+            boardCode[0][1]= -1
+          elif closest_index == 2:  
+            board[0][2]='O'
+            boardCode[0][2]= -1
+          elif closest_index == 3:  
+            board[1][0]='O'
+            boardCode[1][0]= -1
+          elif closest_index == 4:  
+            board[1][1]='O'
+            boardCode[1][1]= -1
+          elif closest_index == 5:  
+            board[1][2]='O'
+            boardCode[1][2]= -1
+          elif closest_index == 6:  
+            board[2][0]='O'
+            boardCode[2][0]= -1
+          elif closest_index == 7:  
+            board[2][1]='O'
+            boardCode[2][1]= -1
+          elif closest_index == 8:  
+            board[2][2]='O'
+            boardCode[2][2]= -1
 
-        elif 62 < centers[i][0] < 109 and 12 <= centers[i][1] < 57:
-          print('At top middle')
-          board[0][1]='O'
-          boardCode[0][1]= -1
-          cv2.rectangle(img,(62,12),(109,57),(0,255,0),1)
+          
+          print('closest index',closest_index)
+      print(board)
+      move = brain.ai_turn('X','O' , boardCode) #outputs move array based on minimx
+      print('MOVE: ',move)
+      # if move == None:
+      #   if brain.wins(boardCode, -1):
+      #     print('YOU WIN!')
+      #     exit()
+      #   elif brain.wins(boardCode, +1):
+      #   # print(f'Computer turn [{c_choice}]')        
+      #     print('YOU LOSE!')
+      #     exit()
+      #   else:
+      #     print('DRAW!')
+      #     exit()
+      # else:
 
-        elif 115 < centers[i][0] < 164 and 12 <= centers[i][1] < 57:
-          print('At top right')
-          board[0][2]='O'
-          boardCode[0][2]= -1
-          cv2.rectangle(img,(115,12),(164,57),(0,255,0),1)
+      # recieve output move and execute robot motion
+      blocksY= [.517,.5524,.5806,.609,.638,.671]
+      board[move[0]][move[1]]='X'
+      boardCode[move[0]][move[1]]= +1
 
-        elif 6 < centers[i][0] < 55 and 68 <= centers[i][1] < 111:
-          print('At mid left')
-          board[1][0]='O'
-          boardCode[1][0]= -1
-          cv2.rectangle(img,(6,68),(55,111),(0,255,0),1)
+      print('attempting to get x:',blocks)
+      Y = blocksY[blocks]
+      blocksX = -0.112
+      PickP.xPickup(blocksX, Y)
 
-        elif 62 < centers[i][0] <= 108 and 66 < centers[i][1] < 109:
-          print('At mid middle')
-          board[1][1]='O'
-          boardCode[1][1]= -1
-          cv2.rectangle(img,(62,66),(108,109),(0,255,0),1)
-
-        elif 114 < centers[i][0] <= 164 and 64 < centers[i][1] < 109:
-          print('At mid right')
-          board[1][2]='O'
-          boardCode[1][2]= -1
-          cv2.rectangle(img,(114,64),(164,109),(0,255,0),1)
-
-        elif 5 <= centers[i][0] < 56 and 118 <= centers[i][1] < 165:
-          print('At bottom left')
-          board[2][0]='O'
-          boardCode[2][0]= -1
-          cv2.rectangle(img,(5,118),(56,165),(0,255,0),1)
-
-        elif 63 <= centers[i][0] <= 108 and 119 < centers[i][1] < 165:
-          print('At bottom middle')
-          board[2][1]= 'O'
-          boardCode[2][1]= -1
-          cv2.rectangle(img,(63,119),(108,165),(0,255,0),1)
-
-        elif 115 < centers[i][0] <= 167 and 117 < centers[i][1] < 163:
-          print('At bottom right')
-          board[2][2]='O'
-          boardCode[2][2]= -1
-          cv2.rectangle(img,(115,117),(167,163),(0,255,0),1)
-
-
-        else:
-          print('not on board')
-          # 
-        cv2.imshow('Tile Boundaries',img)
-      
-
-        cv2.waitKey(0)
+      if move[0] == 0 and move[1] == 0:
+        PickP.moveToBoard(0)
+      if move[0]== 0 and move[1]== 1:
+        PickP.moveToBoard(1)
+      if move[0]== 0 and move[1]== 2:
+        PickP.moveToBoard(2)
+      if move[0]== 1 and move[1]== 0:
+        PickP.moveToBoard(3)
+      if move[0]== 1 and move[1]== 1:
+        PickP.moveToBoard(4)
+      if move[0]== 1 and move[1]== 2:
+        PickP.moveToBoard(5)
+      if move[0]== 2 and move[1]== 0:
+        PickP.moveToBoard(6)
+      if move[0]== 2 and move[1]== 1:
+        PickP.moveToBoard(7)
+      if move[0]== 2 and move[1]== 2:
+        PickP.moveToBoard(8)
+    
+      cv2.waitKey(0)
       return boardCode, board
 
 
@@ -245,15 +289,20 @@ class PlayGame():
 
 def main():
   try:
-    rospy.init_node('board_image_listener', anonymous=True)
+    #rospy.init_node('board_image_listener', anonymous=True)
     PG = PlayGame()
-
+    img = PG.listener()
     print('OpenCV version:',cv2.__version__)
     countO = 0
-    current_board = cv2.imread('images/game_board_3O_Color.png') # frame of board taken after each move
+    # current_board = cv2.imread('images/game_board_3O_Color.png') # frame of board taken after each move
     countO += 1
+    blocks =0
+   
+    PG.circle_detect(countO,img,blocks)
+    blocks +=1
+
   #  PG.listener()
-    PG.Read_Board(countO,current_board,board,boardCode)
+    # PG.Read_Board(countO,current_board,board,boardCode)
 
     # gameInProgress = True
     # countO = 0

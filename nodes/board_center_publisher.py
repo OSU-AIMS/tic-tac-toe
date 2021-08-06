@@ -21,6 +21,40 @@ from math import pi, radians, sqrt
 tf = transformations()
 dXO = detectXO()
 
+def prepare_path_tf_ready():
+  """
+  Convenience Function to Convert Path from a List of xyz points to Transformation Matrices 
+  :param path_list: Input must be list type with cell formatting of XYZ
+  :return: List of Transformation Matrices
+  """
+  # centerxDist = 0.05863
+  # centeryDist = -0.05863
+  centerxDist = 0.0635
+  centeryDist = -0.0635
+
+  pieceHeight = -0.0
+
+  """
+  tictactoe board order assignment:
+  [0 1 2]
+  [3 4 5]
+  [6 7 8]
+  """ 
+  tf = transformations()
+  centers =[[-centerxDist ,centeryDist,pieceHeight],[0,centeryDist,pieceHeight],[centerxDist,centeryDist,pieceHeight],
+            [-centerxDist,0,pieceHeight],[0,0,pieceHeight],[centerxDist,0,pieceHeight],
+            [-centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[centerxDist,-centeryDist,pieceHeight]]
+
+  tictactoe_center_list = np.array(centers,dtype=np.float)
+  #print(tictactoe_center_list)
+  rot_default = np.identity((3))
+  new_list = []
+
+  for vector in tictactoe_center_list:
+    item = np.matrix(vector)
+    new_list.append( tf.generateTransMatrix(rot_default, item) )
+
+  return new_list
 
 def croptoBoard(frame,center):
     #print('Entered RealsenseTools: cropFrame function\n')
@@ -72,7 +106,7 @@ class center_finder:
 
       angle = dXO.getOrientation(self.boardPoints, self.boardImage)
       #print('old orientation angle',np.rad2deg(angle))
-      cv2.imshow('live board',self.boardImage)
+      
 
 
       # boardCropped = croptoBoard(self.boardImage, self.boardCenter)
@@ -88,9 +122,32 @@ class center_finder:
       # boardRotation = np.identity((3))
 
       tf_board = tf.generateTransMatrix(boardRotation,boardTranslation) #tf_body2camera, transform from camera 
+      tileCentersMatrices = prepare_path_tf_ready()
+      tileCenters2camera = tf.convertPath2FixedFrame(tileCentersMatrices,tf_board) # 4x4 transformation matrix
+      # Columns: 0,1,2 are rotations, column: 3 is translation
+      # Rows: 0,1 are x & y rotation & translation values
+      xList = []
+      yList = []
+      scale = .895/1280
+      for i in range(9): 
+        xyzCm = (tileCenters2camera[i][0:2,3:4]) # in cm 
+        x = xyzCm[0]/scale +640
+        y = xyzCm[1]/scale +360# in pixels
+        xList.append(int(x))
+        yList.append(int(y))
+        # print x ,y
+      # print xyList
+
+        cv2.putText(self.boardImage, str(i), (int(xList[i]), int(yList[i])), cv2.FONT_HERSHEY_SIMPLEX,0.75, (0, 0, 0), 2)
+      
+      outputFilePathx = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/xList.npy'
+      np.save(outputFilePathx, xList)
+      outputFilePathy = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/yList.npy'
+      np.save(outputFilePathy, yList)
+      
+      cv2.imshow('live board',self.boardImage)
+
       import subprocess
-
-
       tf_filename = "tf_camera2world.npy"
       # tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/tf_origin_camera_subscriber.py'
       # p2 = time.time()

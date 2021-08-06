@@ -31,10 +31,10 @@ def listener():
 
 if __name__ == '__main__':
     try:
-        listener()
-        # while True:
-        #     listener()
-        #     time.sleep(0.2)
+        # listener()
+        while True:
+            listener()
+            time.sleep(0.2)
     except KeyboardInterrupt:
         exit()
 

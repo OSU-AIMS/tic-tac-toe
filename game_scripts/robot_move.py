@@ -22,9 +22,11 @@ def prepare_path_tf_ready():
 	:param path_list: Input must be list type with cell formatting of XYZ
 	:return: List of Transformation Matrices
 	"""
-	centerxDist = 0.05863
-	centeryDist = -0.05863
-	pieceHeight = -0.02
+	# centerxDist = 0.05863
+	# centeryDist = -0.05863
+	centerxDist = 0.0635
+	centeryDist = -0.0635
+	pieceHeight = -0.03
 	"""
 	tictactoe board order assignment:
 	[0 1 2]
@@ -82,6 +84,56 @@ class tictactoeMotion():
 		# Calling ``stop()`` ensures that there is no residual movement
 		self.rc.move_group.stop() 
 
+	def xPickup(self,x,y):
+		self.rc.send_io(0)#open gripper
+		pose_higher = [x,y,0.08,.707,-.707,0,0]
+		self.rc.goto_Quant_Orient(pose_higher)
+		raw_input('Lower gripper...')
+
+		pose_lower = [x,y,0.04,.707,-.707,0,0]
+		self.rc.goto_Quant_Orient(pose_lower)
+
+		self.rc.send_io(1) #close gripper
+		pose_higher = [x,y,0.08,.707,-.707,0,0]
+		self.rc.goto_Quant_Orient(pose_higher)
+
+	def defineRobotPoses(self):
+		tileCentersMatrices=prepare_path_tf_ready()
+
+		# Body frame
+		quant_board2world = self.listener()
+		#print('quant_board2world:',quant_board2world)
+		tf_board2world = tf.quant_pose_to_tf_matrix(quant_board2world)
+
+		# Rotate board tile positions
+		tileCenters2world = tf.convertPath2FixedFrame(tileCentersMatrices,tf_board2world)
+		#print('after fixed frame',tileCenters2world)
+
+		#Convert tfs to robot poses (quant)
+		self.robot_poses =[]
+		matr_rot = tileCenters2world[0][0:3,0:3]
+		print('rotation matrix',matr_rot)
+
+		b = Quaternion(matrix=matr_rot)
+
+		for i in range(9):
+			trans_rot= tileCenters2world[i][0:3,3:4]
+			new_pose = [trans_rot[0][0],trans_rot[1][0],trans_rot[2][0],b[1],b[2],b[3],b[0]]
+			# print(new_pose)
+			self.robot_poses.append(new_pose)
+
+	def moveToBoard(self,pose_number):
+		self.rc.goto_Quant_Orient(self.robot_poses(pose_number))
+
+		wpose = self.rc.move_group.get_current_pose().pose
+		wpose.position.z += -0.01  # Move up (z)
+
+		self.rc.goto_Quant_Orient(wpose)
+
+
+		self.rc.send_io(0)#open gripper
+		self.scanPos()
+
 def main():
 	try:
 		ttt = tictactoeMotion()
@@ -106,33 +158,6 @@ def main():
 		print('rotation matrix',matr_rot)
 
 		b = Quaternion(matrix=matr_rot)
-
-		#matrix to quat
-		# t= [matr_rot[0,0],matr_rot[0,1],matr_rot[0,2],matr_rot[1,0],matr_rot[1,1],matr_rot[1,2],matr_rot[2,0], matr_rot[2,1], matr_rot[2,2]]
-
-		# w = sqrt(t[0]+t[4]+t[8]+1)/2
-		# x = sqrt(t[0]-t[4]-t[8]+1)/2
-		# y = sqrt(-t[0]+t[4]-t[8]+1)/2
-		# z = sqrt(-t[0]-t[4]+t[8]+1)/2
-		# a = [w,x,y,z]
-		# m = a.index(max(a))
-		# if m == 0:
-		# 		x = (t[7]-t[5])/(4*w)
-		# 		y = (t[2]-t[6])/(4*w)
-		# 		z = (t[3]-t[1])/(4*w)
-		# if m == 1:
-		# 		w = (t[7]-t[5])/(4*x)
-		# 		y = (t[1]+t[3])/(4*x)
-		# 		z = (t[6]+t[2])/(4*x)
-		# if m == 2:
-		# 		w = (t[2]-t[6])/(4*y)
-		# 		x = (t[1]+t[3])/(4*y)
-		# 		z = (t[5]+t[7])/(4*y)
-		# if m == 3:
-		# 		w = (t[3]-t[1])/(4*z)
-		# 		x = (t[6]+t[2])/(4*z)
-		# 		y = (t[5]+t[7])/(4*z)
-		# b = [w,x,y,z]
 
 		for i in range(9):
 			trans_rot= tileCenters2world[i][0:3,3:4]
