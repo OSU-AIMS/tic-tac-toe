@@ -10,12 +10,6 @@ import time
 
 #this class is for grabbing frame from the Realsense d435i camera plus image tools
 def timer_wait(secs=3):
-'''Wait function that waits for desired amount of seconds, default is 3 seconds.
-Parameters:
------------
-secs : int
-The desired wait time in seconds.
-'''
   try:
     for remaining in range(3,0,-1):
       sys.stdout.write("\r")
@@ -29,6 +23,7 @@ The desired wait time in seconds.
 class RealsenseTools:
   """
   A class used to initiate python realsense pipeline for the d435i camera.
+  Contains tools for grabbing and manipulating images from the pipeline.
 
   """
   def __init__(self):
