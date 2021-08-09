@@ -9,7 +9,13 @@ import time
 
 
 #this class is for grabbing frame from the Realsense d435i camera plus image tools
-def timer_wait():
+def timer_wait(secs=3):
+'''Wait function that waits for desired amount of seconds, default is 3 seconds.
+Parameters:
+-----------
+secs : int
+The desired wait time in seconds.
+'''
   try:
     for remaining in range(3,0,-1):
       sys.stdout.write("\r")
@@ -21,6 +27,10 @@ def timer_wait():
     sys.exit()
 
 class RealsenseTools:
+  """
+  A class used to initiate python realsense pipeline for the d435i camera.
+
+  """
   def __init__(self):
     self.pipeline = rs.pipeline()
     self.config = rs.config()
@@ -40,9 +50,16 @@ class RealsenseTools:
 
     # Starts streaming
     self.pipeline.start(self.config)
-    # timer_wait()
+    timer_wait()
 
   def grabFrame(self):
+    """Grabs a frame from the color frame pipeline.
+
+    Returns
+    ------
+    Array
+        A numpy array representation of an rgb color frame from the d435i.
+    """
     # Starts streaming
     #self.pipeline.start(self.config)
     while True:
@@ -60,14 +77,21 @@ class RealsenseTools:
 
 
   def croptoBoard(self,frame,center):
-    print('Entered RealsenseTools: cropFrame function\n')
+
+    # print('Entered RealsenseTools: cropFrame function\n')
     #cropped_image = frame[55:228,335:515] # frame[y,x]
     # cropped_image = frame[45:218,315:495 ] # frame[y,x]
     cropped_image = frame[center[1]-90:center[1]+90,center[0]-90:center[0]+90]
     return cropped_image
 
   def rescaleFrame(self,frame, scale=1):
-    print('Entered RealsenseTools: rescaleFrame function')
+    """
+    Rescales image to specified scale of original. Default = 1 (no rescale)
+    :param frame: The original image that will be rescaled.
+    :param scale: The scale that the image will be resized to, 2 = double the size in both width and height.
+    :@return: Outputs the rescaled image.
+    """
+    # print('Entered RealsenseTools: rescaleFrame function')
     # Images, Videos and Live Video
     width = int(frame.shape[1] * scale)
     height = int(frame.shape[0] * scale)
