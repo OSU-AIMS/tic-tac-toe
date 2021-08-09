@@ -27,6 +27,7 @@ class RealsenseTools:
 
   """
   def __init__(self):
+    """Configures the d435i realsense pipeline for depth/color streams: color in 1280x720p and depth in 640x480p"""
     self.pipeline = rs.pipeline()
     self.config = rs.config()
 
@@ -49,11 +50,7 @@ class RealsenseTools:
 
   def grabFrame(self):
     """Grabs a frame from the color frame pipeline.
-
-    Returns
-    ------
-    Array
-        A numpy array representation of an rgb color frame from the d435i.
+    :return color_image: A numpy array representation of an rgb color frame from the d435i.
     """
     # Starts streaming
     #self.pipeline.start(self.config)
@@ -84,7 +81,7 @@ class RealsenseTools:
     Rescales image to specified scale of original. Default = 1 (no rescale)
     :param frame: The original image that will be rescaled.
     :param scale: The scale that the image will be resized to, 2 = double the size in both width and height.
-    :@return: Outputs the rescaled image.
+    :return rescaled_img: Outputs the rescaled image.
     """
     # print('Entered RealsenseTools: rescaleFrame function')
     # Images, Videos and Live Video
@@ -92,8 +89,8 @@ class RealsenseTools:
     height = int(frame.shape[0] * scale)
 
     dimensions = (width,height)
-
-    return cv2.resize(frame, dimensions, interpolation=cv2.INTER_AREA)
+    rescaled_img = cv2.resize(frame, dimensions, interpolation=cv2.INTER_AREA)
+    return rescaled_img
 
   def deNoise(self,frame): 
     print('Entered RealsenseTools: deNoise function')
