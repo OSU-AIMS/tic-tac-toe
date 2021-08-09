@@ -53,6 +53,7 @@ class tictactoeMotion():
 	def __init__(self):
 		self.board_center = geometry_msgs.msg.TransformStamped()
 		self.rc = moveManipulator('bot_mh5l_pgn64')
+		self.tf = transformations()
 
 	def listener(self):
 
@@ -103,10 +104,10 @@ class tictactoeMotion():
 		# Body frame
 		quant_board2world = self.listener()
 		#print('quant_board2world:',quant_board2world)
-		tf_board2world = tf.quant_pose_to_tf_matrix(quant_board2world)
+		tf_board2world = self.tf.quant_pose_to_tf_matrix(quant_board2world)
 
 		# Rotate board tile positions
-		tileCenters2world = tf.convertPath2FixedFrame(tileCentersMatrices,tf_board2world)
+		tileCenters2world = self.tf.convertPath2FixedFrame(tileCentersMatrices,tf_board2world)
 		#print('after fixed frame',tileCenters2world)
 
 		#Convert tfs to robot poses (quant)
@@ -137,47 +138,15 @@ class tictactoeMotion():
 def main():
 	try:
 		ttt = tictactoeMotion()
-		tf = transformations()
-		rc = moveManipulator('bot_mh5l_pgn64')
 
-		# Tile centers as matrices
-		tileCentersMatrices=prepare_path_tf_ready()
+		ttt.defineRobotPoses()
+		# define robot poses based on current board center/camera position
 
-		# Body frame
-		quant_board2world = ttt.listener()
-		#print('quant_board2world:',quant_board2world)
-		tf_board2world = tf.quant_pose_to_tf_matrix(quant_board2world)
-
-		# Rotate board tile positions
-		tileCenters2world = tf.convertPath2FixedFrame(tileCentersMatrices,tf_board2world)
-		#print('after fixed frame',tileCenters2world)
-
-		#Convert tfs to robot poses (quant)
-		robot_poses =[]
-		matr_rot = tileCenters2world[0][0:3,0:3]
-		print('rotation matrix',matr_rot)
-
-		b = Quaternion(matrix=matr_rot)
-
-		for i in range(9):
-			trans_rot= tileCenters2world[i][0:3,3:4]
-			new_pose = [trans_rot[0][0],trans_rot[1][0],trans_rot[2][0],b[1],b[2],b[3],b[0]]
-			# print(new_pose)
-			robot_poses.append(new_pose)
-		print(robot_poses)
-		#print(matr_rot)
-		# robot_poses = tf.convertPath2RobotPose(tileCenters2world)
-
-
-		rc.set_vel(0.1)
-		rc.set_accel(0.1)
-
-		for pose in robot_poses:
+		for i in range(9): # go to board position 0-8
 			try:
 				raw_input('>> Next Pose <enter>')
-				rc.goto_Quant_Orient(pose)
+				ttt.moveToBoard(i)
 				print('Moved to pose:')
-				print(pose)
 
 			except KeyboardInterrupt:
 				exit()
