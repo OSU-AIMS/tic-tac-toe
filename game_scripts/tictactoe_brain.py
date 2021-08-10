@@ -204,8 +204,8 @@ class BigBrain():
     self.board = board
     depth = len(self.empty_cells(self.board))
     if depth == 0 or self.game_over(self.board):
-        print("GAME OVER")
-        return
+        print("GAME OVER- No valid moves left")
+        return False
 
     # clean()
     #print(f'Computer turn [{c_choice}]')

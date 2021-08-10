@@ -22,8 +22,9 @@ def listener():
         data.transform.rotation.z
         ]
 
-    #print(data_list)
-    outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/tf_board2world.npy'
+    # print(data_list)
+    # outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/tf_board2world.npy'
+    outputFilePath = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/tf_board2world.npy'
     np.save(outputFilePath, data_list)
 
     rospy.loginfo(">> Service Provided: Exported Origin-Camera Transform to %s", outputFilePath)

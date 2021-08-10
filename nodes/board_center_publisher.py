@@ -2,7 +2,8 @@
 
 import sys
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '//home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/game_scripts')  
+# sys.path.insert(1, '//home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/game_scripts')  
+sys.path.insert(1, '//home/khan764/tic-tac-toe_ws/src/tic-tac-toe/game_scripts') 
 import rospy
 
 # from Realsense_tools import *
@@ -140,9 +141,11 @@ class center_finder:
 
         cv2.putText(self.boardImage, str(i), (int(xList[i]), int(yList[i])), cv2.FONT_HERSHEY_SIMPLEX,0.75, (0, 0, 0), 2)
       
-      outputFilePathx = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/xList.npy'
+      # outputFilePathx = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/xList.npy'
+      outputFilePathx = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/xList.npy'
       np.save(outputFilePathx, xList)
-      outputFilePathy = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/yList.npy'
+      # outputFilePathy = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/yList.npy'
+      outputFilePathy = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/yList.npy'
       np.save(outputFilePathy, yList)
       
       cv2.imshow('live board',self.boardImage)
@@ -155,7 +158,8 @@ class center_finder:
       # subprocess.call([tf_listener, '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe', tf_filename])
       # p1 = time.time()
       # print("line 90:",p1-start)
-      tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      # tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      tf_list = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
 
       tf_camera2world = tf.quant_pose_to_tf_matrix(tf_list)
       #print('tf camera to world:',tf_camera2world)

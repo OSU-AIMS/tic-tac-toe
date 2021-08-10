@@ -24,7 +24,8 @@ def listener():
 
     #print(data_list)
     # outputFilePath = workspace + '/' + filename
-    outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/tf_camera2world.npy'
+    # outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/tf_camera2world.npy'
+    outputFilePath = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/tf_camera2world.npy'
     np.save(outputFilePath, data_list)
     rospy.loginfo(">> Service Provided: Exported Origin-Camera Transform to %s", outputFilePath)
 

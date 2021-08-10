@@ -198,10 +198,14 @@ def main():
       import subprocess
 
       tf_filename = "tf_camera2world.npy"
-      tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/tf_origin_camera_subscriber.py'
-      subprocess.call([tf_listener, '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe', tf_filename])
+      # tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/tf_origin_camera_subscriber.py'
+      tf_listener = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/nodes/tf_origin_camera_subscriber.py'
+      # subprocess.call([tf_listener, '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe', tf_filename])
+      subprocess.call([tf_listener, '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe', tf_filename])
 
-      tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      # tf_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      tf_list = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
+      
       tf_camera2world = quant_pose_to_tf_matrix(tf_list)
       #print('tf camera to world:',tf_camera2world)
       rot_camera_hardcode  = np.array([[1,0,0],[0,-1,0],[0,0,-1]])

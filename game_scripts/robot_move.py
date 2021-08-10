@@ -2,7 +2,8 @@
 import os
 import sys
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '//home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes')  
+# sys.path.insert(1, '//home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes')  
+sys.path.insert(1, '//home/khan764/tic-tac-toe_ws/src/tic-tac-toe/nodes')  
 
 import rospy
 from robot_support import *
@@ -43,7 +44,7 @@ def prepare_path_tf_ready():
 						[-centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[centerxDist,-centeryDist,pieceHeight]]
 
 	tictactoe_center_list = np.array(centers,dtype=np.float)
-	print(tictactoe_center_list)
+	print('tictactoe_center_list:\n',tictactoe_center_list)
 	rot_default = np.identity((3))
 	new_list = []
 
@@ -75,6 +76,7 @@ class tictactoeMotion:
 		"""
 		# find tictactoe pkg dir
 		tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+		print('tictactoe_pkg in listener function',tictactoe_pkg)
 
 		tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
 		subprocess.call([tf_listener])
@@ -113,9 +115,9 @@ class tictactoeMotion:
 		self.rc.send_io(0)				# open gripper
 		pose_higher = [x, y, z, .707, -.707, 0, 0]
 		self.rc.goto_Quant_Orient(pose_higher)
-		raw_input('Lower gripper...')
+		raw_input('Lower gripper in xPickup <press enter>')
 
-		pose_lower = [x, y, z-.05, .707, -.707, 0, 0]
+		pose_lower = [x, y, z-.07, .707, -.707, 0, 0]
 		self.rc.goto_Quant_Orient(pose_lower)
 
 		self.rc.send_io(1) 				# close gripper
@@ -127,9 +129,11 @@ class tictactoeMotion:
 		Updates all nine robot poses for the nine grid board centers. Should be called before every robot move.
 		"""
 		tileCentersMatrices = prepare_path_tf_ready()
+		# print('tileCentersMatrices',tileCentersMatrices)
 
 		# Body frame
 		quant_board2world = self.listener()
+		print('Passed self.listener')
 		tf_board2world = self.tf.quant_pose_to_tf_matrix(quant_board2world)
 
 		# Rotate board tile positions
@@ -143,6 +147,7 @@ class tictactoeMotion:
 
 		for i in range(9):
 			trans_rot = tileCenters2world[i][0:3, 3:4]
+			# print('Trans_rot in defineRobotPoses',trans_rot)
 			new_pose = [trans_rot[0][0], trans_rot[1][0], trans_rot[2][0], b[1], b[2], b[3], b[0]]
 			# print(new_pose)
 			self.robot_poses.append(new_pose)
@@ -157,15 +162,20 @@ class tictactoeMotion:
 		:param update: Whether the robot poses should be update before every move.
 		True is default for tictactoe game loop, false is for demonstration purposes.
 		"""
+		print('inside robot_move moveToBoard')
 		if update is True:
+			print('update is True')
 			self.defineRobotPoses()
 
-		self.rc.goto_Quant_Orient(self.robot_poses(pose_number))
+		print('self.robot_poses',self.robot_poses)
+		print('Pose number:',pose_number)
+		self.rc.goto_Quant_Orient(self.robot_poses[pose_number])
 
 		wpose = self.rc.move_group.get_current_pose().pose
 		wpose.position.z += -0.01  # Move down (z)
 
 		self.rc.goto_Quant_Orient(wpose)
+		raw_input('Open gripper <press enter>')
 		self.rc.send_io(0)		# open gripper
 		self.scanPos()
 
@@ -180,7 +190,8 @@ def main():
 		for i in range(9):       # go to board positions 0-8
 			try:
 				raw_input('>> Next Pose <enter>')
-				ttt.moveToBoard(i, update=False)
+				print('i = ',i)
+				ttt.moveToBoard(i,update=True)#False)
 				print('Moved to pose:')
 
 			except KeyboardInterrupt:

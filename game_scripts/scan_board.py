@@ -52,7 +52,7 @@ class detectXO(object):
     # Reorders the four points of the rectangle
   def reorder(self,points):
     try:
-     #print('Entered Rectangle_support: reorder function')
+      print('Entered Rectangle_support: reorder function')
       NewPoints = np.zeros_like(points)
       points = points.reshape((4, 2))
       add = points.sum(1)
@@ -99,7 +99,7 @@ class detectXO(object):
     cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 3, cv2.LINE_AA)
 
   # Gets angle of object
-  def getOrientation(self,pts, img): 
+  def getOrientation(self,pts, img): # uses contours to get orientation
    # print('Entered Rectangle_support: getOrientation function')
     sz = len(pts)
     data_pts = np.empty((sz, 2), dtype=np.float64)
@@ -128,19 +128,20 @@ class detectXO(object):
 
     #finds contours on image
 
-  def newOrientation(self,pts):
-    #print('shape of points:',pts.shape)
+  def newOrientation(self,pts): # Orientation based on slope
+    # print('shape of points:',pts.shape)
     topleft = [pts[0][0][0] , pts[0][0][1]]
     #print('topleft',topleft)
     topright = [pts[1][0][0] , pts[1][0][1]]
+    data_pts = [topleft,topright]
     # print('topright',topright)
     # print('topright y',topright[1])
     # print('topright x',topright[0])
     slope1_2 = (float(topleft[1])-float(topright[1])) / (float(topleft[0]) - float(topright[0])) 
     #print('slope:',slope1_2)
     angle = math.degrees(math.atan(slope1_2))
+
     #print('new slope angle',angle)
-    
     return angle
 
 

@@ -33,7 +33,8 @@ class image_converter:
       #imgData = (self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
       #imgData = Image.fromarray(cv_image)
       imgData = cv_image
-      outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/Camera_image_data.png'
+      # outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/Camera_image_data.png'
+      outputFilePath = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/Camera_image_data.png'
 
       #imgData.save('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/Camera_image_data.png')
       time.sleep(1)

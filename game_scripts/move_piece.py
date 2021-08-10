@@ -22,27 +22,29 @@ class anyPosition(object):
 
   def moveToPickup(self,x,y):
     
-    pose_higher = [x,y,0.05,.707,-.707,0,0]
+    pose_higher = [x,y,0.05,.707,-.707,0,0] # goes above X piece
     self.rc.goto_Quant_Orient(pose_higher)
-    raw_input('Lower gripper...')
-
-    pose_lower = [x,y,0.02,.707,-.707,0,0]
+    
+    raw_input('Lower gripper in moveToPickup <press enter>')
+    pose_lower = [x,y,0.02,.707,-.707,0,0] # lowers to pick up X piece
     self.rc.goto_Quant_Orient(pose_lower)
 
     self.rc.send_io(1) #close gripper
-    pose_higher = [x,y,0.1,.707,-.707,0,0]
+    pose_higher = [x,y,0.1,.707,-.707,0,0] # rises after picking up X piece
     self.rc.goto_Quant_Orient(pose_higher)
 
   def moveToBoard(self,x,y):
-    pose_higher = [x,y,0.05,.707,-.707,0,0]
+    print('inside move_piece moveToBoard')
+    pose_higher = [x,y,0.05,.707,-.707,0,0] # lowers gripper 0.05 m
     self.rc.goto_Quant_Orient(pose_higher)
-    raw_input('Lower gripper...')
+    raw_input('Lower gripper in moveToBoard <press enter>')
 
-    pose_lower = [x,y,0.02,.707,-.707,0,0]
+    pose_lower = [x,y,0.03,.707,-.707,0,0] # lowers gripper to board
     self.rc.goto_Quant_Orient(pose_lower)
 
-    self.rc.send_io(0) #open gripper
-    pose_higher = [x,y,0.1,.707,-.707,0,0]
+    raw_input('Open Gripper in moveToBoard <press enter>')
+    self.rc.send_io(0) # open gripper
+    pose_higher = [x,y,0.1,.707,-.707,0,0] # rises after dropping piece
     self.rc.goto_Quant_Orient(pose_higher)
 
 

@@ -48,20 +48,26 @@ class PlayGame():
    dXO = detectXO()
    brain = BigBrain()
    self.bridge = CvBridge()
+   player = [-1,1]
+   # human: -1, computer = 1
 
 
   def listener(self):
-    # self.image_pub = rospy.Publisher("image_topic",Image,queue_size=20)
+    self.image_pub = rospy.Publisher("image_topic",Image,queue_size=20)
 
-    # self.bridge = CvBridge()
-    # data = rospy.wait_for_message("/camera/color/image_raw",Image,timeout=None)
-    # cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+    self.bridge = CvBridge()
+    data = rospy.wait_for_message("/camera/color/image_raw",Image,timeout=None)
+    cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
     
-    #rospy.init_node('board_image_listener', anonymous=True)
-    # print('Inside Listener')
-    # self.image_sub = rospy.Subscriber("/camera/color/image_raw",Image,self.callback)
-    tf_filename = 'Camera_image_data.png.npy'
-    img_data = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+    # rospy.init_node('board_image_listener', anonymous=True)
+    print('Inside Listener')
+    self.image_sub = rospy.Subscriber("/camera/color/image_raw",Image,self.callback)
+    
+
+    img_data = cv_image
+    # tf_filename = 'Camera_image_data.png.npy' # Pulls from an image Camera_image_data.png, NOT LIVE FEED
+    # img_data = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+    #img_data = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
     # cv2.imshow('test',img_data)
     # cv2.waitKey(0)
     return img_data
@@ -69,11 +75,13 @@ class PlayGame():
 
   def listener_Angle(self):
 
-    tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/board_center_subscriber.py'
+    # tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/board_center_subscriber.py'
+    tf_listener = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/nodes/board_center_subscriber.py'
     subprocess.call([tf_listener])
 
     tf_filename = 'tf_board2world.npy'
-    data_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+    # data_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+    data_list = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
 
     _,_,zAngle = self.euler_from_quaternion(data_list[3],data_list[4],data_list[5],data_list[6]) #(w,x,y,z)
     print('Z_Angle',zAngle)
@@ -142,20 +150,22 @@ class PlayGame():
       centers = dXO.getCircle(img)
      
       cv2.imshow('Circles detected',img)
-      #cv2.waitKey(0)
+      cv2.waitKey(0)
       
       #print('First array: of circles',centers[0,:])
       #print('First x of 1st array:',centers[1][0])
-      print('CentersLIst',centers)
+      print('CentersList from getCircle',centers)
       #  #length = 5 for max
 
       ## ALL THE NUMBERS HERE WILL CHANGE B/C Board can now move & rotate
       ## Unless you move image to the blue tape corner each time & change the robot motion accordingly
       tf_filename = 'xList.npy'
-      xList = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      # xList = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      xList = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
 
       tf_filename = 'yList.npy'
-      yList = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      # yList = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
+      yList = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
       closest_index=[]
       closest_square = [0,0,0,0,0,0,0,0,0]
       for i in range(len(centers)):
@@ -163,7 +173,8 @@ class PlayGame():
         for j in range(len(xList)):
           #centers x to xList/yList centers for dist
           
-          distance = findDis(centers[i][0],centers[i][1],xList[j],yList[j])   #findDis params :(pt1x.pt1y, pt2x,pt2y)
+          distance = findDis(centers[i][0],centers[i][1],xList[j],yList[j])   
+          #findDis params :(pt1x.pt1y, pt2x,pt2y)
           # print('Distance:',j,distance)
           if distance < 40 and distance < closest:
             closest = distance
@@ -204,9 +215,30 @@ class PlayGame():
 
           
           print('closest index',closest_index)
-      print(board)
+      print('Physical Board: ',board)
+      print('Board Computer sees:',boardCode)
+      
+######## Using tictactoe_brain code
       move = brain.ai_turn('X','O' , boardCode) #outputs move array based on minimx
       print('MOVE: ',move)
+      if move == False: 
+      # modifed ai_turn to return False if no valid moves left
+        winner = brain.evaluate(boardCode)
+        print('Evaluate:',winner)
+        if winner == 1:
+          print('Game Over..\n Winner: A.I Computer\n\n\n')
+        elif winner == -1:
+          print('Game Over..\n Winner: Human\n\n\n')
+        elif winner == 0:
+          print('Tie Game!\n\n\n')
+        else:
+          print('The game continues..')
+          # recieve output move and execute robot motion
+          blocksY= [.517,.5524,.5806,.609,.638,.671]
+          board[move[0]][move[1]]='X'
+          boardCode[move[0]][move[1]]= +1
+
+      
       # if move == None:
       #   if brain.wins(boardCode, -1):
       #     print('YOU WIN!')
@@ -220,37 +252,41 @@ class PlayGame():
       #     exit()
       # else:
 
+      # Moved to above else statement after "the game continues"
       # recieve output move and execute robot motion
-      blocksY= [.517,.5524,.5806,.609,.638,.671]
-      board[move[0]][move[1]]='X'
-      boardCode[move[0]][move[1]]= +1
+      # blocksY= [.517,.5524,.5806,.609,.638,.671]
+      # board[move[0]][move[1]]='X'
+      # boardCode[move[0]][move[1]]= +1
 
-      print('attempting to get x:',blocks)
-      Y = blocksY[blocks]
-      blocksX = -0.112
-      PickP.xPickup(blocksX, Y)
+      # Uncomment below after fixing orientation
+      # print('attempting to get X:',blocks)
+      # Y = blocksY[blocks]
+      # # blocksX = -0.112
+      # blocksX = -0.110
+      # raw_input('To attempt to get X <press enter>')
+      # PickP.xPickup(blocksX, Y)
 
-      if move[0] == 0 and move[1] == 0:
-        PickP.moveToBoard(0)
-      if move[0]== 0 and move[1]== 1:
-        PickP.moveToBoard(1)
-      if move[0]== 0 and move[1]== 2:
-        PickP.moveToBoard(2)
-      if move[0]== 1 and move[1]== 0:
-        PickP.moveToBoard(3)
-      if move[0]== 1 and move[1]== 1:
-        PickP.moveToBoard(4)
-      if move[0]== 1 and move[1]== 2:
-        PickP.moveToBoard(5)
-      if move[0]== 2 and move[1]== 0:
-        PickP.moveToBoard(6)
-      if move[0]== 2 and move[1]== 1:
-        PickP.moveToBoard(7)
-      if move[0]== 2 and move[1]== 2:
-        PickP.moveToBoard(8)
+      # if move[0] == 0 and move[1] == 0:
+      #   PickP.moveToBoard(0)
+      # if move[0]== 0 and move[1]== 1:
+      #   PickP.moveToBoard(1)
+      # if move[0]== 0 and move[1]== 2:
+      #   PickP.moveToBoard(2)
+      # if move[0]== 1 and move[1]== 0:
+      #   PickP.moveToBoard(3)
+      # if move[0]== 1 and move[1]== 1:
+      #   PickP.moveToBoard(4)
+      # if move[0]== 1 and move[1]== 2:
+      #   PickP.moveToBoard(5)
+      # if move[0]== 2 and move[1]== 0:
+      #   PickP.moveToBoard(6)
+      # if move[0]== 2 and move[1]== 1:
+      #   PickP.moveToBoard(7)
+      # if move[0]== 2 and move[1]== 2:
+      #   PickP.moveToBoard(8)
     
-      cv2.waitKey(0)
-      return boardCode, board
+      # cv2.waitKey(0)
+      # return boardCode, board
 
 
   # Image modification: If rotated, apply image rotation (once this works, replace it with the one in the original spot)
