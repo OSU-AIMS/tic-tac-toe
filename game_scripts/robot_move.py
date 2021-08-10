@@ -19,8 +19,7 @@ from pyquaternion import Quaternion
 def prepare_path_tf_ready():
 	"""
 	Adam Buynak's Convenience Function to Convert Path from a List of xyz points to Transformation Matrices
-	:param path_list: Input must be list type with cell formatting of XYZ
-	:return: List of Transformation Matrices
+	@return: List of Transformation Matrices
 	"""
 	# Values for paper tictactoe board
 	# centerxDist = 0.05863
@@ -55,6 +54,23 @@ def prepare_path_tf_ready():
 	return new_list
 
 
+def listener():
+	"""
+	"listener" function that loads board center data TODO: reload camera subscriber as well.
+	@return: Outputs board_center transform in quaternion (x, y, z, w, x, y, z)
+	"""
+	# find tictactoe pkg dir
+	tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+	tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
+	subprocess.call([tf_listener])
+
+	tf_filename = 'tf_board2world.npy'
+	data_list = np.load(str(tictactoe_pkg) + '/' + tf_filename)
+
+	return data_list
+
+
 class tictactoeMotion:
 	"""
 	A class used to plan and execute robot poses for the tictactoe game.
@@ -62,8 +78,9 @@ class tictactoeMotion:
 
 	"""
 	def __init__(self, planning_group='bot_mh5l_pgn64'):
-		"""Loads moveManipulator class and transformations class
-		:param planning_group: str planning group that should be loaded onto moveManipulator node
+		"""
+		Loads moveManipulator class and transformations class
+		@param planning_group: str; User's srdf planning group that should be loaded onto moveManipulator node
 		"""
 		self.rc = moveManipulator(planning_group)
 		self.tf = transformations()
@@ -76,7 +93,6 @@ class tictactoeMotion:
 		"""
 		# find tictactoe pkg dir
 		tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-		print('tictactoe_pkg in listener function',tictactoe_pkg)
 
 		tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
 		subprocess.call([tf_listener])
@@ -133,7 +149,6 @@ class tictactoeMotion:
 
 		# Body frame
 		quant_board2world = self.listener()
-		print('Passed self.listener')
 		tf_board2world = self.tf.quant_pose_to_tf_matrix(quant_board2world)
 
 		# Rotate board tile positions
@@ -186,7 +201,7 @@ def main():
 
 	try:
 		ttt = tictactoeMotion()  # initiate movement class, starts manipulator node
-
+		ttt.defineRobotPoses()	 # Defines all robot poses once
 		for i in range(9):       # go to board positions 0-8
 			try:
 				raw_input('>> Next Pose <enter>')
