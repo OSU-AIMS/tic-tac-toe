@@ -22,40 +22,45 @@ from math import pi, radians, sqrt
 tf = transformations()
 dXO = detectXO()
 
-def prepare_path_tf_ready():
+def define_board_tile_centers():
   """
-  Convenience Function to Convert Path from a List of xyz points to Transformation Matrices 
-  :param path_list: Input must be list type with cell formatting of XYZ
-  :return: List of Transformation Matrices
-  """
-  # centerxDist = 0.05863
-  # centeryDist = -0.05863
-  centerxDist = 0.0635
-  centeryDist = -0.0635
-
-  pieceHeight = -0.0
-
-  """
+  Uses hard-coded scale values for size of TTT board to create a list of transformations for each board-tile center
+  relative to the Board Origin (ie, center of board.. tile 4 center)
   tictactoe board order assignment:
   [0 1 2]
   [3 4 5]
   [6 7 8]
-  """ 
-  tf = transformations()
-  centers =[[-centerxDist ,centeryDist,pieceHeight],[0,centeryDist,pieceHeight],[centerxDist,centeryDist,pieceHeight],
+
+  :return: List of Transformation Matrices for each board
+  """
+
+  # Hard-Coded Board Scale Variables (spacing between tile centers)
+  #centerxDist = 0.05863
+  #centeryDist = -0.05863
+  centerxDist = 0.0635
+  centeryDist = -0.0635
+  pieceHeight = -0.0
+
+  # Build 3x3 Matrix to Represent the center of each TTT Board Tile.
+  board_tile_locations =[[-centerxDist ,centeryDist,pieceHeight],[0,centeryDist,pieceHeight],[centerxDist,centeryDist,pieceHeight],
             [-centerxDist,0,pieceHeight],[0,0,pieceHeight],[centerxDist,0,pieceHeight],
             [-centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[centerxDist,-centeryDist,pieceHeight]]
 
-  tictactoe_center_list = np.array(centers,dtype=np.float)
-  #print(tictactoe_center_list)
-  rot_default = np.identity((3))
-  new_list = []
+  # Convert to Numpy Array
+  tictactoe_center_list = np.array(board_tile_locations, dtype=np.float)
 
+  # Set Default Rotation matrix (each tile rotation square with the board)
+  rot_default = np.identity(3)
+  tile_locations_tf = []
+
+  # Create a list of TF's representing each Tile Center. Final list is 9-elements long
+  tf = transformations()
   for vector in tictactoe_center_list:
     item = np.matrix(vector)
-    new_list.append( tf.generateTransMatrix(rot_default, item) )
+    tile_locations_tf.append( tf.generateTransMatrix(rot_default, item) )
 
-  return new_list
+  return tile_locations_tf
+
 
 def croptoBoard(frame,center):
     #print('Entered RealsenseTools: cropFrame function\n')
@@ -123,7 +128,7 @@ class center_finder:
       # boardRotation = np.identity((3))
 
       tf_board = tf.generateTransMatrix(boardRotation,boardTranslation) #tf_body2camera, transform from camera 
-      tileCentersMatrices = prepare_path_tf_ready()
+      tileCentersMatrices = define_board_tile_centers()
       tileCenters2camera = tf.convertPath2FixedFrame(tileCentersMatrices,tf_board) # 4x4 transformation matrix
       # Columns: 0,1,2 are rotations, column: 3 is translation
       # Rows: 0,1 are x & y rotation & translation values
