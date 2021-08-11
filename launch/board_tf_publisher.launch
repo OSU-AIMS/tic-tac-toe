@@ -1,0 +1,9 @@
+<launch>
+
+    <!-- Launch Camera Topics -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+
+    <!-- Board-TF-Publisher -->
+    <node pkg="maze-runner" type="visual_camera_positions.py" name="camera_pose_array" output="screen" launch-prefix="gnome-terminal --command" />
+
+</launch>
