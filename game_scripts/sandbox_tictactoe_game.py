@@ -3,7 +3,7 @@
 import sys
 from std_msgs.msg import String
 import cv2
-from scan_board import *
+from shape_detector import *
 from tictactoe_brain import *
 import rospy
 from PIL import Image # used for image rotation

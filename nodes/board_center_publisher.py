@@ -8,7 +8,7 @@ import rospy
 # from Realsense_tools import *
 from geometry_msgs.msg import TransformStamped
 from transformations import *
-from scan_board import *
+from shape_detector import *
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
@@ -19,7 +19,7 @@ from math import pi, radians, sqrt
 # http://wiki.ros.org/tf2/Tutorials/Writing%20a%20tf2%20listener%20%28Python%29
 # http://docs.ros.org/en/jade/api/geometry_msgs/html/msg/Transform.html
 tf = transformations()
-dXO = detectXO()
+dXO = ShapeDetector()
 
 def prepare_path_tf_ready():
   """

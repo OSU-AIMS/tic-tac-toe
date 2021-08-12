@@ -7,7 +7,7 @@
 # from robot_support import *
 
 from move_piece import *
-from scan_board import *
+from shape_detector import *
 from Realsense_tools import *
 import cv2
 from tictactoe_brain import *
