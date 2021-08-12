@@ -35,7 +35,7 @@ if __name__ == '__main__':
         # listener()
         while True:
             listener()
-            time.sleep(0.2)
+            time.sleep(0.5)
     except KeyboardInterrupt:
         exit()
 

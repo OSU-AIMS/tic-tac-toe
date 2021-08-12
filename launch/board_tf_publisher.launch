@@ -4,6 +4,9 @@
     <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
 
     <!-- Board-TF-Publisher -->
-    <node pkg="maze-runner" type="visual_camera_positions.py" name="camera_pose_array" output="screen" launch-prefix="gnome-terminal --command" />
+    <node pkg="tic-tac-toe" type="board_tf_publisher.py" name="center_pub" output="screen" launch-prefix="gnome-terminal --command" />
+
+    <!-- Camera-Tile-Publisher -->
+    <node pkg="tic-tac-toe" type="board_tf_publisher.py" name="camera_tile_annotation" output="screen" launch-prefix="gnome-terminal --command" />
 
 </launch>

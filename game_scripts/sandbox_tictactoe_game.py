@@ -6,7 +6,7 @@ import cv2
 from scan_board import *
 from tictactoe_brain import *
 import rospy
-from PIL import Image # used for image rotation
+# from PIL import Image # used for image rotation
 import math
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -259,34 +259,34 @@ class PlayGame():
       # boardCode[move[0]][move[1]]= +1
 
       # Uncomment below after fixing orientation
-      # print('attempting to get X:',blocks)
-      # Y = blocksY[blocks]
-      # # blocksX = -0.112
-      # blocksX = -0.110
-      # raw_input('To attempt to get X <press enter>')
-      # PickP.xPickup(blocksX, Y)
+      print('attempting to get X:',blocks)
+      Y = blocksY[blocks]
+      # blocksX = -0.112
+      blocksX = -0.110
+      raw_input('To attempt to get X <press enter>')
+      PickP.xPickup(blocksX, Y)
 
-      # if move[0] == 0 and move[1] == 0:
-      #   PickP.moveToBoard(0)
-      # if move[0]== 0 and move[1]== 1:
-      #   PickP.moveToBoard(1)
-      # if move[0]== 0 and move[1]== 2:
-      #   PickP.moveToBoard(2)
-      # if move[0]== 1 and move[1]== 0:
-      #   PickP.moveToBoard(3)
-      # if move[0]== 1 and move[1]== 1:
-      #   PickP.moveToBoard(4)
-      # if move[0]== 1 and move[1]== 2:
-      #   PickP.moveToBoard(5)
-      # if move[0]== 2 and move[1]== 0:
-      #   PickP.moveToBoard(6)
-      # if move[0]== 2 and move[1]== 1:
-      #   PickP.moveToBoard(7)
-      # if move[0]== 2 and move[1]== 2:
-      #   PickP.moveToBoard(8)
+      if move[0] == 0 and move[1] == 0:
+        PickP.moveToBoard(0)
+      if move[0]== 0 and move[1]== 1:
+        PickP.moveToBoard(1)
+      if move[0]== 0 and move[1]== 2:
+        PickP.moveToBoard(2)
+      if move[0]== 1 and move[1]== 0:
+        PickP.moveToBoard(3)
+      if move[0]== 1 and move[1]== 1:
+        PickP.moveToBoard(4)
+      if move[0]== 1 and move[1]== 2:
+        PickP.moveToBoard(5)
+      if move[0]== 2 and move[1]== 0:
+        PickP.moveToBoard(6)
+      if move[0]== 2 and move[1]== 1:
+        PickP.moveToBoard(7)
+      if move[0]== 2 and move[1]== 2:
+        PickP.moveToBoard(8)
     
-      # cv2.waitKey(0)
-      # return boardCode, board
+      cv2.waitKey(0)
+      return boardCode, board
 
 
   # Image modification: If rotated, apply image rotation (once this works, replace it with the one in the original spot)

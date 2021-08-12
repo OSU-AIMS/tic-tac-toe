@@ -112,11 +112,14 @@ def croptoBoard(frame,center):
 class board_publisher():
 
     def __init__(self):
+
         # Setup Publishers
         self.center_pub = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
+        # ttt_board_origin: publishes the board center and rotation matrix
         self.camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
+        # camera_tile_annotation: publishes the numbers & arrows displayed on the image
 
-        # rospy.Rate(10)
+        rospy.Rate(0.1)
 
         # Tools
         self.bridge = CvBridge()
@@ -124,7 +127,13 @@ class board_publisher():
 
 
     def detectBoard(self, frame):
+        #table_frame = frame.copy()
+
+        # Reading in static image
+        frame=cv2.imread('../sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
         table_frame = frame.copy()
+
+
         # cv2.imshow('test',frame)
         # cv2.waitKey(0)
         # small crop to just table
@@ -148,7 +157,7 @@ class board_publisher():
         :param camera_data: Camera data input from subscriber
         """
         try:
-            # ToDo: Check if this works. Or default back to [640,360]
+            # ToDo: Check if this works. Or default back to [640,360] (only highlighted in PyCharm)
             boardCenter = [data.width/2, data.height/2]   #Initialize as center of frame
 
             # Convert Image to CV2 Frame
@@ -159,7 +168,8 @@ class board_publisher():
             ScaledCenter = self.detectBoard(cv_image)
 
 
-            # # print('unordered points:',boardPoints)
+            # 
+            # print('unordered points:',boardPoints)
             # reorderedPoints = dXO.reorder(boardPoints)
             # # print('reorderedPoints:',reorderedPoints)
             # z_angle = dXO.newOrientation(reorderedPoints)
@@ -223,7 +233,9 @@ class board_publisher():
             msg.transform.rotation.w = pose_goal[6]
 
 
-
+            # Publish
+            self.center_pub.publish(msg)
+            rospy.loginfo(msg)
 
 
 
@@ -262,8 +274,61 @@ class board_publisher():
 
 
             # Publish
-            self.center_pub.publish(msg)
+            self.camera_tile_annotation.publish(msg)
             rospy.loginfo(msg)
+
+            """
+            When using rostopic list, both camera tile & board center topics are present but no data received.
+            https://answers.ros.org/question/90536/ros-remote-master-can-see-topics-but-no-data/
+            - This says to add robot ip to "/etc/hosts" file
+            - Or disable firewall 
+            
+            Using roswtf: I get 4 errors
+            
+            - ERROR Could not contact the following nodes:
+            	* /move_group_commander_wrappers_1628782292499441044
+            	* /move_group_commander_wrappers_1628781147153326381
+            	* /move_group_commander_wrappers_1628781374361842411
+            	* /move_group_commander_wrappers_1628781165460383250
+            
+            - ERROR The following nodes should be connected but aren't:
+            	* /move_group->/move_group_commander_wrappers_1628781374361842411 (/execute_trajectory/status)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/pickup/status)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/move_group/status)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/execute_trajectory/feedback)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/pickup/result)
+				* /robot_state_publisher->/move_group_commander_wrappers_1628781374361842411 (/tf)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/move_group/feedback)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/place/feedback)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/move_group/result)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/place/status)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/pickup/feedback)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/place/result)
+				* /move_group->/move_group_commander_wrappers_1628781374361842411 (/execute_trajectory/result)
+				* /robot_state_publisher->/move_group_commander_wrappers_1628781374361842411 (/tf_static)
+            
+            - ERROR Errors connecting to the following services:
+            	* service [/move_group_commander_wrappers_1628781147153326381/set_logger_level] appears to be malfunctioning:
+            	   Unable to communicate with service [/move_group_commander_wrappers_1628781147153326381/set_logger_level], address [rosrpc://marvin:36961]
+            	* service [/move_group_commander_wrappers_1628781165460383250/get_loggers] appears to be malfunctioning:
+            	   Unable to communicate with service [/move_group_commander_wrappers_1628781165460383250/get_loggers], address [rosrpc://marvin:46761]
+            	* service [/move_group_commander_wrappers_1628781147153326381/get_loggers] appears to be malfunctioning:
+            	   Unable to communicate with service [/move_group_commander_wrappers_1628781147153326381/get_loggers], address [rosrpc://marvin:36961]
+            	* service [/move_group_commander_wrappers_1628782292499441044/set_logger_level] appears to be malfunctioning:
+            	   Unable to communicate with service [/move_group_commander_wrappers_1628782292499441044/set_logger_level], address [rosrpc://marvin:40153]
+            	* service [/move_group_commander_wrappers_1628781374361842411/get_loggers] appears to be malfunctioning:
+            	   Unable to communicate with service [/move_group_commander_wrappers_1628781374361842411/get_loggers], address [rosrpc://marvin:60597]
+            	* service [/move_group_commander_wrappers_1628781165460383250/set_logger_level] appears to be malfunctioning:
+            	   Unable to communicate with service [/move_group_commander_wrappers_1628781165460383250/set_logger_level], address [rosrpc://marvin:46761]
+            	* service [/move_group_commander_wrappers_1628781374361842411/set_logger_level] appears to be malfunctioning:
+            	   Unable to communicate with service [/move_group_commander_wrappers_1628781374361842411/set_logger_level], address [rosrpc://marvin:60597]
+            	* service [/move_group_commander_wrappers_1628782292499441044/get_loggers] appears to be malfunctioning:
+            	   Unable to communicate with service [/move_group_commander_wrappers_1628782292499441044/get_loggers], address [rosrpc://marvin:40153]
+
+            - ERROR Different number of openni2 sensors found.
+               * 0 openni2 sensors found (expected: 1).
+
+	         """
 
 
         except rospy.ROSInterruptException:
@@ -272,21 +337,6 @@ class board_publisher():
             exit()
         except CvBridgeError as e:
             print(e)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #####################################################
@@ -300,8 +350,6 @@ def main():
     # Setup Node
     rospy.init_node('board_vision_processor', anonymous=False)
     print(">> Board Vision Processor Node Successfully Created")
-
-
 
 
     # Listeners

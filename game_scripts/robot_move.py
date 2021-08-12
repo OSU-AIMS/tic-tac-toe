@@ -54,21 +54,21 @@ def prepare_path_tf_ready():
 	return new_list
 
 
-def listener():
-	"""
-	"listener" function that loads board center data TODO: reload camera subscriber as well.
-	@return: Outputs board_center transform in quaternion (x, y, z, w, x, y, z)
-	"""
-	# find tictactoe pkg dir
-	tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+# def listener():
+# 	"""
+# 	"listener" function that loads board center data TODO: reload camera subscriber as well.
+# 	@return: Outputs board_center transform in quaternion (x, y, z, w, x, y, z)
+# 	"""
+# 	# find tictactoe pkg dir
+# 	tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-	tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
-	subprocess.call([tf_listener])
+# 	tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
+# 	subprocess.call([tf_listener])
 
-	tf_filename = 'tf_board2world.npy'
-	data_list = np.load(str(tictactoe_pkg) + '/' + tf_filename)
+# 	tf_filename = 'tf_board2world.npy'
+# 	data_list = np.load(str(tictactoe_pkg) + '/' + tf_filename)
 
-	return data_list
+# 	return data_list
 
 
 class tictactoeMotion:
@@ -129,6 +129,7 @@ class tictactoeMotion:
 		:param z: Z position in meters.
 		"""
 		self.rc.send_io(0)				# open gripper
+		print("Gripper is open")
 		pose_higher = [x, y, z, .707, -.707, 0, 0]
 		self.rc.goto_Quant_Orient(pose_higher)
 		raw_input('Lower gripper in xPickup <press enter>')
@@ -137,6 +138,7 @@ class tictactoeMotion:
 		self.rc.goto_Quant_Orient(pose_lower)
 
 		self.rc.send_io(1) 				# close gripper
+		print("Gripper is closed")
 		pose_higher = [x, y, z, .707, -.707, 0, 0]
 		self.rc.goto_Quant_Orient(pose_higher)
 
@@ -182,21 +184,25 @@ class tictactoeMotion:
 			print('update is True')
 			self.defineRobotPoses()
 
-		print('self.robot_poses',self.robot_poses)
+		# print('self.robot_poses',self.robot_poses)
 		print('Pose number:',pose_number)
 		self.rc.goto_Quant_Orient(self.robot_poses[pose_number])
 
-		wpose = self.rc.move_group.get_current_pose().pose
-		wpose.position.z += -0.01  # Move down (z)
+		# wpose = self.rc.move_group.get_current_pose().pose
+		# wpose.position.z += -0.01  # Move down (z)
 
-		self.rc.goto_Quant_Orient(wpose)
-		raw_input('Open gripper <press enter>')
-		self.rc.send_io(0)		# open gripper
-		self.scanPos()
+		# self.rc.goto_Quant_Orient(wpose)
+		# raw_input('Open gripper <press enter>')
+		
+		# # As of 8/12/21,it doesn't reach the below lines
+		# self.rc.send_io(0)		# open gripper
+		# print('Grippers are now open')
+		# self.scanPos()
+		# print('returned to scan position')
 
 
 def main():
-	# DEMONSTRATION
+	# UnComment main function for demo of robot reaching all nine centers for each tile on the board
 	# Will scan the board once and run through the 9 board center positions
 
 	try:
@@ -204,9 +210,9 @@ def main():
 		ttt.defineRobotPoses()	 # Defines all robot poses once
 		for i in range(9):       # go to board positions 0-8
 			try:
-				raw_input('>> Next Pose <enter>')
-				print('i = ',i)
-				ttt.moveToBoard(i,update=True)#False)
+				# raw_input('>> Next Pose <enter>')
+				# print('i = ',i)
+				ttt.moveToBoard(i,update=False)#False)
 				print('Moved to pose:')
 
 			except KeyboardInterrupt:

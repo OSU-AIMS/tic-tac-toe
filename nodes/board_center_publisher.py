@@ -154,6 +154,7 @@ class center_finder:
       np.save(outputFilePathy, yList)
       
       cv2.imshow('live board',self.boardImage)
+      # cv2.waitKey(0)
 
       import subprocess
       tf_filename = "tf_camera2world.npy"

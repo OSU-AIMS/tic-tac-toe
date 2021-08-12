@@ -38,7 +38,7 @@ class detectXO(object):
     
     #cv2.imshow("detected circles", frame)
     # cv2.waitKey(0)
-    #print("Center List:",centerList)
+    # print("Center List:",centerList)
     # circles outputs (x,y, radius)
 
 
@@ -52,7 +52,7 @@ class detectXO(object):
     # Reorders the four points of the rectangle
   def reorder(self,points):
     try:
-      print('Entered Rectangle_support: reorder function')
+      # print('Entered Rectangle_support: reorder function')
       NewPoints = np.zeros_like(points)
       points = points.reshape((4, 2))
       add = points.sum(1)
@@ -159,7 +159,9 @@ class detectXO(object):
     #cv2.imshow("threshold",imgThre)
 
     #cv2.imshow("img threshold",imgThre)
-    _, contours, _ = cv2.findContours(imgThre, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(imgThre, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #If it needs more values to unpack, add another underscore
+
     contours_image = cv2.drawContours(orignal_frame.copy(),contours,-1,(0,255,0),1)
     #cv2.imshow('all contours seen',contours_image)
 
