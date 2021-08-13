@@ -6,7 +6,6 @@ import cv2
 from scan_board import *
 from tictactoe_brain import *
 import rospy
-# from PIL import Image # used for image rotation
 import math
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -19,6 +18,7 @@ dXO = detectXO()
 brain = BigBrain()
 boardPoints=[]
 
+
 board = [
   [0, 0, 0],
   [0, 0, 0],
@@ -30,7 +30,7 @@ boardCode = [
   [0, 0, 0],
 ] # array for code to know which player went whree
   # Human: -1 (circles)
-  # Computer: +1 (X's)
+  # Computer: +1 (X's)`
   # board filled with -1 & +1
 countO=0
 def findDis(pt1x,pt1y, pt2x,pt2y):
@@ -73,7 +73,7 @@ class PlayGame():
     return img_data
 
 
-  def listener_Angle(self):
+  def listener_Angle(self): 
 
     # tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/board_center_subscriber.py'
     tf_listener = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/nodes/board_center_subscriber.py'
@@ -90,14 +90,14 @@ class PlayGame():
 
   def callback(self,data):
     try:
-      print('Callback:inside try ')
+      # print('Callback:inside try ')
       self.cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
       # cv_image = cv2.resize(cv_image,(640,360),interpolation = cv2.INTER_AREA)
 
     except CvBridgeError as e:
       print(e)
-    #print(cv_image.shape)
-    print('Callback: Past try & Except')
+    # print(cv_image.shape)
+    # print('Callback: Past try & Except')
     # cv2.imshow("Image window", cv_image)
     cv2.waitKey(0)
 
@@ -127,6 +127,13 @@ class PlayGame():
 
   # Detect circles
   def circle_detect(self,countO,current_board,blocks):
+    '''
+    Function should only detect circles: CLEAN IT UP
+    params: 
+    count0: number of O blocks expected
+    current_board= image of the current board state from camera
+    blocks = number of X blocks remaining
+    '''
     centers = []
     print('expected number of Os: ',countO)
 
@@ -137,14 +144,7 @@ class PlayGame():
     # As of 8/4/21, this^^^ is in a different script
     
     while len(centers) != countO:
-      #img_precrop = imgClass.grabFrame()  -->  uncomment when using RealSense
-
-      # cv2.imshow('Precrop',img_precrop)
-      #img = imgClass.cropFrame(img_precrop) --> uncomment when using RealSense
-      # cv2.imshow('Cropped Game Board',img)
-
-      # boardImage, boardCenter, boardPoints = dXO.getContours(img)
-      # cv2.imshow('boardContour',boardImage
+      # while the number of circles detected doesn't equal the number of O blocks expected      
       img = current_board # 
 
       centers = dXO.getCircle(img)
@@ -177,6 +177,8 @@ class PlayGame():
           #findDis params :(pt1x.pt1y, pt2x,pt2y)
           # print('Distance:',j,distance)
           if distance < 40 and distance < closest:
+            # this creates a boundary just outside the ttt board
+            # any circle within this boundary is likley to be detected as a piece in one of the 9 tiles
             closest = distance
             closest_index = j
             print('distance checker')
@@ -185,6 +187,7 @@ class PlayGame():
             print('Not on board!')
         if closest_index is not None:
           print('inside board assignent ifs')
+          # Checks which of the 9 tiles the O block is in
           if closest_index == 0:  
             board[0][0]='O'
             boardCode[0][0]= -1
@@ -217,46 +220,27 @@ class PlayGame():
           print('closest index',closest_index)
       print('Physical Board: ',board)
       print('Board Computer sees:',boardCode)
-      
-######## Using tictactoe_brain code
-      move = brain.ai_turn('X','O' , boardCode) #outputs move array based on minimx
-      print('MOVE: ',move)
-      if move == False: 
-      # modifed ai_turn to return False if no valid moves left
-        winner = brain.evaluate(boardCode)
-        print('Evaluate:',winner)
-        if winner == 1:
-          print('Game Over..\n Winner: A.I Computer\n\n\n')
-        elif winner == -1:
-          print('Game Over..\n Winner: Human\n\n\n')
-        elif winner == 0:
-          print('Tie Game!\n\n\n')
-        else:
-          print('The game continues..')
-          # recieve output move and execute robot motion
-          blocksY= [.517,.5524,.5806,.609,.638,.671]
-          board[move[0]][move[1]]='X'
-          boardCode[move[0]][move[1]]= +1
+      self.AI_move(boardCode,blocks)
+      # not really the best use of the blocks variable
 
-      
-      # if move == None:
-      #   if brain.wins(boardCode, -1):
-      #     print('YOU WIN!')
-      #     exit()
-      #   elif brain.wins(boardCode, +1):
-      #   # print(f'Computer turn [{c_choice}]')        
-      #     print('YOU LOSE!')
-      #     exit()
-      #   else:
-      #     print('DRAW!')
-      #     exit()
-      # else:
-
-      # Moved to above else statement after "the game continues"
-      # recieve output move and execute robot motion
-      # blocksY= [.517,.5524,.5806,.609,.638,.671]
-      # board[move[0]][move[1]]='X'
-      # boardCode[move[0]][move[1]]= +1
+  def AI_move(self,boardCode,blocks):
+    '''
+    params: 
+    - boardCode: state of the board read by computer
+    - refers to ai_turn from tictactoe_brain script: 
+      which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
+    '''
+    ### Using tictactoe_brain code
+    move = brain.ai_turn('X','O' , boardCode) # outputs move array based on minimx
+    print('MOVE: ',move)
+    # modifed ai_turn to return False if no valid moves left
+    if move == False: 
+      print('Inside move if-statement')
+      self.Evaluate_Game(move,boardCode)
+    else:
+      blocksY= [.517,.5524,.5806,.609,.638,.671]
+      board[move[0]][move[1]]='X'
+      boardCode[move[0]][move[1]]= +1
 
       # Uncomment below after fixing orientation
       print('attempting to get X:',blocks)
@@ -285,57 +269,54 @@ class PlayGame():
       if move[0]== 2 and move[1]== 2:
         PickP.moveToBoard(8)
     
-      cv2.waitKey(0)
-      return boardCode, board
-
-
-  # Image modification: If rotated, apply image rotation (once this works, replace it with the one in the original spot)
-  def Read_Board(self,countO,current_board,board,boardCode):
-    cv_image = self.listener()
-    img = cv_image
-    # img = self.bridge.imgmsg_to_cv2(img_data, "bgr8")
-    current_board_color = current_board # frame of board taken after each move
-    #cv2.imread('images/boardwO_Color.png')
-    #cv2.imshow('Color current board',current_board_color)
-    #current_board = cv2.cvtColor(current_board_color,cv2.COLOR_BGR2GRAY)
-    # img = self.cv_image.copy()
-    # cv2.imshow('GrayScale current board',img) 
     cv2.waitKey(0)
-
-
-    angle = self.listener_Angle()
-
-    rotate_img = ndimage.rotate(img,np.rad2deg(angle)) # this needs an input from GetOrientation
-    cv2.imshow('Rotated image',rotate_img)
-    #circle_detect(countO,rotate_img) # detects circles
-    circles = self.circle_detect(countO,rotate_img) # outputs Board & BoardCode matrices
-    # Need to send color image b/c scanboard.py turns image into grayscale already
+    return boardCode, board
     
-    print('Circle Detect output',circles)
-    cv2.waitKey(0)
-  # # # Image modification: If rotated, apply image rotation
-  # def Image_Modification(self,current_board):
-  #    template = cv2.imread('images/board_sample_newRes_Color.png') # background image with no pieces
-  #    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
 
-  # # # Image subtract to see what changed
-  #   return boardCode
+  def Evaluate_Game(self,boardCode):
+    '''
+    params:
+    boardCode = state of board that computer reads
+    uses titactoe_brain script
+    which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
+    Returns game which exits the while loop in main if Game = False
+    '''
+    winner = brain.evaluate(boardCode) 
+    print('Evaluate:',winner)
+    if winner == 1:
+      print('Game Over..\n Winner: A.I Computer\n\n\n')
+      game = False
+    elif winner == -1:
+      print('Game Over..\n Winner: Human\n\n\n')
+      game = False
+    elif winner == 0:
+      print('Tie Game!\n\n\n')
+      game = False
+    else:
+      print('The game continues..')
+      game = True
+    return game
 
-    #output: boardCode & send to AI move so that it can choose next move
 
 def main():
   try:
     #rospy.init_node('board_image_listener', anonymous=True)
+    game = True; # decides when game is over
     PG = PlayGame()
     img = PG.listener()
-    print('OpenCV version:',cv2.__version__)
-    countO = 0
-    # current_board = cv2.imread('images/game_board_3O_Color.png') # frame of board taken after each move
-    countO += 1
-    blocks =0
-   
-    PG.circle_detect(countO,img,blocks)
-    blocks +=1
+    print('OpenCV version:',cv2.__version__)  
+    while game is True:
+      countO = 1 # 1 block O b/c human goes first
+      blocks = 0 # Number of X blocks used
+      PG.circle_detect(countO,img,blocks)
+      # current_board = cv2.imread('images/game_board_3O_Color.png') # frame of board taken after each move
+      countO += 1
+      blocks +=1
+      print('Game Variable to decide if game continues:',game)
+      print('Number of X blocks used:',blocks)
+      if game == False:
+        break;
+      game = False
 
   #  PG.listener()
     # PG.Read_Board(countO,current_board,board,boardCode)

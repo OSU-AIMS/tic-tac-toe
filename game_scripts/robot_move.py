@@ -129,7 +129,7 @@ class tictactoeMotion:
 		:param z: Z position in meters.
 		"""
 		self.rc.send_io(0)				# open gripper
-		print("Gripper is open")
+		# print("Gripper is open in xPickup")
 		pose_higher = [x, y, z, .707, -.707, 0, 0]
 		self.rc.goto_Quant_Orient(pose_higher)
 		raw_input('Lower gripper in xPickup <press enter>')
@@ -138,7 +138,7 @@ class tictactoeMotion:
 		self.rc.goto_Quant_Orient(pose_lower)
 
 		self.rc.send_io(1) 				# close gripper
-		print("Gripper is closed")
+		print("Gripper is closed in xPickup")
 		pose_higher = [x, y, z, .707, -.707, 0, 0]
 		self.rc.goto_Quant_Orient(pose_higher)
 
@@ -166,7 +166,7 @@ class tictactoeMotion:
 			trans_rot = tileCenters2world[i][0:3, 3:4]
 			# print('Trans_rot in defineRobotPoses',trans_rot)
 			new_pose = [trans_rot[0][0], trans_rot[1][0], trans_rot[2][0], b[1], b[2], b[3], b[0]]
-			# print(new_pose)
+			print('New Pose:',new_pose)
 			self.robot_poses.append(new_pose)
 
 	def moveToBoard(self, pose_number, update=True):

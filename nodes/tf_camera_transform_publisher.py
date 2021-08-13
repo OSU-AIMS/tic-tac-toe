@@ -26,8 +26,9 @@ if __name__ == '__main__':
 
     while not rospy.is_shutdown():
         try:
-            msg_new = tfBuffer.lookup_transform('base_link', 'camera_link', rospy.Time())
+            msg_new = tfBuffer.lookup_transform('base_link', 'camera_color_optical_frame', rospy.Time())
             # camera_color_optical_frame
+            # if ^^ above tf disappears, change to camera_link
 
         
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
