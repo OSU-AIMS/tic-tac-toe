@@ -33,19 +33,21 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
 
 # Custom Tools
-# from Realsense_tools import *
 from transformations import *
 from scan_board import *
 from cv_bridge import CvBridge, CvBridgeError
 
 # System Tools
+import cv2
 import time
 import math
+from math import pi, radians, sqrt
 import numpy as np
 
 # Ref
 # http://wiki.ros.org/tf2/Tutorials/Writing%20a%20tf2%20listener%20%28Python%29
 # http://docs.ros.org/en/jade/api/geometry_msgs/html/msg/Transform.html
+
 tf = transformations()
 shapeDetect = ShapeDetector()
 
@@ -91,7 +93,6 @@ def define_board_tile_centers():
     tile_locations_tf = []
 
     # Create a list of TF's representing each Tile Center. Final list is 9-elements long
-    tf = transformations()
     for vector in tictactoe_center_list:
         item = np.matrix(vector)
         tile_locations_tf.append(tf.generateTransMatrix(rot_default, item))
@@ -161,17 +162,19 @@ class board_publisher:
     Custom tictactoe publisher class that:
      1. publishes a topic with the board to world (robot_origin) transformation matrix
      2. publishes a topic with the board tile center location on the image (pixel values)
+     3. publishes a topic with an image that has board visuals
      3. creates a live feed that visualizes where the camera thinks the board is located
     """
     def __init__(self):
 
         # Setup Publishers
-        self.center_pub = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
+        self.center_transform_pub = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
         # ttt_board_origin: publishes the board to world transformation matrix
 
         self.camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
         # camera_tile_annotation: publishes the numbers & arrows displayed on the image
 
+        self.board_image = rospy.Publisher("board_image", # todo , queue_size=20)
         rospy.Rate(0.1)
 
         # Tools
@@ -185,10 +188,10 @@ class board_publisher:
         """
         try:
             # ToDo: Check if this works. Or default back to [640,360] (only highlighted in PyCharm)
-            boardCenter = [data.width / 2, data.height / 2]  # Initialize as center of frame
+            boardCenter = [camera_data.width / 2, camera_data.height / 2]  # Initialize as center of frame
 
             # Convert Image to CV2 Frame
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(camera_data, "bgr8")
             boardImage = cv_image.copy()
 
             # characterize board location and orientation
@@ -227,20 +230,20 @@ class board_publisher:
             pose_goal = tf.transformToPose(tf_board2world)
 
             ## Publish Board Pose
-            msg = geometry_msgs.msg.TransformStamped()
-            msg.header.frame_id = 'Origin'
-            msg.child_frame_id = 'Board'
-            msg.transform.translation.x = pose_goal[0]
-            msg.transform.translation.y = pose_goal[1]
-            msg.transform.translation.z = pose_goal[2]
-            msg.transform.rotation.x = pose_goal[3]
-            msg.transform.rotation.y = pose_goal[4]
-            msg.transform.rotation.z = pose_goal[5]
-            msg.transform.rotation.w = pose_goal[6]
+            transform_msg = geometry_msgs.msg.TransformStamped()
+            transform_msg.header.frame_id = 'Origin'
+            transform_msg.child_frame_id = 'Board'
+            transform_msg.transform.translation.x = pose_goal[0]
+            transform_msg.transform.translation.y = pose_goal[1]
+            transform_msg.transform.translation.z = pose_goal[2]
+            transform_msg.transform.rotation.x = pose_goal[3]
+            transform_msg.transform.rotation.y = pose_goal[4]
+            transform_msg.transform.rotation.z = pose_goal[5]
+            transform_msg.transform.rotation.w = pose_goal[6]
 
             # Publish
-            self.center_pub.publish(msg)
-            rospy.loginfo(msg)
+            self.center_pub.publish(transform_msg)
+            rospy.loginfo(transform_msg)
 
             # Draw Tile Numbers onto Frame
             xList = []
@@ -269,14 +272,18 @@ class board_publisher:
             except CvBridgeError as e:
                 print(e)
 
-            # Outputs
+            # Publish Image with game board visuals
             self.camera_tile_annotation.publish(msg_img)
             # cv2.imshow('CV2: Live Board', boardImage)
             # cv2.waitKey(3)
 
-            # Publish
-            self.camera_tile_annotation.publish(msg)
-            rospy.loginfo(msg)
+            # Publish Transform
+            self.center_transform_pub.publish(transform_msg)
+            rospy.loginfo(transform_msg)
+
+            # Publish Tile centers
+            # todo: not sure what msg to use for tile centers
+
 
 
 

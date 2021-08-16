@@ -6,25 +6,14 @@ import numpy as np
 import rospy
 
 
-class ImageProcessing:
+class ColorFinder:
+  """
+  Class that contains color related functions. Plan to insert dots function that finds rgb dots to find transform of desired plane.
+  """
 
   def __init__(self):
     pass
 
-  def rescaleFrame(self, frame, scale=1):
-    """
-    Rescales image to specified scale of original. Default = 1 (no rescale)
-    :param frame: The original image that will be rescaled.
-    :param scale: The scale that the image will be resized to, 2 = double the size in both width and height.
-    :return rescaled_img: Outputs the rescaled image.
-    """
-    # Images, Videos and Live Video
-    width = int(frame.shape[1] * scale)
-    height = int(frame.shape[0] * scale)
-
-    dimensions = (width,height)
-
-    return cv2.resize(frame, dimensions, interpolation=cv2.INTER_AREA)
 
   def deNoise(self, frame):
     # reduces noise of an image
@@ -70,3 +59,28 @@ class ImageProcessing:
     _, mask_merge_bw = cv2.threshold(gray_merge, thresh=200, maxval=255, type=cv2.THRESH_BINARY)
 
     return gray_merge
+
+
+def main():
+  """
+  DEMONSTRATION:
+  Will scan the board once and run through the 9 board center positions
+  """
+  try:
+
+    for i in range(9):  # go to board positions 0-8
+      try:
+        raw_input('>> Next Pose <enter>')
+        ttt.moveToBoard(i, update=False)
+        print('Moved to pose:')
+
+      except KeyboardInterrupt:
+        exit()
+    ttt.scanPos()  # return to scan position
+  except rospy.ROSInterruptException:
+    exit()
+  except KeyboardInterrupt:
+    exit()
+
+if __name__ == '__main__':
+  main()
