@@ -43,37 +43,6 @@ def findDis(pts1, pts2):
     return dis
 
 
-def drawAxis(img, p_, q_, color, scale):
-    """
-    Draws x-y axis relative to object center and orientation, second part of the getOrientation function.
-    https://docs.opencv.org/master/d1/dee/tutorial_introduction_to_pca.html
-    @param img: Image the orientation axis are drawn on
-    @param p_: Center point of contour for axis origin
-    @param q_: Principal components points for axis end point
-    @param color: rgb 0 - 255 color values for drawn axis
-    @param scale: int scale for length of axis
-    """
-    p = list(p_)
-    q = list(q_)
-
-    angle = math.atan2(p[1] - q[1], p[0] - q[0])  # in radians
-    hypotenuse = math.sqrt((p[1] - q[1]) * (p[1] - q[1]) + (p[0] - q[0]) * (p[0] - q[0]))
-
-    # Lengthens the arrows by a factor of scale
-    q[0] = p[0] - scale * hypotenuse * math.cos(angle)
-    q[1] = p[1] - scale * hypotenuse * math.sin(angle)
-    cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 3, cv2.LINE_AA)
-
-    # Creates the arrow hooks
-    p[0] = q[0] + 9 * math.cos(angle + math.pi / 4)
-    p[1] = q[1] + 9 * math.sin(angle + math.pi / 4)
-    cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 3, cv2.LINE_AA)
-
-    p[0] = q[0] + 9 * math.cos(angle - math.pi / 4)
-    p[1] = q[1] + 9 * math.sin(angle - math.pi / 4)
-    cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 3, cv2.LINE_AA)
-
-
 class ShapeDetector(object):
     """
     Class is a collection of shape/object detection tools.
@@ -280,6 +249,13 @@ class ShapeDetector(object):
         @param pts: reordered points from the boundingRect opencv function.
         @return: Z-axis angle of the board
         """
+
+        sz = len(pts)
+        data_pts = np.empty((sz, 2), dtype=np.float64)
+        for i in range(data_pts.shape[0]):
+            data_pts[i, 0] = pts[i, 0, 0]
+            data_pts[i, 1] = pts[i, 0, 1]
+
         # define top right and left points
         topleft = [pts[0][0][0], pts[0][0][1]]
         topright = [pts[1][0][0], pts[1][0][1]]
@@ -322,3 +298,33 @@ class ShapeDetector(object):
         contours, _ = cv2.findContours(imgThresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         return contours
+
+    def drawAxis(self, img, p_, q_, color, scale):
+        """
+        Draws x-y axis relative to object center and orientation, second part of the getOrientation function.
+        https://docs.opencv.org/master/d1/dee/tutorial_introduction_to_pca.html
+        @param img: Image the orientation axis are drawn on
+        @param p_: Center point of contour for axis origin
+        @param q_: Principal components points for axis end point
+        @param color: rgb 0 - 255 color values for drawn axis
+        @param scale: int scale for length of axis
+        """
+        p = list(p_)
+        q = list(q_)
+
+        angle = math.atan2(p[1] - q[1], p[0] - q[0])  # in radians
+        hypotenuse = math.sqrt((p[1] - q[1]) * (p[1] - q[1]) + (p[0] - q[0]) * (p[0] - q[0]))
+
+        # Lengthens the arrows by a factor of scale
+        q[0] = p[0] - scale * hypotenuse * math.cos(angle)
+        q[1] = p[1] - scale * hypotenuse * math.sin(angle)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 3, cv2.LINE_AA)
+
+        # Creates the arrow hooks
+        p[0] = q[0] + 9 * math.cos(angle + math.pi / 4)
+        p[1] = q[1] + 9 * math.sin(angle + math.pi / 4)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 3, cv2.LINE_AA)
+
+        p[0] = q[0] + 9 * math.cos(angle - math.pi / 4)
+        p[1] = q[1] + 9 * math.sin(angle - math.pi / 4)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 3, cv2.LINE_AA)

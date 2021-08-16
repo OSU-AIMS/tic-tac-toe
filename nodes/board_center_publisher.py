@@ -1,25 +1,55 @@
 #!/usr/bin/env python
 
+#####################################################
+#   Support Node to Output Board Position           #
+#                                                   #
+#   * Works Primarily in transforms                 #
+#   * Relies upon camera input topic                #
+#   * Publishes multiple output topics for results  #
+#                                                   #
+#####################################################
+# Software License Agreement (Apache 2.0 License)
+#
+# Copyright (c) 2021, The Ohio State University
+# The Artificially Intelligent Manufacturing Systems Lab (AIMS)
+#####################################################
+
+
+
+#####################################################
+## IMPORTS
 import sys
+import os
+
+# Add game_scripts directory to the python-modules path options to allow importing other python scripts
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '//home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/game_scripts')  
+# sys.path.insert(1, '//home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/game_scripts')
+ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+path_2_game_scripts = ttt_pkg + '/game_scripts'
+sys.path.insert(1, path_2_game_scripts)
+
 import rospy
 
-# from Realsense_tools import *
-from geometry_msgs.msg import TransformStamped
-from transformations import *
-from shape_detector import *
-from cv_bridge import CvBridge, CvBridgeError
+# ROS Data Types
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
+
+# Custom Tools
+  # from Realsense_tools import *
+from transformations import *
+from scan_board import *
+from cv_bridge import CvBridge, CvBridgeError
+
+# System Tools
 import time
 from math import pi, radians, sqrt
 
 # Ref
 # http://wiki.ros.org/tf2/Tutorials/Writing%20a%20tf2%20listener%20%28Python%29
 # http://docs.ros.org/en/jade/api/geometry_msgs/html/msg/Transform.html
+
 tf = transformations()
-dXO = ShapeDetector()
+shapeDetect = ShapeDetector()
 
 def prepare_path_tf_ready():
   """
@@ -79,7 +109,7 @@ class center_finder:
     # cv2.waitKey(0)
     # small crop to just table
     # table_frame =full_frame[0:480,0:640] # frame[y,x]
-    self.boardImage, self.boardCenter, self.boardPoints= dXO.getContours(table_frame)
+    self.boardImage, self.boardCenter, self.boardPoints= shapeDetect.getContours(table_frame)
     #scale = .664/640 #(m/pixel)
     scale = .895/1280
     self.ScaledCenter = [0,0]
@@ -97,14 +127,14 @@ class center_finder:
       cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
       self.boardImage=cv_image.copy()
       self.detectBoard(cv_image)
-      centers = dXO.getCircle(cv_image)
+      centers = shapeDetect.getCircle(cv_image)
 
       #print('unordered points:',self.boardPoints)
-      reorderedPoints= dXO.reorder(self.boardPoints)
+      reorderedPoints= shapeDetect.reorder(self.boardPoints)
       #print('reorderedPoints:',reorderedPoints)
-      z_angle = dXO.newOrientation(reorderedPoints)
+      z_angle = shapeDetect.newOrientation(reorderedPoints)
 
-      angle = dXO.getOrientation(self.boardPoints, self.boardImage)
+      angle = shapeDetect.getOrientation(self.boardPoints, self.boardImage)
       #print('old orientation angle',np.rad2deg(angle))
       
 

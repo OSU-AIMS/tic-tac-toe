@@ -103,7 +103,7 @@ class tictactoeMotion:
 		# Calling ``stop()`` ensures that there is no residual movement
 		self.rc.move_group.stop() 
 
-	def xPickup(self,x,y,z = .1):
+	def xPickup(self, x, y, z=.1):
 		"""
 		Executes a pickup command to a specified x,y,z location (with respect to robot origin)
 		Default values for z = .1 , hovers at 10cm above origin plane and lowers to 5 cm below input z value.
@@ -134,7 +134,7 @@ class tictactoeMotion:
 		tf_board2world = self.tf.quant_pose_to_tf_matrix(quant_board2world)
 
 		# Rotate board tile positions
-		tileCenters2world = self.tf.convertPath2FixedFrame(tileCentersMatrices,tf_board2world)
+		tileCenters2world = self.tf.convertPath2FixedFrame(tileCentersMatrices, tf_board2world)
 
 		# Convert tfs to robot poses (Quat)
 		matr_rot = tileCenters2world[0][0:3, 0:3]
