@@ -238,8 +238,8 @@ class ShapeDetector(object):
               cntr[1] + 0.02 * eigenvectors[0, 1] * eigenvalues[0, 0])
         p2 = (cntr[0] - 0.02 * eigenvectors[1, 0] * eigenvalues[1, 0],
               cntr[1] - 0.02 * eigenvectors[1, 1] * eigenvalues[1, 0])
-        drawAxis(img, cntr, p1, (255, 255, 0), 1)
-        drawAxis(img, cntr, p2, (255, 80, 255), 1)
+        self.drawAxis(img, cntr, p1, (255, 255, 0), 1)
+        self.drawAxis(img, cntr, p2, (255, 80, 255), 1)
         angle = math.atan2(eigenvectors[0, 1], eigenvectors[0, 0])  # orientation in radians
         return angle
 

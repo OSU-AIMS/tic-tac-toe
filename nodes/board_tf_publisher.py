@@ -34,7 +34,7 @@ from geometry_msgs.msg import TransformStamped
 
 # Custom Tools
 from transformations import *
-from scan_board import *
+from shape_detector import *
 from cv_bridge import CvBridge, CvBridgeError
 
 # System Tools
@@ -120,10 +120,10 @@ def detectBoard(image):
     image = image.copy()
 
     # Find all contours in image
-    contours = shapeDetect.getContours(image)
+    #contours = shapeDetect.getContours(image)
 
     # Find the board contour, create visual, define board center and points
-    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(contours, area=90000)
+    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=90000)
 
     # Scale from image pixels to m (pixels/m)
     # scale = .664/640          # res: (640x480)
@@ -146,6 +146,9 @@ def detectBoard(image):
     # Find rotation of board on the table plane, only a z-axis rotation angle
     z_orient = shapeDetect.newOrientation(boardPoints)
 
+    shapeDetect.drawAxis(img, cntr, p1, (255, 255, 0), 1)
+    shapeDetect.drawAxis(img, cntr, p2, (255, 80, 255), 1)
+
     # convert angle to a rotation matrix with rotation about z-axis
     boardRotationMatrix = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
                                     [math.sin(radians(z_orient)), math.cos(radians(z_orient)), 0],
@@ -163,7 +166,7 @@ class board_publisher:
      1. publishes a topic with the board to world (robot_origin) transformation matrix
      2. publishes a topic with the board tile center location on the image (pixel values)
      3. publishes a topic with an image that has board visuals
-     3. creates a live feed that visualizes where the camera thinks the board is located
+     4. creates a live feed that visualizes where the camera thinks the board is located
     """
     def __init__(self):
 
@@ -174,7 +177,7 @@ class board_publisher:
         self.camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
         # camera_tile_annotation: publishes the numbers & arrows displayed on the image
 
-        self.board_image = rospy.Publisher("board_image", # todo , queue_size=20)
+        #self.tile_center_values = rospy.Publisher("tile_center_values", custom_msg, queue_size=20) ## TODO 
         rospy.Rate(0.1)
 
         # Tools
@@ -230,7 +233,7 @@ class board_publisher:
             pose_goal = tf.transformToPose(tf_board2world)
 
             ## Publish Board Pose
-            transform_msg = geometry_msgs.msg.TransformStamped()
+            transform_msg = TransformStamped()
             transform_msg.header.frame_id = 'Origin'
             transform_msg.child_frame_id = 'Board'
             transform_msg.transform.translation.x = pose_goal[0]
@@ -242,7 +245,7 @@ class board_publisher:
             transform_msg.transform.rotation.w = pose_goal[6]
 
             # Publish
-            self.center_pub.publish(transform_msg)
+            self.center_transform_pub.publish(transform_msg)
             rospy.loginfo(transform_msg)
 
             # Draw Tile Numbers onto Frame
@@ -263,7 +266,7 @@ class board_publisher:
             height, width, channels = boardImage.shape
 
             # Prepare Image Message
-            msg_img = sensor_msgs.msg.Image()
+            msg_img = Image()
             msg_img.height = height
             msg_img.width = width
             msg_img.encoding = 'rgb8'
@@ -274,8 +277,8 @@ class board_publisher:
 
             # Publish Image with game board visuals
             self.camera_tile_annotation.publish(msg_img)
-            # cv2.imshow('CV2: Live Board', boardImage)
-            # cv2.waitKey(3)
+            cv2.imshow('CV2: Live Board', boardImage)
+            cv2.waitKey(3)
 
             # Publish Transform
             self.center_transform_pub.publish(transform_msg)
