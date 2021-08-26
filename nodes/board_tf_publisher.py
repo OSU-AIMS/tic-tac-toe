@@ -48,7 +48,7 @@ from math import pi, radians, sqrt
 # http://wiki.ros.org/tf2/Tutorials/Writing%20a%20tf2%20listener%20%28Python%29
 # http://docs.ros.org/en/jade/api/geometry_msgs/html/msg/Transform.html
 tf = transformations()
-dXO = detectXO()
+shapeDetect = ShapeDetector()
 
 
 
@@ -104,18 +104,83 @@ def croptoBoard(frame,center):
     return cropped_image
 
 
+def detectBoard(frame):
+    """
+    Tictactoe function that finds the physical board. Utilizes ShapeDetector class functions.
+    TODO transition to using rgb dots for both board center and orientation.
+    @param image: image parameter the function tries to find the board on.
+    @return scaledCenter: (x ,y) values in meters of the board center relative to the center of the camera frame.
+    @return boardImage: image with drawn orientation axes and board location.
+    @return tf_board2camera: transformation matrix of board to camera frame of reference.
+    """
 
+    # Reading in static image
+    # frame = cv2.imread('../sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
+
+    image = image.copy()
+
+    # Find all contours in image
+    #contours = shapeDetect.getContours(image)
+
+    # Find the board contour, create visual, define board center and points
+    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=90000)
+
+    # Scale from image pixels to m (pixels/m)
+    # scale = .664/640          # res: (640x480)
+    scale = .895 / 1280         # res: (1280x730)
+
+    scaledCenter = [0, 0]
+
+    # TODO check if works:
+    # scaledCenter[0] = (boardCenter[0]-data.width / 2) * scale
+    # scaledCenter[1] = (boardCenter[1]-data.height / 2) * scale
+
+    # Convert board center pixel values to meters (and move origin to center of image)
+    scaledCenter[0] = (boardCenter[0] - 640) * scale
+    scaledCenter[1] = (boardCenter[1] - 360) * scale
+
+    # Define 3x1 array of board translation (x, y, z) in meters
+    boardTranslation = np.array(
+        [[scaledCenter[0]], [scaledCenter[1]], [0.655]])  ## depth of the table is .655 m from camera
+
+    # Find rotation of board on the table plane, only a z-axis rotation angle
+    z_orient = shapeDetect.newOrientation(boardPoints)
+
+    shapeDetect.drawAxis(img, cntr, p1, (255, 255, 0), 1)
+    shapeDetect.drawAxis(img, cntr, p2, (255, 80, 255), 1)
+
+    # convert angle to a rotation matrix with rotation about z-axis
+    boardRotationMatrix = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
+                                    [math.sin(radians(z_orient)), math.cos(radians(z_orient)), 0],
+                                    [0, 0, 1]])
+
+    # Transformation (board from imageFrame to camera)
+    tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
+
+    return scaledCenter, boardImage, tf_board2camera
 #####################################################
 ## PRIMARY CLASS
 ##
 
 class board_publisher():
+    """
+     Custom tictactoe publisher class that:
+     1. publishes a topic with the board to world (robot_origin) transformation matrix
+     2. publishes a topic with the board tile center location on the image (pixel values)
+     3. publishes a topic with an image that has board visuals
+     4. creates a live feed that visualizes where the camera thinks the board is located
+    """
 
     def __init__(self, center_pub, camera_tile_annotation):
 
         # Inputs
+
         self.center_pub = center_pub
+        # center_pub: publishes the board to world transformation matrix
+
         self.camera_tile_annotation = camera_tile_annotation
+        # camera_tile_annotation: publishes the numbers & arrows displayed on the image
+
 
         # Tools
         self.bridge = CvBridge()
@@ -183,7 +248,9 @@ class board_publisher():
 
 
     def runner(self, data):
-        """
+         """
+        Callback function for image subscriber, every frame gets scanned for board and publishes to board_center topic
+        (for robot movement) and board tile centers (for game state updates)
         :param camera_data: Camera data input from subscriber
         """
         try:
@@ -195,46 +262,26 @@ class board_publisher():
             boardImage = cv_image.copy()
 
 
-            ScaledCenter = self.detectBoard(cv_image)
-            #ScaledCenter = self.detectBoard_coloredSquares(cv_image)
+            # characterize board location and orientation
+            scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
 
 
-            # 
-            # print('unordered points:',boardPoints)
-            # reorderedPoints = dXO.reorder(boardPoints)
-            # # print('reorderedPoints:',reorderedPoints)
-            # z_angle = dXO.newOrientation(reorderedPoints)
-            #
-            # angle = dXO.getOrientation(boardPoints, boardImage)
-            # # print('old orientation angle',np.rad2deg(angle))
-            #
-            # # boardCropped = croptoBoard(boardImage, boardCenter)
-            # # print(boardCropped.sh)
-            # # cv2.imshow('Cropped Board',boardCropped)
+            # For visual purposes, simple crop
+            # cropped_image = frame[center[1]-90:center[1]+90,center[0]-90:center[0]+90] #640x480
+            # cropped_image = frame[center[1] - 125:center[1] + 125, center[0] - 125:center[0] + 125]  # 1280x720
 
-            boardTranslation = np.array(
-                [[ScaledCenter[0]], [ScaledCenter[1]], [0.655]])  ## depth of the table is .64 m
-
-            # z_orient = z_angle
-            # boardRotation = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
-            #                           [math.sin(radians(z_orient)), math.cos(radians(z_orient)), 0],
-            #                           [0, 0, 1]])
-
-
-
-            # Transformations (board to -imageFrame, -camera, -world)
-            tf_board = tf.generateTransMatrix(np.identity((3)), boardTranslation)  # tf_body2camera, transform from camera
+            # find all 9 nine tile centers based on board center
             tileCentersMatrices = define_board_tile_centers()
-            tileCenters2camera = tf.convertPath2FixedFrame(tileCentersMatrices, tf_board)  # 4x4 transformation matrix
+
+            tileCenters2camera = tf.convertPath2FixedFrame(tileCentersMatrices, tf_board2camera)  # 4x4 transformation matrix
 
             # Columns: 0,1,2 are rotations, column: 3 is translation
             # Rows: 0,1 are x & y rotation & translation values
 
 
-
             import subprocess
 
-            ## Build Camer_2_World TF
+            ## Build Camera_2_World TF
             # todo: Rewrite how the camera-tf is defined. Suggestion: grab from topic 'tf'
             ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
             tf_camera2world_filepath = np.load(ttt_pkg + "/tf_camera2world.npy")
@@ -246,7 +293,7 @@ class board_publisher():
             tf_camera2world = tf.generateTransMatrix(rot_camera_hardcode, translation)
 
             ## Build Board_2_World TF
-            tf_board2world = np.matmul(tf_camera2world, tf_board)
+            tf_board2world = np.matmul(tf_camera2world, tf_board2camera)
 
             ## Convert TF (4x4) Array to Pose (7-element list)
             pose_goal = tf.transformToPose(tf_board2world)
@@ -269,21 +316,25 @@ class board_publisher():
             #rospy.loginfo(msg)
 
 
-
-
             # Draw Tile Numbers onto Frame
-            xList = []
-            yList = []
+            xyList = [[] for i in range(9)]
             scale = .895 / 1280  # todo: set to camera intrinsics
             for i in range(9):
                 xyzCm = (tileCenters2camera[i][0:2, 3:4])  # in cm
                 x = xyzCm[0] / scale + 640
                 y = xyzCm[1] / scale + 360  # in pixels
-                xList.append(int(x))
-                yList.append(int(y))
+                xyList[i].append(int(x))
+                xyLis[i].append(int(y))
                 cv2.putText(boardImage, str(i), (int(xList[i]), int(yList[i])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
                             (0, 0, 0),
                             2)
+
+            # save pixel locations for tiles
+            tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+            filename = 'tile_centers_pixel.npy'
+
+            outputFilePath = tictactoe_pkg + '/' + filename
+            np.save(outputFilePath, data_list)
 
             # Image Stats
             height, width, channels = boardImage.shape
