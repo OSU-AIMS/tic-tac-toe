@@ -1,0 +1,22 @@
+<!-- Launch File: Tests the board_tf_publisher NODE using a static image publisher. -->
+
+<launch>
+
+    <!-- Opens a Static Image Publisher to stand in for real camera -->
+    <!-- ns set to match RealSense namespace design. Explicitly matched for testing purposes -->
+    <node pkg="image_publisher" type="image_publisher" name="color" ns="camera"
+        args="$(find tic_tac_toe)/test/Camera_image_data.png" >
+        <param name="flip_horizontal" value="false" />
+        <param name="flip_vertical" value="false" />
+        <param name="frame_id" value="test_camera" />
+        <param name="publish_rate" value="1" />
+    </node>
+
+    <!-- Launch actual code to test -->
+    <node pkg="tic_tac_toe" type="board_tf_publisher.py" name="board_tf_publisher" output="screen" />
+
+    <!-- Open RQT for analysis with a custom perspective -->
+    <node name = "RQT_TestViewer" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" 
+        args = "--perspective-file $(find tic_tac_toe)/test/test_static_image.perspective"/>
+
+</launch>

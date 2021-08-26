@@ -3,10 +3,7 @@
     <!-- Launch Camera Topics -->
     <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
 
-    <!-- Board-TF-Publisher -->
-    <node pkg="tic-tac-toe" type="board_tf_publisher.py" name="center_pub" output="screen" launch-prefix="gnome-terminal --command" />
-
-    <!-- Camera-Tile-Publisher -->
-    <node pkg="tic-tac-toe" type="board_tf_publisher.py" name="camera_tile_annotation" output="screen" launch-prefix="gnome-terminal --command" />
+    <!-- Setup Node for 'Board-TF-Publisher' -->
+    <node pkg="tic_tac_toe" type="board_tf_publisher.py" name="board_tf_publisher" output="screen" />
 
 </launch>

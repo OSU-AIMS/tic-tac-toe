@@ -111,15 +111,11 @@ def croptoBoard(frame,center):
 
 class board_publisher():
 
-    def __init__(self):
+    def __init__(self, center_pub, camera_tile_annotation):
 
-        # Setup Publishers
-        self.center_pub = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
-        # ttt_board_origin: publishes the board center and rotation matrix
-        self.camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
-        # camera_tile_annotation: publishes the numbers & arrows displayed on the image
-
-        rospy.Rate(0.1)
+        # Inputs
+        self.center_pub = center_pub
+        self.camera_tile_annotation = camera_tile_annotation
 
         # Tools
         self.bridge = CvBridge()
@@ -129,8 +125,8 @@ class board_publisher():
         #table_frame = frame.copy()
 
         # Reading in static image
-        frame=cv2.imread('../sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
-        cv2.imshow('Sample Image',frame)
+        #frame=cv2.imread('../sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
+        #cv2.imshow('Sample Image',frame)
         table_frame = frame.copy()
 
 
@@ -235,7 +231,7 @@ class board_publisher():
 
             # Publish
             self.center_pub.publish(msg)
-            rospy.loginfo(msg)
+            #rospy.loginfo(msg)
 
 
 
@@ -258,24 +254,21 @@ class board_publisher():
             height, width, channels = boardImage.shape
 
             # Prepare Image Message
-            msg_img = sensor_msgs.msg.Image()
-            msg_img.height = height
-            msg_img.width = width
-            msg_img.encoding = 'rgb8'
+            # msg_img = Image()
+            # msg_img.height = height
+            # msg_img.width = width
+            # msg_img.encoding = 'rgb8'
             try:
-                msg_img.data = self.bridge.cv2_to_imgmsg(boardImage, 'rgb8')
+                msg_img = self.bridge.cv2_to_imgmsg(boardImage, 'rgb8')
             except CvBridgeError as e:
                 print(e)
 
-            # Outputs
+            # Publish
             self.camera_tile_annotation.publish(msg_img)
+            #rospy.loginfo(msg)
+
             # cv2.imshow('CV2: Live Board', boardImage)
             # cv2.waitKey(3)
-
-
-            # Publish
-            self.camera_tile_annotation.publish(msg)
-            rospy.loginfo(msg)
 
 
         except rospy.ROSInterruptException:
@@ -292,18 +285,27 @@ def main():
     """
     Main Runner.
     This script should only be launched via a launch script or when the Camera Node is already open.
+        ttt_board_origin: publishes the board center and rotation matrix
+        camera_tile_annotation: publishes the numbers & arrows displayed on the image
+
     """
 
     # Setup Node
     rospy.init_node('board_vision_processor', anonymous=False)
-    print(">> Board Vision Processor Node Successfully Created")
+    rospy.loginfo(">> Board Vision Processor Node Successfully Created")
 
 
-    # Listeners
-    # Setup Listener to Automatically run the Board_Publisher whenever an image frame is received.
-    bp_callback = board_publisher()
-    # image_sub = rospy.Subscriber("/camera/color/image_raw", Image, bp_callback.runner)
-    image_sub = rospy.Subscriber("/image_publisher_1628713680875692672/image_raw", Image, bp_callback.runner)
+    # Setup Publishers
+    pub_center = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
+    pub_camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
+
+    # rospy.Rate(0.1)
+
+
+    # Setup Listeners
+    bp_callback = board_publisher(pub_center, pub_camera_tile_annotation)
+    image_sub = rospy.Subscriber("/camera/color/image_raw", Image, bp_callback.runner)
+
 
     # Auto-Run until launch file is shutdown
     try:
