@@ -177,7 +177,7 @@ class board_publisher:
         self.camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
         # camera_tile_annotation: publishes the numbers & arrows displayed on the image
 
-        #self.tile_center_values = rospy.Publisher("tile_center_values", custom_msg, queue_size=20) ## TODO 
+        # self.tile_center_transforms = rospy.Publisher("tile_center_transforms", TransformStamped, queue_size=20)
         rospy.Rate(0.1)
 
         # Tools
@@ -249,18 +249,24 @@ class board_publisher:
             rospy.loginfo(transform_msg)
 
             # Draw Tile Numbers onto Frame
-            xList = []
-            yList = []
+            xyList = [[] for i in range(9)]
             scale = .895 / 1280  # todo: set to camera intrinsics
             for i in range(9):
                 tileTranslationMatrix = (tileCenters2camera[i][0:2, 3:4])  # in cm
                 x = tileTranslationMatrix[0] / scale + 640
                 y = tileTranslationMatrix[1] / scale + 360  # in pixels
-                xList.append(int(x))
-                yList.append(int(y))
+                xyList[i].append(int(x))
+                yyLis[i].append(int(y))
                 cv2.putText(boardImage, str(i), (int(xList[i]), int(yList[i])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
                             (0, 0, 0),
                             2)
+
+            # save pixel locations for tiles
+            tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+            filename = 'tile_centers_pixel.npy'
+
+            outputFilePath = tictactoe_pkg + '/' + filename
+            np.save(outputFilePath, data_list)
 
             # Image Stats
             height, width, channels = boardImage.shape
