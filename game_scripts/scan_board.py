@@ -159,7 +159,7 @@ class detectXO(object):
     #cv2.imshow("threshold",imgThre)
 
     #cv2.imshow("img threshold",imgThre)
-    contours, _ = cv2.findContours(imgThre, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv2.findContours(imgThre, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #If it needs more values to unpack, add another underscore
 
     contours_image = cv2.drawContours(orignal_frame.copy(),contours,-1,(0,255,0),1)
