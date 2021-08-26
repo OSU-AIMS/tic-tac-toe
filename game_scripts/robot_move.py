@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import os
 import sys
-# insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '//home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes')  
+ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+path_2_nodes = ttt_pkg + '/nodes'
+sys.path.insert(1, path_2_game_scripts) 
 
 import rospy
 from robot_support import *
@@ -61,8 +62,9 @@ def listener():
 	# find tictactoe pkg dir
 	tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-	tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
-	subprocess.call([tf_listener])
+	# subscriber should be continously running
+	# tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
+	# subprocess.call([tf_listener])
 
 	tf_filename = 'tf_board2world.npy'
 	data_list = np.load(str(tictactoe_pkg) + '/' + tf_filename)

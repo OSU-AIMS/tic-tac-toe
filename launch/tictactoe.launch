@@ -1,0 +1,16 @@
+
+<launch>
+    <!-- Launch Physical Robot w/ Lab Connection Defaults -->
+    <include file="$(find robot_with_camera_config)/launch/moveit_planning_execution.launch" >
+        <arg name="sim" default="false"/>
+        <arg name="robot_ip" default="192.168.1.200" />
+        <arg name="controller" default="fs100" />
+    </include>
+
+    <!-- TF Listener & Publisher for the Transform between Origin and Camera -->
+    <include file="$(find tic_tac_toe)/launch/camera_transform.launch" />
+
+    <!-- TF Listener & Publisher for the Transform between Origin and Board -->
+    <include file="$(find tic_tac_toe)/launch/board_transform.launch" />
+
+</launch>

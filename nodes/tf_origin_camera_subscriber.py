@@ -35,6 +35,6 @@ if __name__ == '__main__':
     # filename  = sys.argv[2]
     try:
         listener()
-        #Srospy.spin()
+        rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
