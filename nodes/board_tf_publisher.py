@@ -120,6 +120,40 @@ class board_publisher():
         # Tools
         self.bridge = CvBridge()
 
+    def detectBoard_coloredSquares(self,frame):
+        # purpose: recognize  of board based on 3 colored equares
+
+
+        # import image frame with colored squares
+        
+        # frame=cv2.imread('../sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
+        cv2.imshow('Sample Image',frame)
+
+        # covnert to Grayscale
+        gray_frame = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+        cv2.imshow('Grayscaled Image',gray_frame)
+
+        # Set Thresholds for Red, Green, Blue for detection
+        
+        
+
+
+
+        # Find centers for the squares based on location (ScaledCenter)
+        # Look in maze runner d3_post_process
+
+
+
+        # Get distance from each center to get board size & center
+
+
+        # get angle from red to green & use that as the orientation
+        # X-vector: Blue --> Red
+        # Y-vector: Blue --> Green
+
+
+        
+
 
     def detectBoard(self, frame):
         #table_frame = frame.copy()
@@ -157,11 +191,12 @@ class board_publisher():
             boardCenter = [data.width/2, data.height/2]   #Initialize as center of frame
 
             # Convert Image to CV2 Frame
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
             boardImage = cv_image.copy()
 
 
             ScaledCenter = self.detectBoard(cv_image)
+            #ScaledCenter = self.detectBoard_coloredSquares(cv_image)
 
 
             # 
