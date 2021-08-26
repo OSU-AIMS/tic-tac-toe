@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from rectangle_support import *
-from color_filter import *
+from color_finder import *
 import cv2
 #import pyrealsense2 as rs
 import rospy

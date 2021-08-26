@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import os
 import sys
-# insert at 1, 0 is the script path (or '' in REPL)
-# sys.path.insert(1, '//home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes')  
-sys.path.insert(1, '//home/khan764/tic-tac-toe_ws/src/tic-tac-toe/nodes')  
+ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+path_2_nodes = ttt_pkg + '/nodes'
+sys.path.insert(1, path_2_game_scripts) 
 
 import rospy
 from robot_support import *
@@ -62,8 +62,9 @@ def prepare_path_tf_ready():
 # 	# find tictactoe pkg dir
 # 	tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-# 	tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
-# 	subprocess.call([tf_listener])
+	# subscriber should be continously running
+	# tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
+	# subprocess.call([tf_listener])
 
 # 	tf_filename = 'tf_board2world.npy'
 # 	data_list = np.load(str(tictactoe_pkg) + '/' + tf_filename)
@@ -120,7 +121,7 @@ class tictactoeMotion:
 		# Calling ``stop()`` ensures that there is no residual movement
 		self.rc.move_group.stop() 
 
-	def xPickup(self,x,y,z = .1):
+	def xPickup(self, x, y, z=.1):
 		"""
 		Executes a pickup command to a specified x,y,z location (with respect to robot origin)
 		Default values for z = .1 , hovers at 10cm above origin plane and lowers to 5 cm below input z value.
@@ -154,7 +155,7 @@ class tictactoeMotion:
 		tf_board2world = self.tf.quant_pose_to_tf_matrix(quant_board2world)
 
 		# Rotate board tile positions
-		tileCenters2world = self.tf.convertPath2FixedFrame(tileCentersMatrices,tf_board2world)
+		tileCenters2world = self.tf.convertPath2FixedFrame(tileCentersMatrices, tf_board2world)
 
 		# Convert tfs to robot poses (Quat)
 		matr_rot = tileCenters2world[0][0:3, 0:3]

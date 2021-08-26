@@ -22,10 +22,10 @@ def listener():
         data.transform.rotation.w
         ]
 
-    #print(data_list)
-    # outputFilePath = workspace + '/' + filename
-    # outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/tf_camera2world.npy'
-    outputFilePath = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/tf_camera2world.npy'
+    tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    tf_filename = 'tf_camera2world.npy'
+
+    outputFilePath = tictactoe_pkg + '/' + tf_filename
     np.save(outputFilePath, data_list)
     rospy.loginfo(">> Service Provided: Exported Origin-Camera Transform to %s", outputFilePath)
 
@@ -36,6 +36,7 @@ if __name__ == '__main__':
     # filename  = sys.argv[2]
     try:
         listener()
-        #Srospy.spin()
+        rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
+        exit()

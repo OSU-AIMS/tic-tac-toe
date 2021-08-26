@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 import rospy
 import numpy as np
 import sys
@@ -22,20 +22,20 @@ def listener():
         data.transform.rotation.z
         ]
 
-    # print(data_list)
-    # outputFilePath = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/tf_board2world.npy'
-    outputFilePath = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/tf_board2world.npy'
+    #print(data_list)
+    tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    tf_filename = 'tf_board2world.npy'
+
+    outputFilePath = tictactoe_pkg + '/' + tf_filename
     np.save(outputFilePath, data_list)
 
-    rospy.loginfo(">> Service Provided: Exported Origin-Camera Transform to %s", outputFilePath)
+    rospy.loginfo(">> Service Provided: Exported Origin-Board Transform to %s", outputFilePath)
 
 
 if __name__ == '__main__':
     try:
-        # listener()
-        while True:
-            listener()
-            time.sleep(0.5)
+        listener()
+        rospy.spin()
     except KeyboardInterrupt:
         exit()
 
