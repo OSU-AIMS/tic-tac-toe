@@ -10,7 +10,7 @@ import time
 def listener():
     # Intialize New Node for Subscriber, Wait for Topic to Publish, Subscribe to Topic
     rospy.init_node('tictactoe_board_center_listener', anonymous=True)
-    data = rospy.wait_for_message('tictactoe_board_center', TransformStamped, timeout=None)
+    data = rospy.wait_for_message('ttt_board_origin', TransformStamped, timeout=None)
 
     data_list = [ 
         data.transform.translation.x,

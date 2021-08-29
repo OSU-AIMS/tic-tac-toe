@@ -1,6 +1,7 @@
 # Default ignored files
 *.pyc
 *.zip
+*.npy
 .idea/
 venv/
 

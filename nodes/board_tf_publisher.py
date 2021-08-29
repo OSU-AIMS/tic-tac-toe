@@ -93,7 +93,7 @@ def define_board_tile_centers():
         tile_locations_tf.append( tf.generateTransMatrix(rot_default, item) )
 
     return tile_locations_tf
-    
+
 
 def detectBoard(image):
     """
@@ -137,8 +137,8 @@ def detectBoard(image):
     # Find rotation of board on the table plane, only a z-axis rotation angle
     z_orient = shapeDetect.newOrientation(boardPoints)
 
-    shapeDetect.drawAxis(img, cntr, p1, (255, 255, 0), 1)
-    shapeDetect.drawAxis(img, cntr, p2, (255, 80, 255), 1)
+    # shapeDetect.drawAxis(img, cntr, p1, (255, 255, 0), 1)
+    # shapeDetect.drawAxis(img, cntr, p2, (255, 80, 255), 1)
 
     # convert angle to a rotation matrix with rotation about z-axis
     boardRotationMatrix = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
@@ -261,7 +261,7 @@ class board_publisher():
             pose_goal = tf.transformToPose(tf_board2world)
 
             ## Publish Board Pose
-            msg = geometry_msgs.msg.TransformStamped()
+            msg = TransformStamped()
             msg.header.frame_id = 'Origin'
             msg.child_frame_id = 'Board'
             msg.transform.translation.x = pose_goal[0]
@@ -275,7 +275,7 @@ class board_publisher():
 
             # Publish
             self.center_pub.publish(msg)
-            #rospy.loginfo(msg)
+            rospy.loginfo(msg)
 
 
             # Draw Tile Numbers onto Frame
@@ -286,8 +286,8 @@ class board_publisher():
                 x = xyzCm[0] / scale + 640
                 y = xyzCm[1] / scale + 360  # in pixels
                 xyList[i].append(int(x))
-                xyLis[i].append(int(y))
-                cv2.putText(boardImage, str(i), (int(xList[i]), int(yList[i])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
+                xyList[i].append(int(y))
+                cv2.putText(boardImage, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
                             (0, 0, 0),
                             2)
 
@@ -296,7 +296,7 @@ class board_publisher():
             filename = 'tile_centers_pixel.npy'
 
             outputFilePath = tictactoe_pkg + '/' + filename
-            np.save(outputFilePath, data_list)
+            np.save(outputFilePath, xyList)
 
             # Image Stats
             height, width, channels = boardImage.shape
