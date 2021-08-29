@@ -100,7 +100,7 @@ class ShapeDetector(object):
 
                 # check if square with correct area
                 if 0.95 <= aspectRatio <= 1.05 and 1.05 * diag > height > side * .95:
-                    ImageWithSquare = cv2.drawContours(ImageWithSquare, [c], -1, (0, 0, 255), 2)
+                    ImageWithSquare = cv2.drawContours(ImageWithSquare, [c], -1, (255, 36, 0), 3)
 
                     SquareCenter[0] = cX
                     SquareCenter[1] = cY
