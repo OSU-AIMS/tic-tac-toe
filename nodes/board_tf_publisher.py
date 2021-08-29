@@ -37,7 +37,7 @@ from geometry_msgs.msg import TransformStamped
 # Custom Tools
   # from Realsense_tools import *
 from transformations import *
-from scan_board import *
+from shape_detector import *
 from cv_bridge import CvBridge, CvBridgeError
 
 # System Tools
@@ -93,18 +93,9 @@ def define_board_tile_centers():
         tile_locations_tf.append( tf.generateTransMatrix(rot_default, item) )
 
     return tile_locations_tf
+    
 
-
-def croptoBoard(frame,center):
-    #print('Entered RealsenseTools: cropFrame function\n')
-    #cropped_image = frame[55:228,335:515] # frame[y,x]
-    # cropped_image = frame[45:218,315:495 ] # frame[y,x]
-    # cropped_image = frame[center[1]-90:center[1]+90,center[0]-90:center[0]+90] #640x480
-    cropped_image = frame[center[1]-125:center[1]+125,center[0]-125:center[0]+125] #1280x720
-    return cropped_image
-
-
-def detectBoard(frame):
+def detectBoard(image):
     """
     Tictactoe function that finds the physical board. Utilizes ShapeDetector class functions.
     TODO transition to using rgb dots for both board center and orientation.
@@ -217,38 +208,9 @@ class board_publisher():
         # Y-vector: Blue --> Green
 
 
-        
-
-
-    def detectBoard(self, frame):
-        #table_frame = frame.copy()
-
-        # Reading in static image
-        #frame=cv2.imread('../sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
-        #cv2.imshow('Sample Image',frame)
-        table_frame = frame.copy()
-
-
-        # cv2.imshow('test',frame)
-        # cv2.waitKey(0)
-        # small crop to just table
-        # table_frame =full_frame[0:480,0:640] # frame[y,x]
-        boardImage, boardCenter, boardPoints = dXO.getContours(table_frame)
-        # scale = .664/640 #(m/pixel)
-        scale = .895 / 1280
-        ScaledCenter = [0, 0]
-        # ScaledCenter[0] = (boardCenter[0]-320)*scale
-        # ScaledCenter[1] = (boardCenter[1]-240)*scale
-        ScaledCenter[0] = (boardCenter[0] - 640) * scale
-        ScaledCenter[1] = (boardCenter[1] - 360) * scale
-        # print("Center of board relative to center of robot (cm):",ScaledCenter)
-
-        return ScaledCenter
-
-
 
     def runner(self, data):
-         """
+        """
         Callback function for image subscriber, every frame gets scanned for board and publishes to board_center topic
         (for robot movement) and board tile centers (for game state updates)
         :param camera_data: Camera data input from subscriber
