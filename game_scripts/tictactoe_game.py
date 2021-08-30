@@ -14,7 +14,7 @@ from scipy import ndimage
 from robot_move import *
 
 PickP = tictactoeMotion()
-dXO = detectXO()
+shapeDetect = ShapeDetector()
 brain = BigBrain()
 boardPoints=[]
 
@@ -45,7 +45,7 @@ def findDis(pt1x,pt1y, pt2x,pt2y):
 class PlayGame():
 
   def __init__(self):
-   dXO = detectXO()
+   shapeDetect = ShapeDetector()
    brain = BigBrain()
    self.bridge = CvBridge()
    player = [-1,1]
@@ -137,17 +137,13 @@ class PlayGame():
     centers = []
     print('expected number of Os: ',countO)
 
-    ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     ##scanning
-    #robot goes into scannning position
-    #robot_toPaper
-    # As of 8/4/21, this^^^ is in a different script
     
     while len(centers) != countO:
       # while the number of circles detected doesn't equal the number of O blocks expected      
       img = current_board # 
 
-      centers = dXO.getCircle(img)
+      centers = shapeDetect.detectCircle(img)
      
       cv2.imshow('Circles detected',img)
       cv2.waitKey(0)
@@ -159,21 +155,19 @@ class PlayGame():
 
       ## ALL THE NUMBERS HERE WILL CHANGE B/C Board can now move & rotate
       ## Unless you move image to the blue tape corner each time & change the robot motion accordingly
-      tf_filename = 'xList.npy'
-      # xList = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
-      xList = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
+      tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+      tf_filename = 'tile_centers_pixel.npy'
+      xyList = np.load(tictactoe_pkg + '/' + tf_filename)
 
-      tf_filename = 'yList.npy'
-      # yList = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
-      yList = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
+
       closest_index=[]
       closest_square = [0,0,0,0,0,0,0,0,0]
       for i in range(len(centers)):
         closest = 10000
-        for j in range(len(xList)):
+        for j in range(9):
           #centers x to xList/yList centers for dist
           
-          distance = findDis(centers[i][0],centers[i][1],xList[j],yList[j])   
+          distance = findDis(centers[i][0],centers[i][1],xyList[j][0],xyList[j][1])   
           #findDis params :(pt1x.pt1y, pt2x,pt2y)
           # print('Distance:',j,distance)
           if distance < 40 and distance < closest:
