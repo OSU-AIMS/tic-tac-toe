@@ -149,6 +149,68 @@ def detectBoard(image):
     tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
     return scaledCenter, boardImage, tf_board2camera
+
+def detectBoard_coloredSquares(image):
+        # purpose: recognize  of board based on 3 colored equares
+
+        print("Your OpenCV version is: " + cv2.__version__)
+        # import image frame with colored squares
+
+        # frame = cv2.imread('/sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
+        
+        image = image.copy()
+
+       
+        # Next Recognize Location & Centers 
+
+
+        
+        # Remaking Old Code
+
+        # Recognizing center of squares is based on this:
+        # # https://www.pyimagesearch.com/2016/02/01/opencv-center-of-contour/
+        # blurred = cv2.GaussianBlur(gray_frame, (5, 5), 0)
+        # thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
+        # cv2.imshow('Threshold image', thresh)
+        # # Recognize center of contour in binary image
+        # contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # contours = imutils.grab_contours(contours)
+        # loop over contours
+        # for c in contours:
+        #     M = cv2.moments(c)
+        #     cX = int(M["m10"] / M["m00"])
+        #     # Need to get specific contours
+        #     #
+        #     cY = int(M["m10"] / M["m00"])
+
+        #     # draw contour & center of shape on image
+        #     cv2.drawContours(gray_frame, [c], -1, (0, 255, 0), 2)
+        #     cv2.circle(gray_frame, (cX, cY), 7, (255, 255, 255), -1)
+        #     cv2.putText(gray_frame, "center", (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+        #     # show image
+        #     cv2.imshow('With Contours', frame)
+        #     cv2.waitKey(0)
+
+        # Find centers for the squares based on location (ScaledCenter)
+
+        # Look in maze runner d3_post_process
+
+        # Get distance from each center to get board center
+
+        # get angle from red to green & use that as the orientation
+        # X-vector: Blue --> Red
+        # Y-vector: Blue --> Green
+
+        # then use DrawAxis function
+
+        cv2.waitKey(0)
+
+
+
+
+
+
 #####################################################
 ## PRIMARY CLASS
 ##
@@ -176,58 +238,6 @@ class board_publisher():
         # Tools
         self.bridge = CvBridge()
 
-    def detectBoard_coloredSquares(self, frame):
-        # purpose: recognize  of board based on 3 colored equares
-
-        print("Your OpenCV version is: " + cv2.__version__)
-        # import image frame with colored squares
-
-        frame = cv2.imread('../sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
-        cv2.imshow('Sample Image', frame)
-        cv2.waitKey(0)
-
-        # convert to Grayscale
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.imshow('Gray scaled Image', gray_frame)
-
-        # Recognizing center of squares is based on this:
-        # https://www.pyimagesearch.com/2016/02/01/opencv-center-of-contour/
-        blurred = cv2.GaussianBlur(gray_frame, (5, 5), 0)
-        thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
-        cv2.imshow('Threshold image', thresh)
-        # Recognize center of contour in binary image
-        contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours = imutils.grab_contours(contours)
-        # loop over contours
-        for c in contours:
-            M = cv2.moments(c)
-            cX = int(M["m10"] / M["m00"])
-            # Need to get specific contours
-            #
-            cY = int(M["m10"] / M["m00"])
-
-            # draw contour & center of shape on image
-            cv2.drawContours(frame, [c], -1, (0, 255, 0), 2)
-            cv2.circle(frame, (cX, cY), 7, (255, 255, 255), -1)
-            cv2.putText(frame, "center", (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-
-            # show image
-            cv2.imshow('With Contours', frame)
-            cv2.waitKey(0)
-
-        # Find centers for the squares based on location (ScaledCenter)
-
-        # Look in maze runner d3_post_process
-
-        # Get distance from each center to get board center
-
-        # get angle from red to green & use that as the orientation
-        # X-vector: Blue --> Red
-        # Y-vector: Blue --> Green
-
-        # then use DrawAxis function
-
-        cv2.waitKey(0)
 
 
     def runner(self, data):
@@ -241,11 +251,12 @@ class board_publisher():
             boardCenter = [data.width/2, data.height/2]   # Initialize as center of frame
 
             # Convert Image to CV2 Frame
-            cv_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
             boardImage = cv_image.copy()
 
             # characterize board location and orientation
-            scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
+            #scaledCenter, boardImage, tf_board2camera = detectBoard_color(cv_image)
+            scaledCenter, boardImage, tf_board2camera = detectBoard_coloredSquares(cv_image)
 
             # For visual purposes, simple crop
             # cropped_image = frame[center[1]-90:center[1]+90,center[0]-90:center[0]+90] #640x480

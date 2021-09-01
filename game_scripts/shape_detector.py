@@ -295,7 +295,7 @@ class ShapeDetector(object):
         # cv2.imshow("Image threshold", imgThresh)
 
         # Finds all contours on image (using threshold image)
-        contours, _ = cv2.findContours(imgThresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        _, contours, _ = cv2.findContours(imgThresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         return contours
 
