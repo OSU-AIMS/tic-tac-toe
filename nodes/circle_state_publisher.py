@@ -85,9 +85,9 @@ class circle_state_publisher():
             ]
             # array for game board 0 -> empty tile, 1 -> X, -1 -> O
             boardCode = [
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 0, 0],
+                0, 0, 0,
+                0, 0, 0,
+                0, 0, 0,
             ]
             # Convert Image to CV2 Frame
             cv_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
@@ -99,6 +99,7 @@ class circle_state_publisher():
             tf_filename = 'tile_centers_pixel.npy'
             xyList = np.load(tictactoe_pkg + '/' + tf_filename)
 
+                
             closest_index = []
             closest_square = [0, 0, 0, 0, 0, 0, 0, 0, 0]
             closest = 10000
@@ -123,31 +124,32 @@ class circle_state_publisher():
                         # Checks which of the 9 tiles the O block is in
                         if closest_index == 0:
                             board[0][0] = 'O'
-                            boardCode[0][0] = -1
+                            boardCode[0] = -1
                         elif closest_index == 1:
                             board[0][1] = 'O'
-                            boardCode[0][1] = -1
+                            boardCode[1] = -1
+                            cv2.circle(img, centers[i], 15, (255, 36, 0), 13)
                         elif closest_index == 2:
                             board[0][2] = 'O'
-                            boardCode[0][2] = -1
+                            boardCode[2] = -1
                         elif closest_index == 3:
                             board[1][0] = 'O'
-                            boardCode[1][0] = -1
+                            boardCode[3] = -1
                         elif closest_index == 4:
                             board[1][1] = 'O'
-                            boardCode[1][1] = -1
+                            boardCode[4] = -1
                         elif closest_index == 5:
-                            board[1][2] = 'O'
-                            boardCode[1][2] = -1
+                            board[2] = 'O'
+                            boardCode[5] = -1
                         elif closest_index == 6:
                             board[2][0] = 'O'
-                            boardCode[2][0] = -1
+                            boardCode[6] = -1
                         elif closest_index == 7:
                             board[2][1] = 'O'
-                            boardCode[2][1] = -1
+                            boardCode[7] = -1
                         elif closest_index == 8:
                             board[2][2] = 'O'
-                            boardCode[2][2] = -1
+                            boardCode[8] = -1
 
                         print("Circle {} is in tile {}.".format(i, closest_index))
                 else:
@@ -156,14 +158,27 @@ class circle_state_publisher():
             print('Physical Board: ', board)
             print('Board Computer sees:', boardCode)
 
-            try:
-                msg_img = self.bridge.cv2_to_imgmsg(img, 'rgb8')
-            except CvBridgeError as e:
-                print(e)
+            for i in range(9):
+                cv2.putText(img, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
+                            (0, 0, 0),
+                            2)
 
-            # Publish
-            self.circle_state_annotation.publish(msg_img)
-            # rospy.loginfo(msg)
+            if boardCode == [0,0,0,0,0,0,0,0,0]:
+                print("No circles detected on Board")
+            else: 
+                try:
+                    msg_img = self.bridge.cv2_to_imgmsg(img, 'rgb8')
+                except CvBridgeError as e:
+                    print(e)
+
+                # Publish
+                self.circle_state_annotation.publish(msg_img)
+
+                tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                filename = 'circle_board_state.npy'
+
+                outputFilePath = tictactoe_pkg + '/' + filename
+                np.save(outputFilePath, boardCode)
 
         except rospy.ROSInterruptException:
             exit()
@@ -191,6 +206,8 @@ def main():
 
     # Setup Publishers
     pub_circle_state_annotation = rospy.Publisher("circle_state_annotation", Image, queue_size=20)
+
+    # pub_circle_board_state = rospy.Publisher("circle_board_state", Array, queue_size=20)
 
     # Setup Listeners
     cs_callback = circle_state_publisher(pub_circle_state_annotation)

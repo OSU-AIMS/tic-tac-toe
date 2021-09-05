@@ -49,7 +49,12 @@ class PlayGame():
     def __init__(self):
         shapeDetect = ShapeDetector()
         brain = BigBrain()
+
         self.bridge = CvBridge()
+
+        self.countO = 1  # 1 block O b/c human goes first
+        self.blocks = 0  # Number of X blocks used
+
         player = [-1, 1]
         # human: -1, computer = 1
 
@@ -123,118 +128,93 @@ class PlayGame():
         return roll_x, pitch_y, yaw_z  # in radians
 
     # Detect circles
-    def circle_detect(self, countO, current_board, blocks):
+    def circle_detect(self, boardCode, board):
         '''
-    Function should only detect circles: CLEAN IT UP
-    params: 
-    count0: number of O blocks expected
-    current_board= image of the current board state from camera
-    blocks = number of X blocks remaining
-    '''
+        Function should only detect circles: CLEAN IT UP
+        params: 
+        count0: number of O blocks expected
+        current_board= image of the current board state from camera
+        blocks = number of X blocks remaining
+        '''
         centers = []
-        print('expected number of Os: ', countO)
+        
+        print('expected number of Os: ', self.countO)
 
-        ##scanning
 
-        while len(centers) != countO:
-            # while the number of circles detected doesn't equal the number of O blocks expected
-            img = current_board  #
+        while len(boardCountO) != self.countO:
+            boardCountO=0
 
-            centers = shapeDetect.detectCircle(img)
-
-            cv2.imshow('Circles detected', img)
-            cv2.waitKey(0)
-
-            # print('First array: of circles',centers[0,:])
-            # print('First x of 1st array:',centers[1][0])
-            print('CentersList from getCircle', centers)
-            #  #length = 5 for max
-
-            ## ALL THE NUMBERS HERE WILL CHANGE B/C Board can now move & rotate
-            ## Unless you move image to the blue tape corner each time & change the robot motion accordingly
             tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-            tf_filename = 'tile_centers_pixel.npy'
-            xyList = np.load(tictactoe_pkg + '/' + tf_filename)
+            tf_filename = 'circle_board_code.npy'
+            circle_board_code = np.load(tictactoe_pkg + '/' + tf_filename)
 
-            closest_index = []
-            closest_square = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-            for i in range(len(centers)):
-                closest = 10000
-                for j in range(9):
-                    # centers x to xList/yList centers for dist
+            for i in range(9):
+                if circle_board_code[i] == -1:
+                    boardCount += 1
 
-                    distance = findDis(centers[i][0], centers[i][1], xyList[j][0], xyList[j][1])
-                    # findDis params :(pt1x.pt1y, pt2x,pt2y)
-                    # print('Distance:',j,distance)
-                    if distance < 40 and distance < closest:
-                        # this creates a boundary just outside the ttt board
-                        # any circle within this boundary is likely to be detected as a piece in one of the 9 tiles
-                        closest = distance
-                        closest_index = j
-                        print('distance checker')
-                        # closest_square[i]= closest_index
-                    else:
-                        print('Not on board!')
-                if closest_index is not None:
-                    print('inside board assignent ifs')
-                    # Checks which of the 9 tiles the O block is in
-                    if closest_index == 0:
-                        board[0][0] = 'O'
-                        boardCode[0][0] = -1
-                    elif closest_index == 1:
-                        board[0][1] = 'O'
-                        boardCode[0][1] = -1
-                    elif closest_index == 2:
-                        board[0][2] = 'O'
-                        boardCode[0][2] = -1
-                    elif closest_index == 3:
-                        board[1][0] = 'O'
-                        boardCode[1][0] = -1
-                    elif closest_index == 4:
-                        board[1][1] = 'O'
-                        boardCode[1][1] = -1
-                    elif closest_index == 5:
-                        board[1][2] = 'O'
-                        boardCode[1][2] = -1
-                    elif closest_index == 6:
-                        board[2][0] = 'O'
-                        boardCode[2][0] = -1
-                    elif closest_index == 7:
-                        board[2][1] = 'O'
-                        boardCode[2][1] = -1
-                    elif closest_index == 8:
-                        board[2][2] = 'O'
-                        boardCode[2][2] = -1
+        if circle_board_code[0] == -1:
+            board[0][0] = 'O'
+            boardCode[0][0] = -1
 
-                    print('closest index', closest_index)
-            print('Physical Board: ', board)
-            print('Board Computer sees:', boardCode)
-            self.AI_move(boardCode, blocks)
-            # not really the best use of the blocks variable
+        if circle_board_code[1] == -1:
+            board[0][1] = 'O'
+            boardCode[0][1] = -1
 
-    def AI_move(self, boardCode, blocks):
+        if circle_board_code[2] == -1:
+            board[0][2] = 'O'
+            boardCode[0][2] = -1
+
+        if circle_board_code[3] == -1:
+            board[1][0] = 'O'
+            boardCode[1][0] = -1
+
+        if circle_board_code[4] == -1:
+            board[1][1] = 'O'
+            boardCode[1][1] = -1
+
+        if circle_board_code[5] == -1:
+            board[1][2] = 'O'
+            boardCode[1][2] = -1
+
+        if circle_board_code[6] == -1:
+            board[2][0] = 'O'
+            boardCode[2][0] = -1
+
+        if circle_board_code[7] == -1:
+            board[2][1] = 'O'
+            boardCode[2][1] = -1
+
+        if circle_board_code[8] == -1:
+            board[2][2] = 'O'
+            boardCode[2][2] = -1
+        return boardCode, board
+
+    def AI_move(self, boardCode, board):
         '''
-    params: 
-    - boardCode: state of the board read by computer
-    - refers to ai_turn from tictactoe_brain script: 
-      which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
-    '''
+        params: 
+        - boardCode: state of the board read by computer
+        - refers to ai_turn from tictactoe_brain script: 
+          which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
+        '''
+
         ### Using tictactoe_brain code
         move = brain.ai_turn('X', 'O', boardCode)  # outputs move array based on minimx
         print('MOVE: ', move)
+
         # modifed ai_turn to return False if no valid moves left
         if move == False:
             print('Inside move if-statement')
             self.Evaluate_Game(move, boardCode)
+
         else:
             blocksY = [.517, .5524, .5806, .609, .638, .671]
             board[move[0]][move[1]] = 'X'
             boardCode[move[0]][move[1]] = +1
 
             # Uncomment below after fixing orientation
-            print('attempting to get X:', blocks)
-            Y = blocksY[blocks]
-            # blocksX = -0.112
+            print('attempting to get X:', self.blocks)
+            Y = blocksY[self.blocks]
+            
             blocksX = -0.110
             raw_input('To attempt to get X <press enter>')
             PickP.xPickup(blocksX, Y)
@@ -258,17 +238,16 @@ class PlayGame():
             if move[0] == 2 and move[1] == 2:
                 PickP.moveToBoard(8)
 
-        cv2.waitKey(0)
         return boardCode, board
 
     def Evaluate_Game(self, boardCode):
         '''
-    params:
-    boardCode = state of board that computer reads
-    uses titactoe_brain script
-    which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
-    Returns game which exits the while loop in main if Game = False
-    '''
+        params:
+        boardCode = state of board that computer reads
+        uses titactoe_brain script
+        which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
+        Returns game which exits the while loop in main if Game = False
+        '''
         winner = brain.evaluate(boardCode)
         print('Evaluate:', winner)
         if winner == 1:
@@ -290,21 +269,28 @@ def main():
     try:
         # rospy.init_node('board_image_listener', anonymous=True)
         game = True;  # decides when game is over
+
         PG = PlayGame()
-        img = PG.listener()
-        print('OpenCV version:', cv2.__version__)
+        # img = PG.listener()
+        # print('OpenCV version:', cv2.__version__)
+
         while game is True:
-            countO = 1  # 1 block O b/c human goes first
-            blocks = 0  # Number of X blocks used
-            PG.circle_detect(countO, img, blocks)
-            # current_board = cv2.imread('images/game_board_3O_Color.png') # frame of board taken after each move
-            countO += 1
-            blocks += 1
+
+            # define circles on board
+            boardCode, board = PG.circle_detect(boardCode,board)
+            boardCode, board = PG.AI_move(boardCode,board)
+
+            PG.countO += 1
+            PG.blocks += 1
+
+            game = PG.Evaluate_Game(boardCode)
             print('Game Variable to decide if game continues:', game)
             print('Number of X blocks used:', blocks)
-            if game == False:
-                break;
-            game = False
+
+
+            # if game == False:
+            #     break;
+            # game = False
 
         #  PG.listener()
         # PG.Read_Board(countO,current_board,board,boardCode)
@@ -321,7 +307,6 @@ def main():
         #   blocks += 1
 
         # gameInProgress = False
-        cv2.waitKey(0)
 
     except rospy.ROSInterruptException:
         exit()
