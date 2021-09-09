@@ -10,7 +10,6 @@ import math
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import subprocess
-from scipy import ndimage
 from robot_move import *
 
 PickP = tictactoeMotion()
@@ -53,7 +52,7 @@ class PlayGame():
         self.bridge = CvBridge()
 
         self.countO = 1  # 1 block O b/c human goes first
-        self.blocks = 0  # Number of X blocks used
+        self.countX = 0  # Number of X blocks used
 
         player = [-1, 1]
         # human: -1, computer = 1
@@ -77,20 +76,6 @@ class PlayGame():
         # cv2.waitKey(0)
         return img_data
 
-    def listener_Angle(self):
-
-        # tf_listener = '/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe/nodes/board_center_subscriber.py'
-        tf_listener = '/home/khan764/tic-tac-toe_ws/src/tic-tac-toe/nodes/board_center_subscriber.py'
-        subprocess.call([tf_listener])
-
-        tf_filename = 'tf_board2world.npy'
-        # data_list = np.load(str('/home/martinez737/tic-tac-toe_ws/src/tic_tac_toe') + '/' + tf_filename)
-        data_list = np.load(str('/home/khan764/tic-tac-toe_ws/src/tic-tac-toe') + '/' + tf_filename)
-
-        _, _, zAngle = self.euler_from_quaternion(data_list[3], data_list[4], data_list[5], data_list[6])  # (w,x,y,z)
-        print('Z_Angle', zAngle)
-
-        return zAngle
 
     def callback(self, data):
         try:
@@ -134,7 +119,7 @@ class PlayGame():
         params: 
         count0: number of O blocks expected
         current_board= image of the current board state from camera
-        blocks = number of X blocks remaining
+        countX = number of X blocks remaining
         '''
         centers = []
         
@@ -212,8 +197,8 @@ class PlayGame():
             boardCode[move[0]][move[1]] = +1
 
             # Uncomment below after fixing orientation
-            print('attempting to get X:', self.blocks)
-            Y = blocksY[self.blocks]
+            print('attempting to get X:', self.countX)
+            Y = blocksY[self.countX]
             
             blocksX = -0.110
             raw_input('To attempt to get X <press enter>')
@@ -271,8 +256,6 @@ def main():
         game = True;  # decides when game is over
 
         PG = PlayGame()
-        # img = PG.listener()
-        # print('OpenCV version:', cv2.__version__)
 
         while game is True:
 
@@ -281,11 +264,12 @@ def main():
             boardCode, board = PG.AI_move(boardCode,board)
 
             PG.countO += 1
-            PG.blocks += 1
+            PG.countX += 1
 
             game = PG.Evaluate_Game(boardCode)
+            
             print('Game Variable to decide if game continues:', game)
-            print('Number of X blocks used:', blocks)
+            print('Number of X blocks used:', countX)
 
 
             # if game == False:
@@ -298,13 +282,13 @@ def main():
         # gameInProgress = True
         # countO = 0
         # countX = 1 # if user starts with X -> countX = 1, same with o
-        # blocks = 0
+        # countX = 0
         # while gameInProgress == True:
         #   # PickP.scanPos()
         #   raw_input('Press enter after Player move:')
         #   countO +=  1
-        #   # RoboTurn(countO,blocks)
-        #   blocks += 1
+        #   # RoboTurn(countO,countX)
+        #   countX += 1
 
         # gameInProgress = False
 

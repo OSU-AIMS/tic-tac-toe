@@ -350,7 +350,7 @@ class board_publisher():
             boardCenter = [data.width/2, data.height/2]   # Initialize as center of frame
 
             # Convert Image to CV2 Frame
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
             boardImage = cv_image.copy()
 
             # characterize board location and orientation
