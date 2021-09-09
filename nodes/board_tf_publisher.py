@@ -152,114 +152,128 @@ def detectBoard(image):
 
     return scaledCenter, boardImage, tf_board2camera
 
-def detectBoard_coloredSquares(image):
-        # purpose: recognize  of board based on 3 colored equares
+def detectBoard_coloredSquares(imageFrame):
+    # purpose: recognize  of board based on 3 colored equares
 
-        print("Your OpenCV version is: " + cv2.__version__)
-        # import image frame with colored squares
+    print("Your OpenCV version is: " + cv2.__version__)
+    # import image frame with colored squares
 
-        imageframe = cv2.imread('/sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
-        
-        # image = image.copy()
+    # imageframe = cv2.imread('/sample_content/sample_images/twistCorrectedColoredSquares_Color.png') 
 
-       
-        # Next Recognize Location & Centers 
-        # Python code for Multiple Color Detection (from: https://www.geeksforgeeks.org/multiple-color-detection-in-real-time-using-python-opencv/)
-        # use bounding boxes to get square centers
+   
+    # Next Recognize Location & Centers 
+    # Python code for Multiple Color Detection (from: https://www.geeksforgeeks.org/multiple-color-detection-in-real-time-using-python-opencv/)
+    # use bounding boxes to get square centers
 
-        # Capturing video through webcam
-        # webcam = cv2.VideoCapture(0)
-        #^^ test this also
+    # Capturing video through webcam
+    # webcam = cv2.VideoCapture(0)
+    #^^ test this also
 
-        # Start a while loop
-        while(1):     
-            # Reading the video from the
-            # webcam in image frames
+    # Start a while loop
+    # while(1):     
+    # Reading the video from the
+    # webcam in image frames
+    
+    #_, imageFrame = webcam.read() 
+    imageFrame = imageFrame.copy()
+    cv2.imshow("Image Frame",imageFrame)
+    cv2.waitKey(3)
+
+    # Convert the imageFrame in
+    # BGR(RGB color space) to
+    # HSV(hue-saturation-value)
+    # color space
+    hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV)
+    cv2.imshow('HSV frame',hsvFrame)
+    cv2.waitKey(3)
+
+    # Set range for red color and define mask
+    # red_lower = np.array([136, 87, 111], np.uint8)
+    # red_upper = np.array([180, 255, 255], np.uint8)
+
+    # are thresholds below rbg (not this) or rgb(not this) or bgr(not this) or gbr(not this)
+    # psych: It's converting BGR to HSV
+
+    red_lower = np.array([0, 190, 220], np.uint8)
+    red_upper = np.array([2, 220, 255], np.uint8)
+
+
+    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
+
+    # Set range for green color and define mask
+    # green_lower = np.array([25, 52, 72], np.uint8)
+    # green_upper = np.array([102, 255, 255], np.uint8)
+    green_lower = np.array([80, 100, 155], np.uint8)
+    green_upper = np.array([84, 210, 215], np.uint8)
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
+
+    # Set range for blue color and define mask
+    # blue_lower = np.array([94, 80, 2], np.uint8)
+    # blue_upper = np.array([120, 255, 255], np.uint8)
+    blue_lower = np.array([100, 254, 140], np.uint8)
+    blue_upper = np.array([104, 255, 175], np.uint8)
+    blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper)
+    
+    # Morphological Transform, Dilation
+    # for each color and bitwise_and operator
+    # between imageFrame and mask determines
+    # to detect only that particular color
+    kernal = np.ones((5, 5), "uint8")
+    
+    # For red color
+    red_mask = cv2.dilate(red_mask, kernal)
+    res_red = cv2.bitwise_and(imageFrame, imageFrame, mask = red_mask)
+    
+    # For green color
+    green_mask = cv2.dilate(green_mask, kernal)
+    res_green = cv2.bitwise_and(imageFrame, imageFrame, mask = green_mask)
+    
+    # For blue color
+    blue_mask = cv2.dilate(blue_mask, kernal)
+    res_blue = cv2.bitwise_and(imageFrame, imageFrame, mask = blue_mask)
+
+    # Creating contour to track red color
+    contours, hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    for pic, contour in enumerate(contours):
+        area = cv2.contourArea(contour)
+        if(area > 300):
+            x, y, w, h = cv2.boundingRect(contour)
+            imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            center_R = [x/2,y/2]
+            cv2.putText(imageFrame, "Red Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))    
+
+    # Creating contour to track green color
+    contours, hierarchy = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    for pic, contour in enumerate(contours):
+        area = cv2.contourArea(contour)
+        if(area > 300):
+            x, y, w, h = cv2.boundingRect(contour)
+            center_G = [x/2,y/2]
+            imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             
-            #_, imageFrame = webcam.read() 
-            imageframe = imageframe.copy()
+            cv2.putText(imageFrame, "Green Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0))
 
-            # Convert the imageFrame in
-            # BGR(RGB color space) to
-            # HSV(hue-saturation-value)
-            # color space
-            hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV)
-
-            # Set range for red color and define mask
-            red_lower = np.array([136, 87, 111], np.uint8)
-            red_upper = np.array([180, 255, 255], np.uint8)
-            red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
-
-            # Set range for green color and define mask
-            green_lower = np.array([25, 52, 72], np.uint8)
-            green_upper = np.array([102, 255, 255], np.uint8)
-            green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
-
-            # Set range for blue color and define mask
-            blue_lower = np.array([94, 80, 2], np.uint8)
-            blue_upper = np.array([120, 255, 255], np.uint8)
-            blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper)
+    # Creating contour to track blue color
+    contours, hierarchy = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for pic, contour in enumerate(contours):
+        area = cv2.contourArea(contour)
+        if(area > 300):
+            x, y, w, h = cv2.boundingRect(contour)
+            center_B = [x/2,y/2]
+            imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 0), 2)
             
-            # Morphological Transform, Dilation
-            # for each color and bitwise_and operator
-            # between imageFrame and mask determines
-            # to detect only that particular color
-            kernal = np.ones((5, 5), "uint8")
+            cv2.putText(imageFrame, "Blue Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0))
             
-            # For red color
-            red_mask = cv2.dilate(red_mask, kernal)
-            res_red = cv2.bitwise_and(imageFrame, imageFrame, mask = red_mask)
-            
-            # For green color
-            green_mask = cv2.dilate(green_mask, kernal)
-            res_green = cv2.bitwise_and(imageFrame, imageFrame, mask = green_mask)
-            
-            # For blue color
-            blue_mask = cv2.dilate(blue_mask, kernal)
-            res_blue = cv2.bitwise_and(imageFrame, imageFrame, mask = blue_mask)
+    # Program Termination
+    cv2.imshow("Multiple Color Detection in Real-TIme", imageFrame)
+    # if cv2.waitKey(3) & 0xFF == ord('q'):
+    #     cap.release()
+    #     cv2.destroyAllWindows()
+        # break
 
-            # Creating contour to track red color
-            contours, hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            
-            for pic, contour in enumerate(contours):
-                area = cv2.contourArea(contour)
-                if(area > 300):
-                    x, y, w, h = cv2.boundingRect(contour)
-                    imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                    center_R = [x/2,y/2]
-                    cv2.putText(imageFrame, "Red Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))    
-
-            # Creating contour to track green color
-            contours, hierarchy = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            
-            for pic, contour in enumerate(contours):
-                area = cv2.contourArea(contour)
-                if(area > 300):
-                    x, y, w, h = cv2.boundingRect(contour)
-                    center_G = [x/2,y/2]
-                    imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                    
-                    cv2.putText(imageFrame, "Green Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0))
-
-            # Creating contour to track blue color
-            contours, hierarchy = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            for pic, contour in enumerate(contours):
-                area = cv2.contourArea(contour)
-                if(area > 300):
-                    x, y, w, h = cv2.boundingRect(contour)
-                    center_B = [x/2,y/2]
-                    imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                    
-                    cv2.putText(imageFrame, "Blue Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0))
-                    
-            # Program Termination
-            cv2.imshow("Multiple Color Detection in Real-TIme", imageFrame)
-            if cv2.waitKey(10) & 0xFF == ord('q'):
-                cap.release()
-                cv2.destroyAllWindows()
-                break
-
-        # 
+    return scaledCenter, boardImage, tf_board2camera 
 
 
 
@@ -302,8 +316,6 @@ def detectBoard_coloredSquares(image):
         # Y-vector: Blue --> Green
 
         # then use DrawAxis function
-
-        cv2.waitKey(0)
 
 
 
@@ -350,12 +362,13 @@ class board_publisher():
             boardCenter = [data.width/2, data.height/2]   # Initialize as center of frame
 
             # Convert Image to CV2 Frame
-            cv_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
             boardImage = cv_image.copy()
 
             # characterize board location and orientation
-            #scaledCenter, boardImage, tf_board2camera = detectBoard_color(cv_image)
             scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
+            detectBoard_coloredSquares(cv_image)
+            
 
             # For visual purposes, simple crop
             # cropped_image = frame[center[1]-90:center[1]+90,center[0]-90:center[0]+90] #640x480
