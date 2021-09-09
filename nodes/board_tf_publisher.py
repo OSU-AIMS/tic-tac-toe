@@ -355,7 +355,7 @@ class board_publisher():
 
             # characterize board location and orientation
             #scaledCenter, boardImage, tf_board2camera = detectBoard_color(cv_image)
-            scaledCenter, boardImage, tf_board2camera = detectBoard_coloredSquares(cv_image)
+            scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
 
             # For visual purposes, simple crop
             # cropped_image = frame[center[1]-90:center[1]+90,center[0]-90:center[0]+90] #640x480
