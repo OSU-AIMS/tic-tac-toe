@@ -12,21 +12,11 @@ from cv_bridge import CvBridge, CvBridgeError
 import subprocess
 from robot_move import *
 
-PickP = tictactoeMotion()
 shapeDetect = ShapeDetector()
 brain = BigBrain()
-boardPoints = []
+PickP = tictactoeMotion()
 
-board = [
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-]  # array for game board
-boardCode = [
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-]  # array for code to know which player went whree
+# array for code to know which player went where
 # Human: -1 (circles)
 # Computer: +1 (X's)`
 # board filled with -1 & +1
@@ -46,9 +36,16 @@ def findDis(pt1x, pt1y, pt2x, pt2y):
 class PlayGame():
 
     def __init__(self):
-        shapeDetect = ShapeDetector()
-        brain = BigBrain()
-
+        self.board = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            ]  # array for game board
+        self.boardCode = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            ]
         self.bridge = CvBridge()
 
         self.countO = 1  # 1 block O b/c human goes first
@@ -92,11 +89,11 @@ class PlayGame():
 
     def euler_from_quaternion(self, w, x, y, z):
         """
-    Convert a quaternion into euler angles (roll, pitch, yaw)
-    roll is rotation around x in radians (counterclockwise)
-    pitch is rotation around y in radians (counterclockwise)
-    yaw is rotation around z in radians (counterclockwise)
-    """
+        Convert a quaternion into euler angles (roll, pitch, yaw)
+        roll is rotation around x in radians (counterclockwise)
+        pitch is rotation around y in radians (counterclockwise)
+        yaw is rotation around z in radians (counterclockwise)
+        """
         t0 = +2.0 * (w * x + y * z)
         t1 = +1.0 - 2.0 * (x * x + y * y)
         roll_x = math.atan2(t0, t1)
@@ -113,7 +110,7 @@ class PlayGame():
         return roll_x, pitch_y, yaw_z  # in radians
 
     # Detect circles
-    def circle_detect(self, boardCode, board):
+    def circle_detect(self):
         '''
         Function should only detect circles: CLEAN IT UP
         params: 
@@ -125,56 +122,55 @@ class PlayGame():
         
         print('expected number of Os: ', self.countO)
 
-
-        while len(boardCountO) != self.countO:
+        boardCountO=0
+        while boardCountO != self.countO:
             boardCountO=0
-
             tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-            tf_filename = 'circle_board_code.npy'
+            tf_filename = 'circle_board_state.npy'
             circle_board_code = np.load(tictactoe_pkg + '/' + tf_filename)
 
             for i in range(9):
                 if circle_board_code[i] == -1:
-                    boardCount += 1
+                    boardCountO += 1
+                    
 
         if circle_board_code[0] == -1:
-            board[0][0] = 'O'
-            boardCode[0][0] = -1
+            self.board[0][0] = 'O'
+            self.boardCode[0][0] = -1
 
         if circle_board_code[1] == -1:
-            board[0][1] = 'O'
-            boardCode[0][1] = -1
+            self.board[0][1] = 'O'
+            self.boardCode[0][1] = -1
 
         if circle_board_code[2] == -1:
-            board[0][2] = 'O'
-            boardCode[0][2] = -1
+            self.board[0][2] = 'O'
+            self.boardCode[0][2] = -1
 
         if circle_board_code[3] == -1:
-            board[1][0] = 'O'
-            boardCode[1][0] = -1
+            self.board[1][0] = 'O'
+            self.boardCode[1][0] = -1
 
         if circle_board_code[4] == -1:
-            board[1][1] = 'O'
-            boardCode[1][1] = -1
+            self.board[1][1] = 'O'
+            self.boardCode[1][1] = -1
 
         if circle_board_code[5] == -1:
-            board[1][2] = 'O'
-            boardCode[1][2] = -1
+            self.board[1][2] = 'O'
+            self.boardCode[1][2] = -1
 
         if circle_board_code[6] == -1:
-            board[2][0] = 'O'
-            boardCode[2][0] = -1
+            self.board[2][0] = 'O'
+            self.boardCode[2][0] = -1
 
         if circle_board_code[7] == -1:
-            board[2][1] = 'O'
-            boardCode[2][1] = -1
+            self.board[2][1] = 'O'
+            self.boardCode[2][1] = -1
 
         if circle_board_code[8] == -1:
-            board[2][2] = 'O'
-            boardCode[2][2] = -1
-        return boardCode, board
+            self.board[2][2] = 'O'
+            self.boardCode[2][2] = -1
 
-    def AI_move(self, boardCode, board):
+    def AI_move(self):
         '''
         params: 
         - boardCode: state of the board read by computer
@@ -183,18 +179,18 @@ class PlayGame():
         '''
 
         ### Using tictactoe_brain code
-        move = brain.ai_turn('X', 'O', boardCode)  # outputs move array based on minimx
+        move = brain.ai_turn('X', 'O', self.boardCode)  # outputs move array based on minimx
         print('MOVE: ', move)
 
         # modifed ai_turn to return False if no valid moves left
         if move == False:
             print('Inside move if-statement')
-            self.Evaluate_Game(move, boardCode)
+            self.Evaluate_Game(move, self.boardCode)
 
         else:
             blocksY = [.517, .5524, .5806, .609, .638, .671]
-            board[move[0]][move[1]] = 'X'
-            boardCode[move[0]][move[1]] = +1
+            self.board[move[0]][move[1]] = 'X'
+            self.boardCode[move[0]][move[1]] = +1
 
             # Uncomment below after fixing orientation
             print('attempting to get X:', self.countX)
@@ -223,9 +219,8 @@ class PlayGame():
             if move[0] == 2 and move[1] == 2:
                 PickP.moveToBoard(8)
 
-        return boardCode, board
 
-    def Evaluate_Game(self, boardCode):
+    def Evaluate_Game(self):
         '''
         params:
         boardCode = state of board that computer reads
@@ -233,19 +228,24 @@ class PlayGame():
         which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
         Returns game which exits the while loop in main if Game = False
         '''
-        winner = brain.evaluate(boardCode)
+        depth = len(brain.empty_cells(self.boardCode))
+        winner = brain.evaluate(self.boardCode)
         print('Evaluate:', winner)
-        if winner == 1:
-            print('Game Over..\n Winner: A.I Computer\n\n\n')
-            game = False
-        elif winner == -1:
-            print('Game Over..\n Winner: Human\n\n\n')
-            game = False
-        elif winner == 0:
-            print('Tie Game!\n\n\n')
-            game = False
+        if depth == 0:
+
+            if winner == 1:
+                print('Game Over..\n Winner: A.I Computer\n\n\n')
+                game = False
+            elif winner == -1:
+                print('Game Over..\n Winner: Human\n\n\n')
+                game = False
+            elif winner == 0:
+                print('Tie Game!\n\n\n')
+                game = False
+            else:
+                print('The game continues..')
+                game = True
         else:
-            print('The game continues..')
             game = True
         return game
 
@@ -253,6 +253,7 @@ class PlayGame():
 def main():
     try:
         # rospy.init_node('board_image_listener', anonymous=True)
+        
         game = True;  # decides when game is over
 
         PG = PlayGame()
@@ -260,16 +261,16 @@ def main():
         while game is True:
 
             # define circles on board
-            boardCode, board = PG.circle_detect(boardCode,board)
-            boardCode, board = PG.AI_move(boardCode,board)
+            PG.circle_detect()
+            PG.AI_move()
 
             PG.countO += 1
             PG.countX += 1
 
-            game = PG.Evaluate_Game(boardCode)
+            game = PG.Evaluate_Game()
             
             print('Game Variable to decide if game continues:', game)
-            print('Number of X blocks used:', countX)
+            print('Number of X blocks used:', PG.countX)
 
 
             # if game == False:
