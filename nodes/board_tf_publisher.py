@@ -42,7 +42,7 @@ from cv_bridge import CvBridge, CvBridgeError
 
 # System Tools
 import time
-from math import pi, radians, sqrt
+from math import pi, radians, sqrt, atan
 import numpy as np
 
 
@@ -150,10 +150,12 @@ def detectBoard(image):
     # Transformation (board from imageFrame to camera)
     tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
+    # talk with Luis about boardImage. It uses contour detect and gets its own center values. Is that needed here?
     return scaledCenter, boardImage, tf_board2camera
 
 def detectBoard_coloredSquares(imageFrame):
-    # purpose: recognize  of board based on 3 colored equares
+    # purpose: recognize orientation of board based on 3 colored equares
+    # @param: imageFrame - frame pulled from realsense camera
 
     print("Your OpenCV version is: " + cv2.__version__)
     # import image frame with colored squares
@@ -272,8 +274,6 @@ def detectBoard_coloredSquares(imageFrame):
     # print('Center of Green Bounding Box: ',center_G)
     # print('Center of Red Bounding Box: ',center_R)
 
-    # Get distance from each center to get board center
-
 
 
     # get angle from red to green & use that as the orientation
@@ -291,6 +291,31 @@ def detectBoard_coloredSquares(imageFrame):
     #     cv2.destroyAllWindows()
         # break
 
+    # Get distance from each center to get board center
+    x_axis = [center_R[0] - center_B[0], center_R[1] - center_B[1]] 
+    y_axis = [center_G[0] - center_B[0], center_G[1] - center_B[1]]
+    print("X-axis: ", x_axis)
+    pritn("Y-axis: ", y_axis)
+
+    scaledCenter = [x_axis[0]/2,y_axis[0]/2]
+
+    # obtaining orientation based on centers of top left green square and bottom right red square
+    angle = math.degrees(math.atan2(center_G[1] - center_R[1], center_G[0] - center_R[0])) # in degrees 
+    print("Angle: ", angle)
+
+
+    # Define 3x1 array of board translation (x, y, z) in meters
+    boardTranslation = np.array(
+        [[scaledCenter[0]], [scaledCenter[1]], [0.655]])  ## depth of the table is .655 m from camera
+
+
+    # convert angle to a rotation matrix with rotation about z-axis
+    boardRotationMatrix = np.array([[math.cos(radians(angle)), -math.sin(radians(angle)), 0],
+                                    [math.sin(radians(angle)), math.cos(radians(angle)), 0],
+                                    [0, 0, 1]])
+
+    # Transformation (board from imageFrame to camera)
+    tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
 
     return scaledCenter, boardImage, tf_board2camera 
