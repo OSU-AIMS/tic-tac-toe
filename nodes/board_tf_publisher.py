@@ -178,6 +178,8 @@ def detectBoard_coloredSquares(imageFrame):
     
     #_, imageFrame = webcam.read() 
     imageFrame = imageFrame.copy()
+    scale = .895 / 1280         # res: (1280x730)
+
     # cv2.imshow("Image Frame",imageFrame)
     # cv2.waitKey(3)
     # used for debugging purposes
@@ -198,7 +200,9 @@ def detectBoard_coloredSquares(imageFrame):
     # psych: It's converting BGR to HSV
 
     red_lower = np.array([0, 190, 220], np.uint8)
+    # [0, 190, 220]
     red_upper = np.array([2, 220, 255], np.uint8)
+    # [2, 220, 255]
 
 
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
@@ -206,15 +210,19 @@ def detectBoard_coloredSquares(imageFrame):
     # Set range for green color and define mask
     # green_lower = np.array([25, 52, 72], np.uint8)
     # green_upper = np.array([102, 255, 255], np.uint8)
-    green_lower = np.array([80, 230, 150], np.uint8)
-    green_upper = np.array([84, 255, 215], np.uint8)
+    green_lower = np.array([80, 230, 130], np.uint8)
+    # [80, 230, 150]
+    green_upper = np.array([84, 255, 200], np.uint8)
+    # [84, 255, 215]
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
 
     # Set range for blue color and define mask
     # blue_lower = np.array([94, 80, 2], np.uint8)
     # blue_upper = np.array([120, 255, 255], np.uint8)
-    blue_lower = np.array([100, 254, 140], np.uint8)
-    blue_upper = np.array([104, 255, 175], np.uint8)
+    blue_lower = np.array([190, 120, 100], np.uint8)
+    # [100, 254, 140]
+    blue_upper = np.array([200, 255, 104], np.uint8)
+    # [104, 255, 175]
     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper)
     
     # Morphological Transform, Dilation
@@ -240,7 +248,7 @@ def detectBoard_coloredSquares(imageFrame):
     
     for pic, contour in enumerate(contours):
         area = cv2.contourArea(contour)
-        if(area > 300):
+        if(area > 300): # assuming area is in pixels
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 0, 255), 2)
             center_R = [w/2+x,h/2+y]
@@ -254,15 +262,14 @@ def detectBoard_coloredSquares(imageFrame):
         if(area > 300):
             x, y, w, h = cv2.boundingRect(contour)
             center_G = [w/2+x,h/2+y]
-            imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            
+            imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 255, 0), 2)           
             cv2.putText(imageFrame, "Green Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0))
 
     # Creating contour to track blue color
     contours, hierarchy = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
         area = cv2.contourArea(contour)
-        if(area > 300):
+        if(area > 300): # original : area>300
             x, y, w, h = cv2.boundingRect(contour)
             center_B = [w/2+x,h/2+y]
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 0), 2)
@@ -270,9 +277,10 @@ def detectBoard_coloredSquares(imageFrame):
             cv2.putText(imageFrame, "Blue Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0))
             
     
+    # Used for debugging and checking values
     print('Center of Blue Bounding Box: ',center_B)
-    # print('Center of Green Bounding Box: ',center_G)
-    # print('Center of Red Bounding Box: ',center_R)
+    print('Center of Green Bounding Box: ',center_G)
+    print('Center of Red Bounding Box: ',center_R)
 
 
 
@@ -280,24 +288,32 @@ def detectBoard_coloredSquares(imageFrame):
         # X-vector: Blue --> Red
         # Y-vector: Blue --> Green
 
-    # then use DrawAxis function
-    shapeDetect.drawAxis(imageFrame, center_B, center_G, (14, 108, 3), 1) # Y-axis CHANGE TO GREEN
-    shapeDetect.drawAxis(imageFrame, center_B, center_R, (0, 0, 255), 1) # X-Axis CHANGE TO RED
+    # then use DrawAxis function to draw x(blue - red) & y axis (blue to green) 
+    shapeDetect.drawAxis(imageFrame, center_B, center_G, (9, 195, 33), 1) # Y-axis GREEN
+    shapeDetect.drawAxis(imageFrame, center_B, center_R, (104,104, 255), 1) # X-Axis RED
     #angle = math.atan2(eigenvectors[0, 1], eigenvectors[0, 0])  # orientation in radians
     # Program Termination
     cv2.imshow("Multiple Color Detection in Real-TIme", imageFrame)
+    #cv2.waitKey(3)
     # if cv2.waitKey(3) & 0xFF == ord('q'):
     #     cap.release()
     #     cv2.destroyAllWindows()
         # break
 
+    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(imageFrame, area=5000) # original: area=90000)
+
     # Get distance from each center to get board center
     x_axis = [center_R[0] - center_B[0], center_R[1] - center_B[1]] 
     y_axis = [center_G[0] - center_B[0], center_G[1] - center_B[1]]
-    print("X-axis: ", x_axis)
-    pritn("Y-axis: ", y_axis)
+    #print("X-axis: ", x_axis)
+    #print("Y-axis: ", y_axis)
 
-    scaledCenter = [x_axis[0]/2,y_axis[0]/2]
+    # Convert board center pixel values to meters (and move origin to center of image)
+    scaledCenter = [0.0]
+    scaledCenter[0] = (x_axis[0]/2 - 640) * scale
+    scaledCenter[1] = (y_axis[0]/2 - 360) * scale
+    print("Scaled Center: ",scaledCenter)
+    # scaledCenter = [x_axis[0]/2,y_axis[0]/2]
 
     # obtaining orientation based on centers of top left green square and bottom right red square
     angle = math.degrees(math.atan2(center_G[1] - center_R[1], center_G[0] - center_R[0])) # in degrees 
@@ -317,50 +333,8 @@ def detectBoard_coloredSquares(imageFrame):
     # Transformation (board from imageFrame to camera)
     tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
-
+    # do I need to return BoardImage
     return scaledCenter, boardImage, tf_board2camera 
-
-
-
-  ##############################################      
-        # Remaking Old Code
-
-        # Recognizing center of squares is based on this:
-        # # https://www.pyimagesearch.com/2016/02/01/opencv-center-of-contour/
-        # blurred = cv2.GaussianBlur(gray_frame, (5, 5), 0)
-        # thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
-        # cv2.imshow('Threshold image', thresh)
-        # # Recognize center of contour in binary image
-        # contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        # contours = imutils.grab_contours(contours)
-        # loop over contours
-        # for c in contours:
-        #     M = cv2.moments(c)
-        #     cX = int(M["m10"] / M["m00"])
-        #     # Need to get specific contours
-        #     #
-        #     cY = int(M["m10"] / M["m00"])
-
-        #     # draw contour & center of shape on image
-        #     cv2.drawContours(gray_frame, [c], -1, (0, 255, 0), 2)
-        #     cv2.circle(gray_frame, (cX, cY), 7, (255, 255, 255), -1)
-        #     cv2.putText(gray_frame, "center", (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-
-        #     # show image
-        #     cv2.imshow('With Contours', frame)
-        #     cv2.waitKey(0)
-
-        # Find centers for the squares based on location (ScaledCenter)
-
-        # Look in maze runner d3_post_process
-
-        
-
-        
-
-
-
-
 
 
 #####################################################
@@ -408,6 +382,7 @@ class board_publisher():
 
             # characterize board location and orientation
             scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
+            # scaledCenter, boardImage, tf_board2camera = detectBoard_coloredSquares(cv_image)
             detectBoard_coloredSquares(cv_image)
             
 
