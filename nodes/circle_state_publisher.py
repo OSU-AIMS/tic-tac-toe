@@ -125,31 +125,39 @@ class circle_state_publisher():
                         if closest_index == 0:
                             board[0][0] = 'O'
                             boardCode[0] = -1
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
                         elif closest_index == 1:
                             board[0][1] = 'O'
                             boardCode[1] = -1
-                            cv2.circle(img, centers[i], 15, (255, 36, 0), 13)
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
                         elif closest_index == 2:
                             board[0][2] = 'O'
                             boardCode[2] = -1
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
                         elif closest_index == 3:
                             board[1][0] = 'O'
                             boardCode[3] = -1
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
                         elif closest_index == 4:
                             board[1][1] = 'O'
                             boardCode[4] = -1
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
                         elif closest_index == 5:
                             board[2] = 'O'
                             boardCode[5] = -1
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
                         elif closest_index == 6:
                             board[2][0] = 'O'
                             boardCode[6] = -1
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
                         elif closest_index == 7:
                             board[2][1] = 'O'
                             boardCode[7] = -1
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
                         elif closest_index == 8:
                             board[2][2] = 'O'
                             boardCode[8] = -1
+                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
 
                         print("Circle {} is in tile {}.".format(i, closest_index))
                 else:

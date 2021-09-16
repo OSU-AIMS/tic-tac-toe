@@ -150,7 +150,6 @@ def detectBoard(image):
     # Transformation (board from imageFrame to camera)
     tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
-    # talk with Luis about boardImage. It uses contour detect and gets its own center values. Is that needed here?
     return scaledCenter, boardImage, tf_board2camera
 
 def detectBoard_coloredSquares(image):
@@ -279,7 +278,7 @@ def detectBoard_coloredSquares(image):
             rect = cv2.minAreaRect(contour)
             box = cv2.boxPoints(rect)
             box = np.int0(box)
-            cv2.drawContours(imageFrame,[box],0,(0,191,255),2)
+            cv2.drawContours(imageFrame,[box],0,(255,0,0),2)
             
             cv2.putText(imageFrame, "Blue Color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0))
             
@@ -295,9 +294,6 @@ def detectBoard_coloredSquares(image):
         # X-vector: Blue --> Red
         # Y-vector: Blue --> Green
 
-    # remove the BLACK RECTANGLE --> doesn't work
-    boardImage = cv2.rectangle(imageFrame,(center_R[0],center_R[1]),(center_G[0],center_G[1]),(0,0,0),1)
-    # need to draw an angled rectangle
 
     # then use DrawAxis function to draw x(blue - red) & y axis (blue to green) 
     shapeDetect.drawAxis(imageFrame, center_B, center_G, (9, 195, 33), 1) # Y-axis GREEN
@@ -404,12 +400,13 @@ class board_publisher():
             boardImage = cv_image.copy()
 
             # characterize board location and orientation
-            scaledCenter, boardImage, tf_board2camera = detectBoard_coloredSquares(cv_image)
+
+            # Run using color
+            # scaledCenter, boardImage, tf_board2camera = detectBoard_coloredSquares(cv_image)
             
-            # Used for testing purposes 
-            # scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
-            # detectBoard_coloredSquares(cv_image)
-            # ######
+            # Run using contours
+            scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
+        
             
 
             # For visual purposes, simple crop
