@@ -29,6 +29,7 @@ path_2_game_scripts = ttt_pkg + '/game_scripts'
 sys.path.insert(1, path_2_game_scripts)
 
 import rospy
+import tf2_ros
 
 # ROS Data Types
 from sensor_msgs.msg import Image
@@ -426,14 +427,28 @@ class board_publisher():
 
             ## Build Camera_2_World TF
             # todo: Rewrite how the camera-tf is defined. Suggestion: grab from topic 'tf'
-            ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-            tf_camera2world_filepath = np.load(ttt_pkg + "/tf_camera2world.npy")
-            tf_camera2world = tf.quant_pose_to_tf_matrix(tf_camera2world_filepath)
+            # ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+            # tf_camera2world_filepath = np.load(ttt_pkg + "/tf_camera2world.npy")
+            tfBuffer = tf2_ros.Buffer()
+            listener = tf2_ros.TransformListener(tfBuffer)
 
-            rot_camera_hardcode = np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]])
+            data = tfBuffer.lookup_transform('base_link', 'camera_link', rospy.Time())
+            tf_camera2world_vector = [ 
+                data.transform.translation.x,
+                data.transform.translation.y,
+                data.transform.translation.z, ### change this value to hardcoded z-value
+                data.transform.rotation.x,
+                data.transform.rotation.y,
+                data.transform.rotation.z,
+                data.transform.rotation.w
+                ]
+            tf_camera2world = tf.quant_pose_to_tf_matrix(tf_camera2world_vector)
 
-            translation = tf_camera2world[:-1, -1].tolist()
-            tf_camera2world = tf.generateTransMatrix(rot_camera_hardcode, translation)
+
+            rot_camera_hardcode = np.array([[0, -1, 0], [0, 0, 1], [-1, 0, 0]])
+
+            # translation = tf_camera2world[:-1, -1].tolist()
+            # tf_camera2world = tf.generateTransMatrix(rot_camera_hardcode, translation)
 
             ## Build Board_2_World TF
             tf_board2world = np.matmul(tf_camera2world, tf_board2camera)
@@ -443,7 +458,7 @@ class board_publisher():
 
             ## Publish Board Pose
             msg = TransformStamped()
-            msg.header.frame_id = 'Origin'
+            msg.header.frame_id = 'Origin'# change to camera link frame id (then just lookup transform for board to origin)
             msg.child_frame_id = 'Board'
             msg.transform.translation.x = pose_goal[0]
             msg.transform.translation.y = pose_goal[1]

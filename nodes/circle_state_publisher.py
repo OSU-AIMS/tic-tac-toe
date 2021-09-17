@@ -27,6 +27,7 @@ sys.path.insert(1, path_2_game_scripts)
 import rospy
 
 # ROS Data Types
+import std_msgs import ByteMultiArray
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
 
@@ -62,11 +63,12 @@ class circle_state_publisher():
      Custom tictactoe publisher class that finds circles on image and identifies if/where the circles are on the board.
     """
 
-    def __init__(self, circle_state_annotation):
+    def __init__(self, circle_state_annotation, circle_board_state):
 
         # Inputs
 
         self.circle_state_annotation = circle_state_annotation
+        self.circle_board_state = circle_board_state
         # camera_tile_annotation: publishes the numbers & arrows displayed on the image
 
         # Tools
@@ -163,8 +165,8 @@ class circle_state_publisher():
                 else:
                     print("Circle {} is not on the board".format(i))
 
-            print('Physical Board: ', board)
-            print('Board Computer sees:', boardCode)
+            # print('Physical Board: ', board)
+            # print('Board Computer sees:', boardCode)
 
             for i in range(9):
                 cv2.putText(img, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
@@ -182,11 +184,13 @@ class circle_state_publisher():
                 # Publish
                 self.circle_state_annotation.publish(msg_img)
 
-                tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-                filename = 'circle_board_state.npy'
+                self.pub_circle_board_state
 
-                outputFilePath = tictactoe_pkg + '/' + filename
-                np.save(outputFilePath, boardCode)
+                # tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                # filename = 'circle_board_state.npy'
+
+                # outputFilePath = tictactoe_pkg + '/' + filename
+                # np.save(outputFilePath, boardCode)
 
         except rospy.ROSInterruptException:
             exit()
@@ -215,7 +219,7 @@ def main():
     # Setup Publishers
     pub_circle_state_annotation = rospy.Publisher("circle_state_annotation", Image, queue_size=20)
 
-    # pub_circle_board_state = rospy.Publisher("circle_board_state", Array, queue_size=20)
+    pub_circle_board_state = rospy.Publisher("circle_board_state", ByteMultiArray, queue_size=20)
 
     # Setup Listeners
     cs_callback = circle_state_publisher(pub_circle_state_annotation)

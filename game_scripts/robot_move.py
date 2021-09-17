@@ -43,7 +43,7 @@ def prepare_path_tf_ready():
                         [-centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[centerxDist,-centeryDist,pieceHeight]]
 
     tictactoe_center_list = np.array(centers,dtype=np.float)
-    print('tictactoe_center_list:\n',tictactoe_center_list)
+    # print('tictactoe_center_list:\n',tictactoe_center_list)
     rot_default = np.identity((3))
     new_list = []
 
@@ -159,6 +159,7 @@ class tictactoeMotion:
         """
         Updates all nine robot poses for the nine grid board centers. Should be called before every robot move.
         """
+        self.robot_poses = []
         tileCentersMatrices = prepare_path_tf_ready()
         # print('tileCentersMatrices',tileCentersMatrices)
 
@@ -192,9 +193,6 @@ class tictactoeMotion:
         :param update: Whether the robot poses should be update before every move.
         True is default for tictactoe game loop, false is for demonstration purposes.
         """
-        if update is True:
-            print('update is True')
-            self.defineRobotPoses()
 
         # print('self.robot_poses',self.robot_poses)
         print('Tile Number:',pose_number)
@@ -209,7 +207,7 @@ class tictactoeMotion:
         # # As of 8/12/21,it doesn't reach the below lines
         # self.rc.send_io(0)        # open gripper
         # print('Grippers are now open')
-        # self.scanPos()
+        self.scanPos()
         # print('returned to scan position')
 
 

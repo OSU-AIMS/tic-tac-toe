@@ -184,7 +184,7 @@ class PlayGame():
 
         # modifed ai_turn to return False if no valid moves left
         if move == False:
-            print('Inside move if-statement')
+            # print('Inside move if-statement')
             self.Evaluate_Game(move, self.boardCode)
 
         else:
@@ -197,6 +197,7 @@ class PlayGame():
             Y = blocksY[self.countX]
             
             blocksX = -0.110
+            PickP.defineRobotPoses()
             raw_input('To attempt to get X <press enter>')
             PickP.xPickup(blocksX, Y)
 
@@ -261,6 +262,7 @@ def main():
         while game is True:
 
             # define circles on board
+            PickP.scanPos()
             PG.circle_detect()
             PG.AI_move()
 
