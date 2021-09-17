@@ -3,23 +3,44 @@
 <robot name="mounted_camera" xmlns:xacro="http://ros.org/wiki/xacro">
 <xacro:macro name="mounted_camera" params="prefix">
 
-    <!-- Mount-->
-    <xacro:include filename="$(find tic_tac_toe)/urdf/mount_macro.xacro" />
+
+    <!-- AIMS Lab Custom Camera Mount -->
+    <link name="${prefix}mount_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://tic_tac_toe/meshes/visual/link_4_r_camera_mount.stl"/>
+            </geometry>
+            <material name="white">
+              <color rgba="0.9 0.9 0.9 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://tic_tac_toe/meshes/collision/link_4_r_camera_mount.stl"/>
+            </geometry>
+        </collision>
+    </link>
+
 
     <!-- Camera -->
     <xacro:include filename="$(find realsense2_description)/urdf/_d435i.urdf.xacro" />
     <xacro:arg name="use_nominal_extrinsics" default="false"/>
-    <!-- Build Kinematic Chain using imported components -->
-    <xacro:camera_mount prefix=""/>
-    <link name="camera_base_link" />
-    <xacro:sensor_d435i parent="camera_base_link" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
+
+    <link name="tool0_camera" />
+
+    <xacro:sensor_d435i parent="tool0_camera" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
         <origin xyz="0 0 0" rpy="0 0 0"/>
     </xacro:sensor_d435i>
 
-    <joint name="mount_link-camera_base_link" type="fixed">
-        <origin xyz="0.03495 0.013 0.039" rpy="${-pi/2} 0 ${-pi/2}"/>
+
+    <!-- Locating: Camera mounted on lower side of Link R. Reference frame along link centerline. -->
+    <joint name="mount_link-tool0_camera" type="fixed">
+        <origin xyz="0.02195 0 -0.0535" rpy="0 ${pi/2} 0"/>
         <parent link="mount_link"/>
-        <child link="camera_base_link"/>
+        <child link="tool0_camera"/>
     </joint>
+
 </xacro:macro>
 </robot>
