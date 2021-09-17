@@ -200,12 +200,11 @@ def detectBoard_coloredSquares(image):
     # are thresholds below rbg (not this) or rgb(not this) or bgr(not this) or gbr(not this)
     # psych: It's converting BGR to HSV
 
-    red_lower = np.array([0, 190, 220], np.uint8)
+    # Set range for red color and define mask
+    red_lower = np.array([0, 190, 210], np.uint8)
     # [0, 190, 220]
     red_upper = np.array([2, 220, 255], np.uint8)
     # [2, 220, 255]
-
-
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
 
     # Set range for green color and define mask
@@ -251,8 +250,15 @@ def detectBoard_coloredSquares(image):
         area = cv2.contourArea(contour)
         if(area > 300): # assuming area is in pixels
             x, y, w, h = cv2.boundingRect(contour)
-            imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 0, 255), 2)
             center_R = [w/2+x,h/2+y]
+            # imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            # ^^ Uncomment if you want bounding boxes to appear
+            
+            # drawing rect around blue sqaure
+            rect = cv2.minAreaRect(contour)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            cv2.drawContours(imageFrame,[box],0,(0,0,0),2)
             cv2.putText(imageFrame, "Red Color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))    
 
     # Creating contour to track green color
@@ -263,7 +269,16 @@ def detectBoard_coloredSquares(image):
         if(area > 300):
             x, y, w, h = cv2.boundingRect(contour)
             center_G = [w/2+x,h/2+y]
-            imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 255, 0), 2)           
+            #imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            # ^^ Uncomment if you want bounding boxes to appear
+
+
+            # drawing rect around green sqaure
+            rect = cv2.minAreaRect(contour)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            cv2.drawContours(imageFrame,[box],0,(0,0,0),2)
+
             cv2.putText(imageFrame, "Green Color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0))
 
     # Creating contour to track blue color
@@ -273,13 +288,14 @@ def detectBoard_coloredSquares(image):
         if(area > 300): # original : area>300
             x, y, w, h = cv2.boundingRect(contour)
             center_B = [w/2+x,h/2+y]
-            imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # ^^ Uncomment if you want bounding boxes to appear
 
             # drawing rect around blue sqaure
             rect = cv2.minAreaRect(contour)
             box = cv2.boxPoints(rect)
             box = np.int0(box)
-            cv2.drawContours(imageFrame,[box],0,(255,0,0),2)
+            cv2.drawContours(imageFrame,[box],0,(0,0,0),2)
             
             cv2.putText(imageFrame, "Blue Color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0))
             
@@ -302,7 +318,7 @@ def detectBoard_coloredSquares(image):
     #angle = math.atan2(eigenvectors[0, 1], eigenvectors[0, 0])  # orientation in radians
     # Program Termination
     cv2.imshow("Multiple Color Detection in Real-TIme", imageFrame)
-    #cv2.waitKey(3)
+    # cv2.waitKey(3)
     # if cv2.waitKey(3) & 0xFF == ord('q'):
     #     cap.release()
     #     cv2.destroyAllWindows()
@@ -317,8 +333,8 @@ def detectBoard_coloredSquares(image):
     # Get distance from each center to get board center
     x_axis = [center_R[0] - center_B[0], center_R[1] - center_B[1]] 
     y_axis = [center_G[0] - center_B[0], center_G[1] - center_B[1]]
-    print("X-axis: ", x_axis)
-    print("Y-axis: ", y_axis)
+    # print("X-axis: ", x_axis)
+    # print("Y-axis: ", y_axis)
 
     # Convert board center pixel values to meters (and move origin to center of image)
     scaledCenter = [0,0]
@@ -327,16 +343,15 @@ def detectBoard_coloredSquares(image):
     print("Scaled Center (m): ",scaledCenter)
     # scaledCenter = [x_axis[0]/2,y_axis[0]/2]
 
-    # obtaining orientation based on centers of top left green square and bottom right red square
-    # diagonal = [center_R[0]-center_G[0],center_R[1]-center_G[1]] 
     # vertical line used as reference line
     # vertical = cv2.line(imageFrame,[437,4], [437,713],(0,0,0), 1)
-    vertical = [437,713-4]
-    # shapedetect.drawAxis(imageFrame,[437,4],[437,713],(0,0,0),1)
+    # vertical = [437,713-4]
+    # 
+    # shapeDetect.drawAxis(imageFrame,[437,4],[437,713],(0,0,0),1)
     # cv2.imshow("Multiple Color Detection in Real-TIme", imageFrame)
 
     # vector from red square (bottom right) to green square (top left)
-    angle = math.degrees(math.atan(vertical[1] - y_axis[1], vertical[0] - y_axis[0])) # in degrees 
+    angle = math.degrees(math.atan2(center_R[1] - center_B[1], center_R[0] - center_B[0])) # in degrees 
     print("Angle(deg): ", angle)
 
 
@@ -354,7 +369,7 @@ def detectBoard_coloredSquares(image):
     tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
     # do I need to return BoardImage
-    return scaledCenter, boardImage, tf_board2camera 
+    return scaledCenter, tf_board2camera 
 
 
 #####################################################
@@ -403,10 +418,10 @@ class board_publisher():
             # characterize board location and orientation
 
             # Run using color
-            # scaledCenter, boardImage, tf_board2camera = detectBoard_coloredSquares(cv_image)
+            scaledCenter, tf_board2camera = detectBoard_coloredSquares(cv_image)
             
             # Run using contours
-            scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
+            # scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
         
             
 
