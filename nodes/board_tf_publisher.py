@@ -105,7 +105,7 @@ def detectBoard_contours(image):
     @param image: image parameter the function tries to find the board on.
     @return scaledCenter: (x ,y) values in meters of the board center relative to the center of the camera frame.
     @return boardImage: image with drawn orientation axes and board location.
-    @return tf_board2camera: transformation matrix of board to camera frame of reference.
+    @return tf_camera2board: transformation matrix of board to camera frame of reference.
     """
 
     # Reading in static image
@@ -149,9 +149,9 @@ def detectBoard_contours(image):
                                     [0, 0, 1]])
 
     # Transformation (board from imageFrame to camera)
-    tf_board2camera = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
+    tf_camera2board = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
-    return scaledCenter, boardImage, tf_board2camera
+    return scaledCenter, boardImage, tf_camera2board
 
 def detectBoard_coloredSquares(image):
     # purpose: recognize orientation of board based on 3 colored equares
@@ -366,7 +366,7 @@ def detectBoard_coloredSquares(image):
                                     [0, 0, 1]])
 
     # Transformation (board from imageFrame to camera)
-    tf_board2camera = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
+    tf_camera2board = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
 
     # Assemble Annotated Image for Output Image
@@ -395,7 +395,7 @@ def detectBoard_coloredSquares(image):
 
 
     # Returns Center Location, CV2 image annotated with vectors used in analysis, TF
-    return scaledCenter, boardImage ,tf_board2camera 
+    return scaledCenter, boardImage ,tf_camera2board 
 
 
 #####################################################
@@ -446,10 +446,10 @@ class board_publisher():
             # characterize board location and orientation
 
             # Run using color
-            scaledCenter, boardImage, tf_board2camera = detectBoard_coloredSquares(cv_image)
+            scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
             
             # Run using contours
-            #scaledCenter, boardImage, tf_board2camera = detectBoard_contours(cv_image)
+            #scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
         
             
 
@@ -460,7 +460,7 @@ class board_publisher():
             # find all 9 nine tile centers based on board center
             tileCentersMatrices = define_board_tile_centers()
 
-            tileCenters2camera = tf_helper.convertPath2FixedFrame(tileCentersMatrices, tf_board2camera)  # 4x4 transformation matrix
+            tileCenters2camera = tf_helper.convertPath2FixedFrame(tileCentersMatrices, tf_camera2board)  # 4x4 transformation matrix
 
             # Columns: 0,1,2 are rotations, column: 3 is translation
             # Rows: 0,1 are x & y rotation & translation values
@@ -471,9 +471,9 @@ class board_publisher():
             ## Build Camera_2_World TF
                 # todo: Rewrite how the camera-tf is defined. Suggestion: grab from topic 'tf'
                 # ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-                # tf_camera2world_filepath = np.load(ttt_pkg + "/tf_camera2world.npy")
+                # tf_fixed2camera_filepath = np.load(ttt_pkg + "/tf_fixed2camera.npy")
             tf_matrix = self.tfBuffer.lookup_transform('camera_link', 'base_link', rospy.Time(0))
-            tf_camera2world_vector = [ 
+            tf_fixed2camera_vector = [ 
                 tf_matrix.transform.translation.x,
                 tf_matrix.transform.translation.y,
                 tf_matrix.transform.translation.z, ### change this value to hardcoded z-value
@@ -483,24 +483,30 @@ class board_publisher():
                 tf_matrix.transform.rotation.w
                 ]
             #TODO: Use native techniques. http://docs.ros.org/en/melodic/api/tf_conversions/html/python/
-            tf_camera2world = tf_helper.quant_pose_to_tf_matrix(tf_camera2world_vector)
+            tf_fixed2camera = tf_helper.quant_pose_to_tf_matrix(tf_fixed2camera_vector)
 
 
             rot_camera_hardcode = np.array([[0, -1, 0], [0, 0, 1], [-1, 0, 0]])
 
-            # translation = tf_camera2world[:-1, -1].tolist()
-            # tf_camera2world = tf_helper.generateTransMatrix(rot_camera_hardcode, translation)
+
+            # Distance from Camera to Board
+            # .. Hacky. Extract height from camera global transform.
+            standoff_z_axis = tf_matrix.transform.translation.z
+
+
+            # translation = tf_fixed2camera[:-1, -1].tolist()
+            # tf_fixed2camera = tf_helper.generateTransMatrix(rot_camera_hardcode, translation)
 
             ## Build Board_2_World TF
-            tf_board2world = np.matmul(tf_camera2world, tf_board2camera)
+            tf_fixed2board = np.matmul(tf_fixed2camera, tf_camera2board)
 
             ## Convert TF (4x4) Array to Pose (7-element list)
-            pose_goal = tf_helper.transformToPose(tf_board2world)
+            pose_goal = tf_helper.transformToPose(tf_fixed2board)
 
             ## Publish Board Pose
             msg = TransformStamped()
-            msg.header.frame_id = 'Origin'# change to camera link frame id (then just lookup transform for board to origin)
-            msg.child_frame_id = 'Board'
+            msg.header.frame_id = 'base_link'# change to camera link frame id (then just lookup transform for board to origin)
+            msg.child_frame_id = 'ttt_board'
             msg.transform.translation.x = pose_goal[0]
             msg.transform.translation.y = pose_goal[1]
             msg.transform.translation.z = pose_goal[2]
