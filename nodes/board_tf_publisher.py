@@ -98,7 +98,7 @@ def define_board_tile_centers():
     return tile_locations_tf
 
 
-def detectBoard(image):
+def detectBoard_contours(image):
     """
     Tictactoe function that finds the physical board. Utilizes ShapeDetector class functions.
     TODO transition to using rgb dots for both board center and orientation.
@@ -421,7 +421,7 @@ class board_publisher():
             scaledCenter, tf_board2camera = detectBoard_coloredSquares(cv_image)
             
             # Run using contours
-            # scaledCenter, boardImage, tf_board2camera = detectBoard(cv_image)
+            #scaledCenter, boardImage, tf_board2camera = detectBoard_contours(cv_image)
         
             
 
