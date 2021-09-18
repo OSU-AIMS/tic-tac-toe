@@ -368,8 +368,34 @@ def detectBoard_coloredSquares(image):
     # Transformation (board from imageFrame to camera)
     tf_board2camera = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
-    # do I need to return BoardImage
-    return scaledCenter, tf_board2camera 
+
+    # Assemble Annotated Image for Output Image
+    boardImage = image.copy()
+    shapeDetect.drawAxis(boardImage, center_B, center_G, (9, 195, 33), 1)   # Y-axis GREEN
+    shapeDetect.drawAxis(boardImage, center_B, center_R, (104,104, 255), 1) # X-Axis RED
+    cv2.putText(boardImage,
+        "Board Rotation Technique: RGB Corner Squares",
+        org = (20, 20),
+        fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale = 0.5,
+        color = (0,0,0),
+        thickness = 2,
+        lineType = cv2.LINE_AA,
+        bottomLeftOrigin = False)
+    text_angle = "Angle(deg): " + str(int(angle))
+    cv2.putText(boardImage,
+        text_angle,
+        org = (20, 40),
+        fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale = 0.5,
+        color = (0,0,0),
+        thickness = 2,
+        lineType = cv2.LINE_AA,
+        bottomLeftOrigin = False)
+
+
+    # Returns Center Location, CV2 image annotated with vectors used in analysis, TF
+    return scaledCenter, boardImage ,tf_board2camera 
 
 
 #####################################################
@@ -420,7 +446,7 @@ class board_publisher():
             # characterize board location and orientation
 
             # Run using color
-            scaledCenter, tf_board2camera = detectBoard_coloredSquares(cv_image)
+            scaledCenter, boardImage, tf_board2camera = detectBoard_coloredSquares(cv_image)
             
             # Run using contours
             #scaledCenter, boardImage, tf_board2camera = detectBoard_contours(cv_image)
