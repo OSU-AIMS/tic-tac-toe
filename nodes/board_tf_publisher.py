@@ -50,7 +50,7 @@ import numpy as np
 # Ref
 # http://wiki.ros.org/tf2/Tutorials/Writing%20a%20tf2%20listener%20%28Python%29
 # http://docs.ros.org/en/jade/api/geometry_msgs/html/msg/Transform.html
-tf = transformations()
+tf_helper = transformations()
 shapeDetect = ShapeDetector()
 
 
@@ -90,10 +90,10 @@ def define_board_tile_centers():
     tile_locations_tf = []
 
     # Create a list of TF's representing each Tile Center. Final list is 9-elements long
-    tf = transformations()
+    tf_helper = transformations()
     for vector in tictactoe_center_list:
         item = np.matrix(vector)
-        tile_locations_tf.append( tf.generateTransMatrix(rot_default, item) )
+        tile_locations_tf.append( tf_helper.generateTransMatrix(rot_default, item) )
 
     return tile_locations_tf
 
@@ -149,7 +149,7 @@ def detectBoard(image):
                                     [0, 0, 1]])
 
     # Transformation (board from imageFrame to camera)
-    tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
+    tf_board2camera = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
     return scaledCenter, boardImage, tf_board2camera
 
@@ -366,7 +366,7 @@ def detectBoard_coloredSquares(image):
                                     [0, 0, 1]])
 
     # Transformation (board from imageFrame to camera)
-    tf_board2camera = tf.generateTransMatrix(boardRotationMatrix, boardTranslation)
+    tf_board2camera = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
     # do I need to return BoardImage
     return scaledCenter, tf_board2camera 
@@ -432,7 +432,7 @@ class board_publisher():
             # find all 9 nine tile centers based on board center
             tileCentersMatrices = define_board_tile_centers()
 
-            tileCenters2camera = tf.convertPath2FixedFrame(tileCentersMatrices, tf_board2camera)  # 4x4 transformation matrix
+            tileCenters2camera = tf_helper.convertPath2FixedFrame(tileCentersMatrices, tf_board2camera)  # 4x4 transformation matrix
 
             # Columns: 0,1,2 are rotations, column: 3 is translation
             # Rows: 0,1 are x & y rotation & translation values
@@ -457,19 +457,20 @@ class board_publisher():
                 data.transform.rotation.z,
                 data.transform.rotation.w
                 ]
-            tf_camera2world = tf.quant_pose_to_tf_matrix(tf_camera2world_vector)
+            #TODO: Use native techniques. http://docs.ros.org/en/melodic/api/tf_conversions/html/python/
+            tf_camera2world = tf_helper.quant_pose_to_tf_matrix(tf_camera2world_vector)
 
 
             rot_camera_hardcode = np.array([[0, -1, 0], [0, 0, 1], [-1, 0, 0]])
 
             # translation = tf_camera2world[:-1, -1].tolist()
-            # tf_camera2world = tf.generateTransMatrix(rot_camera_hardcode, translation)
+            # tf_camera2world = tf_helper.generateTransMatrix(rot_camera_hardcode, translation)
 
             ## Build Board_2_World TF
             tf_board2world = np.matmul(tf_camera2world, tf_board2camera)
 
             ## Convert TF (4x4) Array to Pose (7-element list)
-            pose_goal = tf.transformToPose(tf_board2world)
+            pose_goal = tf_helper.transformToPose(tf_board2world)
 
             ## Publish Board Pose
             msg = TransformStamped()
