@@ -385,7 +385,7 @@ class board_publisher():
      4. creates a live feed that visualizes where the camera thinks the board is located
     """
 
-    def __init__(self, center_pub, camera_tile_annotation):
+    def __init__(self, center_pub, camera_tile_annotation, tfBuffer):
 
         # Inputs
 
@@ -395,6 +395,8 @@ class board_publisher():
         self.camera_tile_annotation = camera_tile_annotation
         # camera_tile_annotation: publishes the numbers & arrows displayed on the image
 
+        self.tfBuffer = tfBuffer
+        # tfBuffer: listener for all all transforms in ROS
 
         # Tools
         self.bridge = CvBridge()
@@ -441,21 +443,18 @@ class board_publisher():
             import subprocess
 
             ## Build Camera_2_World TF
-            # todo: Rewrite how the camera-tf is defined. Suggestion: grab from topic 'tf'
-            # ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-            # tf_camera2world_filepath = np.load(ttt_pkg + "/tf_camera2world.npy")
-            tfBuffer = tf2_ros.Buffer()
-            listener = tf2_ros.TransformListener(tfBuffer)
-
-            data = tfBuffer.lookup_transform('base_link', 'camera_link', rospy.Time())
+                # todo: Rewrite how the camera-tf is defined. Suggestion: grab from topic 'tf'
+                # ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                # tf_camera2world_filepath = np.load(ttt_pkg + "/tf_camera2world.npy")
+            tf_matrix = self.tfBuffer.lookup_transform('camera_link', 'base_link', rospy.Time(0))
             tf_camera2world_vector = [ 
-                data.transform.translation.x,
-                data.transform.translation.y,
-                data.transform.translation.z, ### change this value to hardcoded z-value
-                data.transform.rotation.x,
-                data.transform.rotation.y,
-                data.transform.rotation.z,
-                data.transform.rotation.w
+                tf_matrix.transform.translation.x,
+                tf_matrix.transform.translation.y,
+                tf_matrix.transform.translation.z, ### change this value to hardcoded z-value
+                tf_matrix.transform.rotation.x,
+                tf_matrix.transform.rotation.y,
+                tf_matrix.transform.rotation.z,
+                tf_matrix.transform.rotation.w
                 ]
             #TODO: Use native techniques. http://docs.ros.org/en/melodic/api/tf_conversions/html/python/
             tf_camera2world = tf_helper.quant_pose_to_tf_matrix(tf_camera2world_vector)
@@ -559,11 +558,13 @@ def main():
     pub_center = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
     pub_camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
 
-    # rospy.Rate(0.1)
+    # rate = rospy.Rate(0.1)
 
 
     # Setup Listeners
-    bp_callback = board_publisher(pub_center, pub_camera_tile_annotation)
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
+    bp_callback = board_publisher(pub_center, pub_camera_tile_annotation, tfBuffer)
     image_sub = rospy.Subscriber("/camera/color/image_raw", Image, bp_callback.runner)
 
 
