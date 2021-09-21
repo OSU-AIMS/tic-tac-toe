@@ -120,18 +120,19 @@ def detectBoard_contours(image):
     boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=90000)
 
     # Scale from image pixels to m (pixels/m)
-    # scale = .664/640          # res: (640x480)
-    scale = .895 / 1280         # res: (1280x730)
+    scale = .664/640          # res: (640x480)
+    # scale = .895 / 1280         # res: (1280x730)
+    # TODO: use camera intrinsics
 
     scaledCenter = [0, 0]
 
     # TODO check if works:
-    # scaledCenter[0] = (boardCenter[0]-data.width / 2) * scale
-    # scaledCenter[1] = (boardCenter[1]-data.height / 2) * scale
+    scaledCenter[0] = (boardCenter[0]-data.width / 2) * scale
+    scaledCenter[1] = (boardCenter[1]-data.height / 2) * scale
 
     # Convert board center pixel values to meters (and move origin to center of image)
-    scaledCenter[0] = (boardCenter[0] - 640) * scale
-    scaledCenter[1] = (boardCenter[1] - 360) * scale
+    # scaledCenter[0] = (boardCenter[0] - 640) * scale
+    # scaledCenter[1] = (boardCenter[1] - 360) * scale
 
     # Define 3x1 array of board translation (x, y, z) in meters
     boardTranslation = np.array(
