@@ -18,6 +18,6 @@
 
     <!-- Open RQT for analysis with a custom perspective -->
    <node name = "RQT_TestViewer" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" 
-        args = "--perspective-file $(find tic_tac_toe)/test/test_static_image.perspective"/>  
+        args = "--perspective-file $(find tic_tac_toe)/config/test_static_image.perspective"/>  
 
 </launch>

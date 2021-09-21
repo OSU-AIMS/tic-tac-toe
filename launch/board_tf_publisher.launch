@@ -2,13 +2,16 @@
 <launch>
 
     <!-- Launch Camera Topics -->
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch" >
+        <arg name="align_depth" value="true"/>
+        <arg name="enable_pointcloud" value="true"/>
+    </include>
 
     <!-- Setup Node for 'Board-TF-Publisher' -->
     <node pkg="tic_tac_toe" type="board_tf_publisher.py" name="board_tf_publisher" output="screen" />
     
      <!-- Open RQT for analysis with a custom perspective -->
     <node name = "RQT_TestViewer" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" 
-        args = "--perspective-file $(find tic_tac_toe)/test/test_static_image.perspective"/>
+        args = "--perspective-file $(find tic_tac_toe)/config/test_static_image.perspective"/>
 
 </launch>
