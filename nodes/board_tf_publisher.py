@@ -179,7 +179,8 @@ def detectBoard_coloredSquares(image):
     #_, imageFrame = webcam.read()
 
     imageFrame = image.copy()
-    scale = .895 / 1280         # res: (1280x730)
+    # scale = .895 / 1280         # res: (1280x730)
+    scale = .65/640
 
     # cv2.imshow("Image Frame",imageFrame)
     # cv2.waitKey(3)
@@ -338,8 +339,8 @@ def detectBoard_coloredSquares(image):
 
     # Convert board center pixel values to meters (and move origin to center of image)
     scaledCenter = [0,0]
-    scaledCenter[0] = ((x_axis[0]+x_axis[1])/2 - 640) * scale
-    scaledCenter[1] = ((y_axis[0]+y_axis[1])/2 - 365) * scale #originally subtracted 360, changed to 365 = 720/2
+    scaledCenter[0] = ((x_axis[0]+x_axis[1])/2 - 320) * scale
+    scaledCenter[1] = ((y_axis[0]+y_axis[1])/2 - 240) * scale 
     print("Scaled Center (m): ",scaledCenter)
     # scaledCenter = [x_axis[0]/2,y_axis[0]/2]
 
