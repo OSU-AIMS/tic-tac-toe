@@ -112,12 +112,13 @@ def detectBoard_contours(image):
     # frame = cv2.imread('../sample_content/sample_images/1X_1O_ATTACHED_coloredSquares_Color_Color.png')
 
     image = image.copy()
+    print(image.shape)
 
     # Find all contours in image
     #contours = shapeDetect.getContours(image)
 
     # Find the board contour, create visual, define board center and points
-    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=90000)
+    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=40000)
 
     # Scale from image pixels to m (pixels/m)
     scale = .664/640          # res: (640x480)
@@ -127,16 +128,16 @@ def detectBoard_contours(image):
     scaledCenter = [0, 0]
 
     # TODO check if works:
-    scaledCenter[0] = (boardCenter[0]-data.width / 2) * scale
-    scaledCenter[1] = (boardCenter[1]-data.height / 2) * scale
+    # scaledCenter[0] = (boardCenter[0]-data.width / 2) * scale
+    # scaledCenter[1] = (boardCenter[1]-data.height / 2) * scale
 
     # Convert board center pixel values to meters (and move origin to center of image)
-    # scaledCenter[0] = (boardCenter[0] - 640) * scale
-    # scaledCenter[1] = (boardCenter[1] - 360) * scale
+    scaledCenter[0] = (boardCenter[0] - 320) * scale
+    scaledCenter[1] = (boardCenter[1] - 240) * scale
 
     # Define 3x1 array of board translation (x, y, z) in meters
     boardTranslation = np.array(
-        [[scaledCenter[0]], [scaledCenter[1]], [0.655]])  ## depth of the table is .655 m from camera
+        [[scaledCenter[0]], [scaledCenter[1]], [0.655]])  ## TODO use depth from camera data
 
     # Find rotation of board on the table plane, only a z-axis rotation angle
     z_orient = shapeDetect.newOrientation(boardPoints)
@@ -448,10 +449,10 @@ class board_publisher():
             # characterize board location and orientation
 
             # Run using color
-            scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
+            # scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
             
             # Run using contours
-            #scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
+            scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
         
             
 
@@ -525,11 +526,12 @@ class board_publisher():
 
             # Draw Tile Numbers onto Frame
             xyList = [[] for i in range(9)]
-            scale = .895 / 1280  # todo: set to camera intrinsics
+            # scale = .895 / 1280  # todo: set to camera intrinsics
+            scale = .664 / 640
             for i in range(9):
                 xyzCm = (tileCenters2camera[i][0:2, 3:4])  # in cm
-                x = xyzCm[0] / scale + 640
-                y = xyzCm[1] / scale + 360  # in pixels
+                x = xyzCm[0] / scale + 320
+                y = xyzCm[1] / scale + 240  # in pixels
                 xyList[i].append(int(x))
                 xyList[i].append(int(y))
                 cv2.putText(boardImage, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
