@@ -1,6 +1,0 @@
-<launch>
-  <node pkg="tic_tac_toe" type="tf_camera_transform_publisher.py" 
-            name="publisher" output="screen"/>
-  <node pkg="tic_tac_toe" type="tf_origin_subscriber.py" 
-            name="subscriber" output="screen"/>
-</launch>

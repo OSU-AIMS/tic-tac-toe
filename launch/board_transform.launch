@@ -1,6 +1,0 @@
-<launch>
-  <node pkg="tic_tac_toe" type="board_tf_publisher.py"
-            name="publisher" output="screen"/>
-  <node pkg="tic_tac_toe" type="board_center_subscriber.py" 
-            name="subscriber" output="screen"/>
-</launch>
