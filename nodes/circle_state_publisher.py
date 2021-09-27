@@ -27,7 +27,7 @@ sys.path.insert(1, path_2_game_scripts)
 import rospy
 
 # ROS Data Types
-import std_msgs import ByteMultiArray
+from std_msgs.msg import ByteMultiArray
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
 
@@ -172,8 +172,14 @@ class circle_state_publisher():
                 cv2.putText(img, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
                             (0, 0, 0),
                             2)
+            msg_circle = ByteMultiArray()
 
             if boardCode == [0,0,0,0,0,0,0,0,0]:
+                msg_circle.data = boardCode
+
+                self.circle_board_state.publish(msg_circle)
+                rospy.loginfo(msg_circle)
+                
                 print("No circles detected on Board")
             else: 
                 try:
@@ -183,8 +189,9 @@ class circle_state_publisher():
 
                 # Publish
                 self.circle_state_annotation.publish(msg_img)
+                msg_circle.data = boardCode
 
-                self.pub_circle_board_state
+                self.pub_circle_board_state.publish(msg_circle)
 
                 # tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
                 # filename = 'circle_board_state.npy'
@@ -222,7 +229,7 @@ def main():
     pub_circle_board_state = rospy.Publisher("circle_board_state", ByteMultiArray, queue_size=20)
 
     # Setup Listeners
-    cs_callback = circle_state_publisher(pub_circle_state_annotation)
+    cs_callback = circle_state_publisher(pub_circle_state_annotation,pub_circle_board_state)
     image_sub = rospy.Subscriber("/camera_tile_annotation", Image, cs_callback.runner)
 
     # Auto-Run until launch file is shutdown
