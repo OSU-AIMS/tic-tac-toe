@@ -184,8 +184,8 @@ def detectBoard_coloredSquares(image):
     # scale = .895 / 1280         # res: (1280x730)
     scale = .65/640
 
-    # cv2.imshow("Image Frame",imageFrame)
-    # cv2.waitKey(3)
+    cv2.imshow("Image Frame",imageFrame)
+    cv2.waitKey(3)
     # used for debugging purposes
 
     # Convert the imageFrame in
@@ -196,6 +196,20 @@ def detectBoard_coloredSquares(image):
     cv2.imshow('HSV frame',hsvFrame)
     cv2.waitKey(3)
 
+    '''
+    from https://stackoverflow.com/questions/36817133/identifying-the-range-of-a-color-in-hsv-using-opencv/51686953
+    color_dict_HSV = {'black': [[180, 255, 30], [0, 0, 0]],
+              'white': [[180, 18, 255], [0, 0, 231]],
+              'red1': [[180, 255, 255], [159, 50, 70]],
+              'red2': [[9, 255, 255], [0, 50, 70]],
+              'green': [[89, 255, 255], [36, 50, 70]],
+              'blue': [[128, 255, 255], [90, 50, 70]],
+              'yellow': [[35, 255, 255], [25, 50, 70]],
+              'purple': [[158, 255, 255], [129, 50, 70]],
+              'orange': [[24, 255, 255], [10, 50, 70]],
+              'gray': [[180, 18, 230], [0, 0, 40]]}
+    '''
+
     # Set range for red color and define mask
     # red_lower = np.array([136, 87, 111], np.uint8)
     # red_upper = np.array([180, 255, 255], np.uint8)
@@ -204,13 +218,15 @@ def detectBoard_coloredSquares(image):
     # psych: It's converting BGR to HSV
 
     # Set range for red color and define mask
-    red_lower = np.array([0, 190, 210], np.uint8)
+    red_lower = np.array([170, 100, 100], np.uint8)
+    # [0, 190, 210]
     # [0, 190, 220]
-    red_upper = np.array([2, 220, 255], np.uint8)
+    red_upper = np.array([180, 255, 255], np.uint8)
     # [2, 220, 255]
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
 
     # Set range for green color and define mask
+    # values are V,S,H b/c color values are in BGR
     # green_lower = np.array([25, 52, 72], np.uint8)
     # green_upper = np.array([102, 255, 255], np.uint8)
     green_lower = np.array([80, 230, 130], np.uint8)
@@ -449,10 +465,10 @@ class board_publisher():
             # characterize board location and orientation
 
             # Run using color
-            # scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
+            scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
             
             # Run using contours
-            scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
+            # scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
         
             
 
