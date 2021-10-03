@@ -13,6 +13,9 @@
         <param name="publish_rate" value="1" />
     </node>
 
+    <!-- Launch Sim Robot -->
+    <include file="$(find robot_with_camera_config)/launch/moveit_planning_execution.launch" />
+
     <!-- Launch actual code to test -->
     <node pkg="tic_tac_toe" type="board_tf_publisher.py" name="board_tf_publisher" output="screen" />
 
