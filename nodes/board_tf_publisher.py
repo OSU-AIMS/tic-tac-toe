@@ -416,89 +416,89 @@ def detectBoard_coloredSquares(image):
     # Returns Center Location, CV2 image annotated with vectors used in analysis, TF
     return scaledCenter, boardImage ,tf_camera2board 
 
-def hsv_extractor(image):
+# def hsv_extractor(image):
 
-    # bridge = CvBridge()
-    # cv_image = bridge.imgmsg_to_cv2(image, "bgr8")
-    cap = cv_image.copy()
-    cap.set(3,1280)
-    cap.set(4,720)
+#     # bridge = CvBridge()
+#     # cv_image = bridge.imgmsg_to_cv2(image, "bgr8")
+#     cap = cv_image.copy()
+#     cap.set(3,1280)
+#     cap.set(4,720)
 
-    # create window named Trackbars
-    cv2.namedWindow('Trackbars for HSV')
+#     # create window named Trackbars
+#     cv2.namedWindow('Trackbars for HSV')
 
-    #Now create 6 tracks to control range of HSV channels
-    # Arguments: 
-    #      Name of tracker, window name, range, callback function
-    # For hue: range is 0-179 
-    # Foe S & V: 0-255
-    cv2.createTrackbar("Lower-H","Trackbars",0,179,nothing)
-    cv2.createTrackbar("Lower-S","Trackbars",0,255,nothing)
-    cv2.createTrackbar("Lower-V","Trackbars",0,255,nothing)
+#     #Now create 6 tracks to control range of HSV channels
+#     # Arguments: 
+#     #      Name of tracker, window name, range, callback function
+#     # For hue: range is 0-179 
+#     # Foe S & V: 0-255
+#     cv2.createTrackbar("Lower-H","Trackbars",0,179,nothing)
+#     cv2.createTrackbar("Lower-S","Trackbars",0,255,nothing)
+#     cv2.createTrackbar("Lower-V","Trackbars",0,255,nothing)
 
-    cv2.createTrackbar("Upper-H","Trackbars",179,179,nothing)
-    cv2.createTrackbar("Upper-S","Trackbars",255,255,nothing)
-    cv2.createTrackbar("Upper-V","Trackbars",255,255,nothing)
+#     cv2.createTrackbar("Upper-H","Trackbars",179,179,nothing)
+#     cv2.createTrackbar("Upper-S","Trackbars",255,255,nothing)
+#     cv2.createTrackbar("Upper-V","Trackbars",255,255,nothing)
 
-    while True:
+#     while True:
 
-        # read webcam feed frame by frame
-        ret,frame = cap.read()
-        if not ret:
-            break
-        # flip frame horizontally (not required)
-        # frame.cv2.flip(frame,1)
+#         # read webcam feed frame by frame
+#         ret,frame = cap.read()
+#         if not ret:
+#             break
+#         # flip frame horizontally (not required)
+#         # frame.cv2.flip(frame,1)
 
-        #Get new values of tracker in real time as user moves slider
-        l_h = cv2.getTrackbarPos("Lower-H","Trackbars")
-        l_s = cv2.getTrackbarPos("Lower-S","Trackbars")
-        l_v = cv2.getTrackbarPos("Lower-V","Trackbars")
+#         #Get new values of tracker in real time as user moves slider
+#         l_h = cv2.getTrackbarPos("Lower-H","Trackbars")
+#         l_s = cv2.getTrackbarPos("Lower-S","Trackbars")
+#         l_v = cv2.getTrackbarPos("Lower-V","Trackbars")
 
-        u_h = cv2,getTrackbarPos("Upper-H","Trackbars")
-        u_s = cv2.getTrackbarPos("Upper-S","Trackbars")
-        u_v = cv2.getTrackbarPos("Upper-V","Trackbars")
+#         u_h = cv2,getTrackbarPos("Upper-H","Trackbars")
+#         u_s = cv2.getTrackbarPos("Upper-S","Trackbars")
+#         u_v = cv2.getTrackbarPos("Upper-V","Trackbars")
 
-        # Set lower & upper HSB range according to value selected by trackbar
-        lower_range = np.array([l_h,l_s,l_v])
-        upper_range = np.array([u_h,u_s,u_v])
+#         # Set lower & upper HSB range according to value selected by trackbar
+#         lower_range = np.array([l_h,l_s,l_v])
+#         upper_range = np.array([u_h,u_s,u_v])
 
-        # Filter image & get binary mask
-        # white represents target color
-        mask = cv2.inRange(hsv,lower_range,upper_range)
+#         # Filter image & get binary mask
+#         # white represents target color
+#         mask = cv2.inRange(hsv,lower_range,upper_range)
 
-        # Also visualize real part of target color (Optional)
-        # res = cv2.bitwise_and(frame,frame,mask-mask)
+#         # Also visualize real part of target color (Optional)
+#         # res = cv2.bitwise_and(frame,frame,mask-mask)
 
-        # Converting binary mask to 3 channel image
-        # so we can stack it with others
-        mask_3 = cv2.cvtColor(mask, cv2.GRAY2BGR)
+#         # Converting binary mask to 3 channel image
+#         # so we can stack it with others
+#         mask_3 = cv2.cvtColor(mask, cv2.GRAY2BGR)
 
-        # stack mask, orginal frame & filtered result
-        stacked = np.hstack((mask_3,frame,res))
+#         # stack mask, orginal frame & filtered result
+#         stacked = np.hstack((mask_3,frame,res))
 
-        # show this stacked frame at 40% size
-        cv2.imshow('Trackbars',cv2.resize(stacked, None, fx=0.4,fy=0.4))
+#         # show this stacked frame at 40% size
+#         cv2.imshow('Trackbars',cv2.resize(stacked, None, fx=0.4,fy=0.4))
 
-        # press ESC then exit program
-        key = cv2.waitKey(1)
-        if key == 27:
-            break
+#         # press ESC then exit program
+#         key = cv2.waitKey(1)
+#         if key == 27:
+#             break
 
 
-        # if user presses 's' print this array
-        # 's' is to save to npy file
-        if key == ord('s'):
-            thearray =[[l_h,l_s,l_v],[u_h,u_s,u_v]]
-            print(thearray)
+#         # if user presses 's' print this array
+#         # 's' is to save to npy file
+#         if key == ord('s'):
+#             thearray =[[l_h,l_s,l_v],[u_h,u_s,u_v]]
+#             print(thearray)
 
-        # Also save this array as penval.npy
-        np.save('hsv_value','thearray')
-        break
+#         # Also save this array as penval.npy
+#         np.save('hsv_value','thearray')
+#         break
 
-    # Realsense camera & destroy windows
+#     # Realsense camera & destroy windows
 
-    cap.release()
-    cv2.destroyAllWindows()
+#     cap.release()
+#     cv2.destroyAllWindows()
 
 
 #####################################################
@@ -548,11 +548,11 @@ class board_publisher():
 
             # characterize board location and orientation
 
-            # Run HSV Extraction
-            hsv_extractor(cv_image)
+            # # Run HSV Extraction
+            # hsv_extractor(cv_image)
 
             # Run using color
-            # scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
+            scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
             
             # Run using contours
             # scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
