@@ -2,6 +2,7 @@
 
 # this is a test script to extract HSv ranges from the tic tac toe image
 # 10/1/2021- Unsure if we're keeping it. Need to test.
+# 10/6/2021: Use as separate script. Getting board topic isn't working
 
 # Script from:
  # https://medium.com/programming-fever/how-to-find-hsv-range-of-an-object-for-computer-vision-applications-254a8eb039fc
@@ -28,12 +29,13 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
 
 # Custom Tools
-  # from Realsense_tools import *
+    # from Realsense_tools import *
 from transformations import *
 from shape_detector import *
 from cv_bridge import CvBridge, CvBridgeError
 
 # System Tools
+import pyrealsense2 as rs
 import time
 from math import pi, radians, sqrt, atan
 import numpy as np
@@ -49,94 +51,159 @@ shapeDetect = ShapeDetector()
 
 #finding hsv range of target object (pen)
 def nothing(x):
-	pass
-
-print("Your OpenCV version is: " + cv2.__version__)
+    pass
 
 
-# initialize webcam feed
-# Convert Image to CV2 Frame
-bridge = CvBridge()
-cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
-# replace data with image
-cap = cv_image.copy()
-# cap = cv2.VideoCapture(0)
-cap.set(3,1280) #ours: 640
-cap.set(4,720) # ours: 480
+#bridge = CvBridge()
+#cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
+# # replace data with webcam feed
+# # Video Capture doesn't work
 
-# create window named Trackbars
-cv2.namedWindow('Trackbars for HSV')
+# cap = cv_image.copy()
 
-#Now create 6 tracks to control range of HSV channels
-# Arguments: 
-#      Name of tracker, window name, range, callback function
-# For hue: range is 0-179 
-# Foe S & V: 0-255
-cv2.createTrackbar("Lower-H","Trackbars",0,179,nothing)
-cv2.createTrackbar("Lower-S","Trackbars",0,255,nothing)
-cv2.createTrackbar("Lower-V","Trackbars",0,255,nothing)
+def color_HSV_extract(image):
+    print("Your OpenCV version is: " + cv2.__version__)
+    
+    frame = image.copy()
 
-cv2.createTrackbar("Upper-H","Trackbars",179,179,nothing)
-cv2.createTrackbar("Upper-S","Trackbars",255,255,nothing)
-cv2.createTrackbar("Upper-V","Trackbars",255,255,nothing)
+    # cv2.VideoCapture(0) # replace with Ros Image Topic
 
-while True:
+    # video capture grabs a frame & then stores it
+    # cap.set(3,640) #ours: 640
+    # cap.set(4,480) # ours: 480
 
-	# read webcame feed frame by frame
-	ret,frame = cap.read()
-	if not ret:
-		break
-	# flip frame horizontally (not required)
-	# frame.cv2.flip(frame,1)
-
-	#Get new values of tracker in real time as user moves slider
-	l_h = cv2.getTrackbarPos("Lower-H","Trackbars")
-	l_s = cv2.getTrackbarPos("Lower-S","Trackbars")
-	l_v = cv2.getTrackbarPos("Lower-V","Trackbars")
-
-	u_h = cv2,getTrackbarPos("Upper-H","Trackbars")
-	u_s = cv2.getTrackbarPos("Upper-S","Trackbars")
-	u_v = cv2.getTrackbarPos("Upper-V","Trackbars")
-
-	# Set lower & upper HSB range according to value selected by trackbar
-	lower_range = np.array([l_h,l_s,l_v])
-	upper_range = np.array([u_h,u_s,u_v])
-
-	# Filter image & get binary mask
-	# white represents target color
-	mask = cv2.inRange(hsv,lower_range,upper_range)
-
-	# Also visualize real part of target color (Optional)
-	# res = cv2.bitwise_and(frame,frame,mask-mask)
-
-	# Converting binary mask to 3 channel image
-	# so we can stack it with others
-	mask_3 = cv2.cvtColor(mask, cv2.GRAY2BGR)
-
-	# stack mask, orginal frame & filtered result
-	stacked = np.hstack((mask_3,frame,res))
-
-	# show this stacked frame at 40% size
-	cv2.imshow('Trackbars',cv2.resize(stacked, None, fx=0.4,fy=0.4))
-
-	# press ESC then exit program
-	key = cv2.waitKey(1)
-	if key == 27:
-		break
+    # create window named Trackbars
+    win_name = 'Trackbars'
+    cv2.namedWindow(win_name)
 
 
-	# if user presses 's' print this array
-	# 's' is to save to npy file
-	if key == ord('s'):
-		thearray =[[l_h,l_s,l_v],[u_h,u_s,u_v]]
-		print(thearray)
+    #Now create 6 tracks to control range of HSV channels
+    # Arguments: 
+    #      Name of tracker, window name, range, callback function
+    # For hue: range is 0-179 
+    # Foe S & V: 0-255
+    cv2.createTrackbar("Lower-H",win_name,0,179,nothing)
+    cv2.createTrackbar("Lower-S",win_name,0,255,nothing)
+    cv2.createTrackbar("Lower-V",win_name,0,255,nothing)
 
-	# Also save this array as penval.npy
-	np.save('hsv_value','thearray')
-	break
+    cv2.createTrackbar("Upper-H",win_name,179,179,nothing)
+    cv2.createTrackbar("Upper-S",win_name,255,255,nothing)
+    cv2.createTrackbar("Upper-V",win_name,255,255,nothing)
 
-# Realsense camera & destroy windows
+    while True:
 
-cap.release()
-cv2.destroyAllWindows()
+        # read webcam feed frame by frame
+        # ret,frame = cap.read()
+        # if not ret:
+            # break
+        # flip frame horizontally (not required)
+        # frame.cv2.flip(frame,1)
+
+        # Convert the BGR image to HSV image.
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        
+        #Get new values of tracker in real time as user moves slider
+        l_h = cv2.getTrackbarPos("Lower-H",win_name)
+        l_s = cv2.getTrackbarPos("Lower-S",win_name)
+        l_v = cv2.getTrackbarPos("Lower-V",win_name)
+
+        u_h = cv2,getTrackbarPos("Upper-H",win_name)
+        u_s = cv2.getTrackbarPos("Upper-S",win_name)
+        u_v = cv2.getTrackbarPos("Upper-V",win_name)
+
+        # Set lower & upper HSB range according to value selected by trackbar
+        lower_range = np.array([l_h,l_s,l_v])
+        upper_range = np.array([u_h,u_s,u_v])
+
+        # Filter image & get binary mask
+        # white represents target color
+        mask = cv2.inRange(hsv,lower_range,upper_range)
+
+        # Also visualize real part of target color (Optional)
+        # res = cv2.bitwise_and(frame,frame,mask-mask)
+
+        # Converting binary mask to 3 channel image
+        # so we can stack it with others
+        mask_3 = cv2.cvtColor(mask, cv2.GRAY2BGR)
+
+        # stack mask, orginal frame & filtered result
+        stacked = np.hstack((mask_3,frame,res))
+
+        # show this stacked frame at 40% size
+        cv2.imshow(win_name,cv2.resize(stacked, None, fx=0.4,fy=0.4))
+
+        # press ESC then exit program
+        key = cv2.waitKey(1)
+        if key == 27:
+            break
+
+
+        # if user presses 's' print this array
+        # 's' is to save to npy file
+        if key == ord('s'):
+            thearray =[[l_h,l_s,l_v],[u_h,u_s,u_v]]
+            print(thearray)
+
+        # Also save this array as penval.npy
+        np.save('hsv_value','thearray')
+        break
+
+    # Realsense camera & destroy windows
+
+    # cap.release()
+    cv2.destroyAllWindows()
+
+
+def runner(data):
+    """
+    Callback function for image subscriber, every frame gets scanned for board and publishes to board_center topic
+    (for robot movement) and board tile centers (for game state updates)
+    :param camera_data: Camera data input from subscriber
+    """
+    try:
+        # Convert Image to CV2 Frame
+        bridge = CvBridge()
+        cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
+        color_HSV_extract(cv_image)
+
+
+    except rospy.ROSInterruptException:
+        exit()
+    except KeyboardInterrupt:
+        exit()
+    except CvBridgeError as e:
+        print(e)
+
+
+
+
+def main():
+    # Setup Node
+    rospy.init_node('HSV_Extractor', anonymous=False)
+    rospy.loginfo(">> HSV_Extractor Node Successfully Created")
+
+    # Setup Publishers
+    pub_center = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
+    pub_camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
+
+    # Setup Listeners
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
+    # bp_callback = board_publisher(pub_center, pub_camera_tile_annotation, tfBuffer)
+
+    # create subscriber to ros Image Topic
+    image_sub = rospy.Subscriber("/camera/color/image_raw", Image, runner)
+
+    # Auto-Run until launch file is shutdown
+    try:
+            rospy.spin()
+    except KeyboardInterrupt:
+            print("Shutting down")
+    cv2.destroyAllWindows()
+
+
+
+if __name__ == '__main__':
+        main()
+
 
