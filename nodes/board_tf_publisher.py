@@ -484,7 +484,6 @@ class board_publisher():
             # Rows: 0,1 are x & y rotation & translation values
 
 
-            import subprocess
 
             ## Build Camera_2_World TF
                 # todo: Rewrite how the camera-tf is defined. Suggestion: grab from topic 'tf'
@@ -522,21 +521,21 @@ class board_publisher():
             pose_goal = tf_helper.transformToPose(tf_fixed2board)
 
             ## Publish Board Pose
-            msg = TransformStamped()
-            msg.header.frame_id = 'base_link'# change to camera link frame id (then just lookup transform for board to origin)
-            msg.child_frame_id = 'ttt_board'
-            msg.transform.translation.x = pose_goal[0]
-            msg.transform.translation.y = pose_goal[1]
-            msg.transform.translation.z = pose_goal[2]
-            msg.transform.rotation.x = pose_goal[3]
-            msg.transform.rotation.y = pose_goal[4]
-            msg.transform.rotation.z = pose_goal[5]
-            msg.transform.rotation.w = pose_goal[6]
+            board_msg = TransformStamped()
+            board_msg.header.frame_id = 'base_link'# change to camera link frame id (then just lookup transform for board to origin)
+            board_msg.child_frame_id = 'ttt_board'
+            board_msg.transform.translation.x = pose_goal[0]
+            board_msg.transform.translation.y = pose_goal[1]
+            board_msg.transform.translation.z = pose_goal[2]
+            board_msg.transform.rotation.x = pose_goal[3]
+            board_msg.transform.rotation.y = pose_goal[4]
+            board_msg.transform.rotation.z = pose_goal[5]
+            board_msg.transform.rotation.w = pose_goal[6]
 
 
             # Publish
-            self.center_pub.publish(msg)
-            rospy.loginfo(msg)
+            self.center_pub.publish(board_msg)
+            rospy.loginfo(board_msg)
 
 
             # Draw Tile Numbers onto Frame
