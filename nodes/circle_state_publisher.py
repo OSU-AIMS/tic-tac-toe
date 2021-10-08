@@ -80,17 +80,9 @@ class circle_state_publisher():
         :param data: Camera data input from subscriber
         """
         try:
-            board = [
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 0, 0],
-            ]
+            board = [0,0,0,0,0,0,0,0,0]
             # array for game board 0 -> empty tile, 1 -> X, -1 -> O
-            boardCode = [
-                0, 0, 0,
-                0, 0, 0,
-                0, 0, 0,
-            ]
+            
             # Convert Image to CV2 Frame
             cv_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
             img = cv_image.copy()
@@ -109,8 +101,10 @@ class circle_state_publisher():
             # for each circle found
             for i in range(len(centers)):
                 distanceFromCenter = findDis(centers[i][0], centers[i][1], xyList[4][0], xyList[4][1])
+
                 if distanceFromCenter < 200:  # TODO update to be according to board size
                     # look at tiles 0-8 and compare distance from circle
+
                     for j in range(9):
                         distance = findDis(centers[i][0], centers[i][1], xyList[j][0], xyList[j][1])
                         # findDis params :(pt1x,pt1y, pt2x,pt2y)
@@ -120,46 +114,49 @@ class circle_state_publisher():
                             # any circle within this boundary is likely to be detected as a piece in one of the 9 tiles
                             closest = distance
                             closest_index = j
-                    # closest_square[i]= closest_index
+                    
                     if closest_index is not None:
+                        board[closest_index] = -1
+                        cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+
                         # print('inside board assignment ifs')
                         # Checks which of the 9 tiles the O block is in
-                        if closest_index == 0:
-                            board[0][0] = 'O'
-                            boardCode[0] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
-                        elif closest_index == 1:
-                            board[0][1] = 'O'
-                            boardCode[1] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
-                        elif closest_index == 2:
-                            board[0][2] = 'O'
-                            boardCode[2] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
-                        elif closest_index == 3:
-                            board[1][0] = 'O'
-                            boardCode[3] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
-                        elif closest_index == 4:
-                            board[1][1] = 'O'
-                            boardCode[4] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
-                        elif closest_index == 5:
-                            board[2] = 'O'
-                            boardCode[5] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
-                        elif closest_index == 6:
-                            board[2][0] = 'O'
-                            boardCode[6] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
-                        elif closest_index == 7:
-                            board[2][1] = 'O'
-                            boardCode[7] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
-                        elif closest_index == 8:
-                            board[2][2] = 'O'
-                            boardCode[8] = -1
-                            cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # if closest_index == 0:
+                        #     board[0][0] = 'O'
+                        #     boardCode[0] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # elif closest_index == 1:
+                        #     board[0][1] = 'O'
+                        #     boardCode[1] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # elif closest_index == 2:
+                        #     board[0][2] = 'O'
+                        #     boardCode[2] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # elif closest_index == 3:
+                        #     board[1][0] = 'O'
+                        #     boardCode[3] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # elif closest_index == 4:
+                        #     board[1][1] = 'O'
+                        #     boardCode[4] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # elif closest_index == 5:
+                        #     board[2] = 'O'
+                        #     boardCode[5] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # elif closest_index == 6:
+                        #     board[2][0] = 'O'
+                        #     boardCode[6] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # elif closest_index == 7:
+                        #     board[2][1] = 'O'
+                        #     boardCode[7] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        # elif closest_index == 8:
+                        #     board[2][2] = 'O'
+                        #     boardCode[8] = -1
+                        #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
 
                         print("Circle {} is in tile {}.".format(i, closest_index))
                 else:
@@ -174,8 +171,8 @@ class circle_state_publisher():
                             2)
             msg_circle = ByteMultiArray()
 
-            if boardCode == [0,0,0,0,0,0,0,0,0]:
-                msg_circle.data = boardCode
+            if board == [0,0,0,0,0,0,0,0,0]:
+                msg_circle.data = np.zeros((3,3))
 
                 self.circle_board_state.publish(msg_circle)
                 rospy.loginfo(msg_circle)
