@@ -17,10 +17,9 @@ Year: 2017
 License: GNU GENERAL PUBLIC LICENSE (GPL)COMP
 """
 
-class BigBrain():
+class tictactoeBrain():
 
   def __init__(self):
-    #supr(BigBrain,self).__init__()
     self.infinity = np.inf
     self.HUMAN = -1
     self.COMP =  +1
@@ -158,7 +157,7 @@ class BigBrain():
                 best = score  # min value
 
     return best
-    print('Best move from Minimax algorithm',best)
+    # print('Best move from Minimax algorithm',best)
 
 
   # def clean():
