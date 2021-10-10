@@ -1,13 +1,20 @@
 #!/usr/bin/env python
 
+## IMPORTS
 import sys
-from std_msgs.msg import String
-from tictactoe_brain import *
-import rospy
-import math
 import subprocess
+
+## ROS Data Types
+from std_msgs.msg import String
+from std_msgs.msg import ByteMultiArray
+
+## Custom tools
+from tictactoe_brain import *
 from robot_move import *
 
+## System tools
+import rospy
+import math
 import pygame
 import numpy as np
 
@@ -30,13 +37,44 @@ BOARD_ROWS = 3
 BOARD_COLS = 3
 board = np.zeros(( BOARD_ROWS , BOARD_COLS ))
 
-countO = 0  # Number of O blocks
-countX = 0  # Number of X blocks 
+
 
 player = [-1, 1]
 # human: -1, computer = 1
 
+pygame.init()
 
+# ---------
+# CONSTANTS FOR GUI
+# ---------
+
+WIDTH = 600
+HEIGHT = 600
+LINE_WIDTH = 15
+WIN_LINE_WIDTH = 15
+BOARD_ROWS = 3
+BOARD_COLS = 3
+SQUARE_SIZE = 200
+CIRCLE_RADIUS = 60
+CIRCLE_WIDTH = 15
+CROSS_WIDTH = 25
+SPACE = 55
+# rgb: red green blue
+RED = (255, 0, 0)
+BG_COLOR = (28, 170, 156)
+LINE_COLOR = (23, 145, 135)
+CIRCLE_COLOR = (239, 231, 200)
+CROSS_COLOR = (66, 66, 66)
+
+screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
+pygame.display.set_caption( 'TIC TAC TOE' )
+screen.fill( BG_COLOR )
+
+# -------------
+# CONSOLE BOARD
+# -------------
+board = np.zeros( (BOARD_ROWS, BOARD_COLS) )
+print(board,"board")
 # -------------
 # FUNCTIONS
 # -------------
@@ -52,7 +90,7 @@ def findDis(pt1x, pt1y, pt2x, pt2y):
 
 
 
-def circle_detect(countO):
+def circle_detect():
     '''
     Function detects circles on tictactoe image and returns updated circle board
      
@@ -61,28 +99,26 @@ def circle_detect(countO):
     '''
     
     # print('expected number of Os: ', countO)
+  
     boardCountO=0
+   
+    boardO = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
 
-    while boardCountO != countO:
-        boardCountO=0
-       
-        boardO = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
+    for row in range(BOARD_ROWS):
+        for col in range(BOARD_COLS):
+            if boardO[row][col] == -1:
+                boardCountO =+ 1
 
-        for row in range(BOARD_ROWS):
-            for col in range(BOARD_COLS):
-                if boardO[row][col] == -1
-                    boardCountO =+ 1
-
-    return boardO
+    return boardO, boardCountO
                 
-def x_detect(countX):
+# def x_detect(countX):
 """
-Function planned to decipher X's on table and board for robotic move
-params:
-countX: number of X's expected on board
+    Function planned to decipher X's on table and board for robotic move
+    params:
+    countX: number of X's expected on board
 """ 
 
-def combine_board(boardO,boardX)
+def combine_board(boardO,boardX):
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
             if boardX[row][col] == 1:
@@ -161,28 +197,98 @@ def Evaluate_Game():
 
     return game
 
+def draw_lines():
+    # 1 horizontal
+    pygame.draw.line( screen, LINE_COLOR, (0, SQUARE_SIZE), (WIDTH, SQUARE_SIZE), LINE_WIDTH )
+    # 2 horizontal
+    pygame.draw.line( screen, LINE_COLOR, (0, 2 * SQUARE_SIZE), (WIDTH, 2 * SQUARE_SIZE), LINE_WIDTH )
 
+    # 1 vertical
+    pygame.draw.line( screen, LINE_COLOR, (SQUARE_SIZE, 0), (SQUARE_SIZE, HEIGHT), LINE_WIDTH )
+    # 2 vertical
+    pygame.draw.line( screen, LINE_COLOR, (2 * SQUARE_SIZE, 0), (2 * SQUARE_SIZE, HEIGHT), LINE_WIDTH )
+
+def draw_figures(board):
+    for row in range(BOARD_ROWS):
+        for col in range(BOARD_COLS):
+            if board[row][col] == -1:
+                pygame.draw.circle( screen, CIRCLE_COLOR, (int( col * SQUARE_SIZE + SQUARE_SIZE//2 ), int( row * SQUARE_SIZE + SQUARE_SIZE//2 )), CIRCLE_RADIUS, CIRCLE_WIDTH )
+            elif board[row][col] == 1:
+                pygame.draw.line( screen, CROSS_COLOR, (col * SQUARE_SIZE + SPACE, row * SQUARE_SIZE + SQUARE_SIZE - SPACE), (col * SQUARE_SIZE + SQUARE_SIZE - SPACE, row * SQUARE_SIZE + SPACE), CROSS_WIDTH )    
+                pygame.draw.line( screen, CROSS_COLOR, (col * SQUARE_SIZE + SPACE, row * SQUARE_SIZE + SPACE), (col * SQUARE_SIZE + SQUARE_SIZE - SPACE, row * SQUARE_SIZE + SQUARE_SIZE - SPACE), CROSS_WIDTH )
+
+def mark_square(row, col, player):
+    board[row][col] = player
+
+def available_square(row, col):
+    return board[row][col] == 0
+
+def restart():
+    screen.fill( BG_COLOR )
+    draw_lines()
+    for row in range(BOARD_ROWS):
+        for col in range(BOARD_COLS):
+            board[row][col] = 0
 
 
 
 def main():
     try:
         game = True;  # decides when game is over
+        draw_lines()
+        
+        countO = 0  # Number of O blocks
+        countX = 0  # Number of X blocks 
 
+        player=1
         while game is True:
               
-            #Define circles
-            boardO = circle_detect(countO)
+            # #Define circles
+            # boardO = circle_detect(countO)
 
-            #Define squares 
-            # boardX = x_detect(countX)
+            # #Define squares 
+            # # boardX = x_detect(countX)
 
-            #Redefine board state
-            # board = combine_board(boardO,boardX) ## TODO:  there is no x detection
+            # #Redefine board state
+            # # board = combine_board(boardO,boardX) ## TODO:  there is no x detection
 
-            # Board 
-            board = ai_turn(board)
+            # # Board 
+            # board = ai_turn(board)
+            while game is True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        sys.exit()
+                    
+                    boardO, boardCountO = circle_detect()
+                    while boardCountO != countO:
+                        boardO, boardCountO = circle_detect()
+                    draw_figures(boardO)
 
+
+
+                    # if event.type == pygame.MOUSEBUTTONDOWN:
+                    #     mouseX = event.pos[0] # x
+                    #     mouseY = event.pos[1] # y
+
+                    #     clicked_row = int(mouseY // SQUARE_SIZE)
+                    #     clicked_col = int(mouseX // SQUARE_SIZE)
+
+                    #     if available_square( clicked_row, clicked_col ):
+
+                    #         mark_square( clicked_row, clicked_col, player )
+                    #         # if check_win( player ):
+                    #         #     game_over = True
+                    #         player = player % 2 + 1
+
+                    #         draw_figures()
+
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_r:
+                            restart()
+                            player = 1
+                            game_over = False
+                            board = np.zeros(( BOARD_ROWS, BOARD_COLS ))
+                pygame.display.update()
 
 
 
@@ -204,97 +310,9 @@ if __name__ == '__main__':
 ## Tested on Luis VM too slow to respond (try testing at CDME)
 
 # # initializes pygame
-# pygame.init()
 
-# # ---------
-# # CONSTANTS FOR GUI
-# # ---------
 
-# WIDTH = 600
-# HEIGHT = 600
-# LINE_WIDTH = 15
-# WIN_LINE_WIDTH = 15
-# BOARD_ROWS = 3
-# BOARD_COLS = 3
-# SQUARE_SIZE = 200
-# CIRCLE_RADIUS = 60
-# CIRCLE_WIDTH = 15
-# CROSS_WIDTH = 25
-# SPACE = 55
-# # rgb: red green blue
-# RED = (255, 0, 0)
-# BG_COLOR = (28, 170, 156)
-# LINE_COLOR = (23, 145, 135)
-# CIRCLE_COLOR = (239, 231, 200)
-# CROSS_COLOR = (66, 66, 66)
-
-# screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
-# pygame.display.set_caption( 'TIC TAC TOE' )
-# screen.fill( BG_COLOR )
-
-# # -------------
-# # CONSOLE BOARD
-# # -------------
-# board = np.zeros( (BOARD_ROWS, BOARD_COLS) )
-# print(board,"board")
-
-# while game is True:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             sys.exit()
-        
-#         if event.type == pygame.MOUSEBUTTONDOWN:
-#             mouseX = event.pos[0] # x
-#             mouseY = event.pos[1] # y
-
-#             clicked_row = int(mouseY // SQUARE_SIZE)
-#             clicked_col = int(mouseX // SQUARE_SIZE)
-
-#             if available_square( clicked_row, clicked_col ):
-
-#                 mark_square( clicked_row, clicked_col, player )
-#                 # if check_win( player ):
-#                 #     game_over = True
-#                 player = player % 2 + 1
-
-#                 draw_figures()
-
-#         if event.type == pygame.KEYDOWN:
-#             if event.key == pygame.K_r:
-#                 restart()
-#                 player = 1
-#                 game_over = False
+# 
                 
-#     pygame.display.update()
-# def draw_lines():
-#     # 1 horizontal
-#     pygame.draw.line( screen, LINE_COLOR, (0, SQUARE_SIZE), (WIDTH, SQUARE_SIZE), LINE_WIDTH )
-#     # 2 horizontal
-#     pygame.draw.line( screen, LINE_COLOR, (0, 2 * SQUARE_SIZE), (WIDTH, 2 * SQUARE_SIZE), LINE_WIDTH )
+#     
 
-#     # 1 vertical
-#     pygame.draw.line( screen, LINE_COLOR, (SQUARE_SIZE, 0), (SQUARE_SIZE, HEIGHT), LINE_WIDTH )
-#     # 2 vertical
-#     pygame.draw.line( screen, LINE_COLOR, (2 * SQUARE_SIZE, 0), (2 * SQUARE_SIZE, HEIGHT), LINE_WIDTH )
-
-# def draw_figures():
-#     for row in range(BOARD_ROWS):
-#         for col in range(BOARD_COLS):
-#             if board[row][col] == 1:
-#                 pygame.draw.circle( screen, CIRCLE_COLOR, (int( col * SQUARE_SIZE + SQUARE_SIZE//2 ), int( row * SQUARE_SIZE + SQUARE_SIZE//2 )), CIRCLE_RADIUS, CIRCLE_WIDTH )
-#             elif board[row][col] == 2:
-#                 pygame.draw.line( screen, CROSS_COLOR, (col * SQUARE_SIZE + SPACE, row * SQUARE_SIZE + SQUARE_SIZE - SPACE), (col * SQUARE_SIZE + SQUARE_SIZE - SPACE, row * SQUARE_SIZE + SPACE), CROSS_WIDTH )    
-#                 pygame.draw.line( screen, CROSS_COLOR, (col * SQUARE_SIZE + SPACE, row * SQUARE_SIZE + SPACE), (col * SQUARE_SIZE + SQUARE_SIZE - SPACE, row * SQUARE_SIZE + SQUARE_SIZE - SPACE), CROSS_WIDTH )
-
-# def mark_square(row, col, player):
-#     board[row][col] = player
-
-# def available_square(row, col):
-#     return board[row][col] == 0
-
-# def restart():
-#     screen.fill( BG_COLOR )
-#     draw_lines()
-#     for row in range(BOARD_ROWS):
-#         for col in range(BOARD_COLS):
-#             board[row][col] = 0

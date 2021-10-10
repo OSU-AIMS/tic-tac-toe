@@ -80,14 +80,14 @@ class circle_state_publisher():
         :param data: Camera data input from subscriber
         """
         try:
-            board = [0,0,0,0,0,0,0,0,0]
+            board = np.zeros((3,3))
             # array for game board 0 -> empty tile, 1 -> X, -1 -> O
             
             # Convert Image to CV2 Frame
             cv_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
             img = cv_image.copy()
 
-            centers = shapeDetect.detectCircle(img)
+            centers,image = shapeDetect.detectCircle(img)
 
             tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
             tf_filename = 'tile_centers_pixel.npy'
@@ -171,11 +171,11 @@ class circle_state_publisher():
                             2)
             msg_circle = ByteMultiArray()
 
-            if board == [0,0,0,0,0,0,0,0,0]:
-                msg_circle.data = np.zeros((3,3))
+            if board == np.zeros((3,3)):
+                # msg_circle.data = board
 
-                self.circle_board_state.publish(msg_circle)
-                rospy.loginfo(msg_circle)
+                # self.circle_board_state.publish(msg_circle)
+                # rospy.loginfo(msg_circle)
                 
                 print("No circles detected on Board")
             else: 
@@ -186,7 +186,7 @@ class circle_state_publisher():
 
                 # Publish
                 self.circle_state_annotation.publish(msg_img)
-                msg_circle.data = boardCode
+                msg_circle.data = board
 
                 self.pub_circle_board_state.publish(msg_circle)
 
@@ -227,7 +227,7 @@ def main():
 
     # Setup Listeners
     cs_callback = circle_state_publisher(pub_circle_state_annotation,pub_circle_board_state)
-    image_sub = rospy.Subscriber("/camera_tile_annotation", Image, cs_callback.runner)
+    image_sub = rospy.Subscriber("/camera/color/image_raw", Image, cs_callback.runner)
 
     # Auto-Run until launch file is shutdown
     try:
