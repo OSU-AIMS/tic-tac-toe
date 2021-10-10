@@ -17,8 +17,8 @@ Finds the correct board positions based on current camera and board center topic
 
 """
 
-brain = BigBrain()
-PickP = tictactoeMotion()
+brain = tictactoeBrain()
+motion = tictactoeMotion()
 
 # array for code to know which player went where
 # Human: -1 (circles)
@@ -54,14 +54,11 @@ def findDis(pt1x, pt1y, pt2x, pt2y):
 
 def circle_detect(countO):
     '''
-    Function should only detect circles: CLEAN IT UP
-    params: 
-    count0: number of O blocks expected
-    current_board= image of the current board state from camera
-    countX = number of X blocks remaining
+    Function detects circles on tictactoe image and returns updated circle board
+     
+    :param count0: int; number of O blocks expected
+    :return boardO: 3x3 representation of which tiles have O's
     '''
-
-    centers = []
     
     # print('expected number of Os: ', countO)
     boardCountO=0
@@ -69,25 +66,42 @@ def circle_detect(countO):
     while boardCountO != countO:
         boardCountO=0
        
-        board = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
+        boardO = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
 
         for row in range(BOARD_ROWS):
             for col in range(BOARD_COLS):
-                if board[row][col] == -1
+                if boardO[row][col] == -1
                     boardCountO =+ 1
-                
-       
 
-def AI_move():
+    return boardO
+                
+def x_detect(countX):
+"""
+Function planned to decipher X's on table and board for robotic move
+params:
+countX: number of X's expected on board
+""" 
+
+def combine_board(boardO,boardX)
+    for row in range(BOARD_ROWS):
+        for col in range(BOARD_COLS):
+            if boardX[row][col] == 1:
+                if boardO[row][col] == 0:
+                    boardO[row][col] = 1
+                else:
+                    print("Overlapping O and X!") 
+    return boardO    
+
+def AI_move(board):
     '''
     params: 
-    - boardCode: state of the board read by computer
+    computer
     - refers to ai_turn from tictactoe_brain script: 
       which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
     '''
 
     ### Using tictactoe_brain code
-    move = brain.ai_turn('X', 'O', boardCode)  # outputs move array based on minimx
+    move = brain.ai_turn('X', 'O', board)  # outputs move array based on minimx
     print('MOVE: ', move)
 
     # modifed ai_turn to return False if no valid moves left
@@ -104,11 +118,13 @@ def AI_move():
         Y = blocksY[countX]
         
         blocksX = -0.110
-        PickP.defineRobotPoses()
+        motion.defineRobotPoses()
         raw_input('To attempt to get X <press enter>')
-        PickP.xPickup(blocksX, Y)
+        motion.xPickup(blocksX, Y)
+        motion.moveToBoard() #need to convert xy matrix to 1-9, how do we without 9 ifs?
 
-      
+    return board
+     
 
 
 def Evaluate_Game():
@@ -121,6 +137,7 @@ def Evaluate_Game():
     '''
     depth = len(brain.empty_cells(board))
     winner = brain.evaluate(board)
+
     # print('Evaluate:', winner)
     if depth == 0:
 
@@ -149,11 +166,25 @@ def Evaluate_Game():
 
 
 def main():
-    # draw_lines()
     try:
         game = True;  # decides when game is over
 
         while game is True:
+              
+            #Define circles
+            boardO = circle_detect(countO)
+
+            #Define squares 
+            # boardX = x_detect(countX)
+
+            #Redefine board state
+            # board = combine_board(boardO,boardX) ## TODO:  there is no x detection
+
+            # Board 
+            board = ai_turn(board)
+
+
+
 
         
 
