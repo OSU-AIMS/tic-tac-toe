@@ -86,7 +86,13 @@ def color_HSV_extract(image):
     cv2.createTrackbar("Lower-S",win_name,0,255,nothing)
     cv2.createTrackbar("Lower-V",win_name,0,255,nothing)
 
-    cv2.createTrackbar("Upper-H",win_name,179,179,nothing)
+    cv2.createTrackbar("Upper-H",win_name,179,179,nothing)  # <-- 179,179 means what?
+    '''
+    OpenCV docs: https://docs.opencv.org/4.2.0/d7/dfc/group__highgui.html#gaf78d2155d30b728fc413803745b67a9b
+    createTrackbar("trackbarname", win_name, value, count, Trackbar Callback)
+    value - option pointer to an int variable whose value reflects position of slider
+    count - Max position of slider 
+    '''
     cv2.createTrackbar("Upper-S",win_name,255,255,nothing)
     cv2.createTrackbar("Upper-V",win_name,255,255,nothing)
 
@@ -107,7 +113,11 @@ def color_HSV_extract(image):
         l_s = cv2.getTrackbarPos("Lower-S",win_name)
         l_v = cv2.getTrackbarPos("Lower-V",win_name)
 
-        u_h = cv2,getTrackbarPos("Upper-H",win_name)
+        u_h = cv2,getTrackbarPos("Upper-H",win_name) 
+        # ^^ as of 10/12/2021: global name 'getTrackbarPos' not defined
+        # Issue is with u_h
+        # u_h = 179, used this to see further errors
+        # need to resolve this issue to get trackbar GUI to appear
         u_s = cv2.getTrackbarPos("Upper-S",win_name)
         u_v = cv2.getTrackbarPos("Upper-V",win_name)
 
@@ -120,11 +130,11 @@ def color_HSV_extract(image):
         mask = cv2.inRange(hsv,lower_range,upper_range)
 
         # Also visualize real part of target color (Optional)
-        # res = cv2.bitwise_and(frame,frame,mask-mask)
+        res = cv2.bitwise_and(frame,frame,mask-mask)
 
         # Converting binary mask to 3 channel image
         # so we can stack it with others
-        mask_3 = cv2.cvtColor(mask, cv2.GRAY2BGR)
+        mask_3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR) 
 
         # stack mask, orginal frame & filtered result
         stacked = np.hstack((mask_3,frame,res))
@@ -141,15 +151,14 @@ def color_HSV_extract(image):
         # if user presses 's' print this array
         # 's' is to save to npy file
         if key == ord('s'):
-            thearray =[[l_h,l_s,l_v],[u_h,u_s,u_v]]
+            thearray =[[l_h, l_s, l_v],[u_h, u_s, u_v]]
             print(thearray)
 
         # Also save this array as penval.npy
         np.save('hsv_value','thearray')
         break
 
-    # Realsense camera & destroy windows
-
+    # Realse the camera & destroy windows
     # cap.release()
     cv2.destroyAllWindows()
 
