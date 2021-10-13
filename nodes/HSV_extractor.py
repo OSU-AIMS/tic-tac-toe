@@ -162,6 +162,44 @@ def color_HSV_extract(image):
     # cap.release()
     cv2.destroyAllWindows()
 
+def slide_window(image):
+    '''
+    purpose: slides an array (nxn pixels) across an image to find color
+    - obtain heat map of the color
+    - find pixel location
+    - get transform
+    '''
+    # Uncomment below for at home testing with webcam
+    # cap = cv2.VideoCapture(0)
+    # cap.set(3,1280)
+    # cap.set(4,720) 
+
+    # (RGB)
+    # Red: (255,0,0)
+    # Green: (0,255,0)
+    # Blue: (0,0,255)
+    print("Your OpenCV version is: " + cv2.__version__)  
+    # make matrix size 50x50 with rgb values inside
+    red = [255,0,0]
+    green = [0,255,0]
+    blue = [0,0,255]
+
+    win_im = np.ones((3,3))  # create 50x50 array window to slide over image 
+
+    # Finding Blue Square - origin
+    window = win_im.dot(blue)
+    print(window)
+
+    frame = image.copy()      # frame to slide window over
+
+    # conv = cv2.convolve(frame,window)
+    # OpenCV docs: https://docs.opencv.org/4.2.0/d4/d25/classcv_1_1cuda_1_1Convolution.html
+    conv = cv2.filter2D(frame,-1,win_im)
+    cv2.imshow("Convolution",conv)
+    cv2.waitKey(0)
+
+    # Uncomment below when using webcam
+    # cap.release()
 
 def runner(data):
     """
@@ -173,7 +211,12 @@ def runner(data):
         # Convert Image to CV2 Frame
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
-        color_HSV_extract(cv_image)
+
+        # Uncomment below to run HSV extraction code
+        # color_HSV_extract(cv_image)
+
+        # Convolution Function
+        slide_window(cv_image)
 
 
     except rospy.ROSInterruptException:
@@ -189,7 +232,7 @@ def runner(data):
 def main():
     # Setup Node
     rospy.init_node('HSV_Extractor', anonymous=False)
-    rospy.loginfo(">> HSV_Extractor Node Successfully Created")
+    rospy.loginfo(">> HSV/Convolution Node Successfully Created")
 
     # Setup Publishers
     pub_center = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
