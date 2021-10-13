@@ -102,7 +102,11 @@ def circle_detect():
   
     boardCountO=0
    
-    boardO = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
+    board = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
+    # print(board.data,'boardmsg')
+    boarda = np.array(board.data)
+
+    boardO = boarda.reshape((3,3))
 
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
@@ -237,7 +241,7 @@ def main():
         game = True;  # decides when game is over
         draw_lines()
         
-        countO = 0  # Number of O blocks
+        countO = 1  # Number of O blocks, player goes first
         countX = 0  # Number of X blocks 
 
         player=1

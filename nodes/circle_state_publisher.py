@@ -80,21 +80,21 @@ class circle_state_publisher():
         :param data: Camera data input from subscriber
         """
         try:
-            board = np.zeros((3,3))
+            board = [0,0,0,0,0,0,0,0,0]
             # array for game board 0 -> empty tile, 1 -> X, -1 -> O
             
             # Convert Image to CV2 Frame
             cv_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
             img = cv_image.copy()
 
-            centers,image = shapeDetect.detectCircle(img)
+            centers = shapeDetect.detectCircle(img, radius=15, tolerance=5)
 
             tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
             tf_filename = 'tile_centers_pixel.npy'
             xyList = np.load(tictactoe_pkg + '/' + tf_filename)
 
                 
-            closest_index = []
+            
             closest_square = [0, 0, 0, 0, 0, 0, 0, 0, 0]
             closest = 10000
 
@@ -102,14 +102,13 @@ class circle_state_publisher():
             for i in range(len(centers)):
                 distanceFromCenter = findDis(centers[i][0], centers[i][1], xyList[4][0], xyList[4][1])
 
-                if distanceFromCenter < 200:  # TODO update to be according to board size
-                    # look at tiles 0-8 and compare distance from circle
-
+                if distanceFromCenter < 145:  # 100 * sqrt2
+                    closest_index = None
                     for j in range(9):
                         distance = findDis(centers[i][0], centers[i][1], xyList[j][0], xyList[j][1])
                         # findDis params :(pt1x,pt1y, pt2x,pt2y)
 
-                        if distance < 40 and distance < closest:
+                        if distance < 50 and distance < closest:
                             # this creates a boundary just outside the ttt board of 40 pixels away from each tile
                             # any circle within this boundary is likely to be detected as a piece in one of the 9 tiles
                             closest = distance
@@ -117,7 +116,7 @@ class circle_state_publisher():
                     
                     if closest_index is not None:
                         board[closest_index] = -1
-                        cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
+                        cv2.circle(img, centers[i], 15, (0, 200, 40), 7)
 
                         # print('inside board assignment ifs')
                         # Checks which of the 9 tiles the O block is in
@@ -169,32 +168,19 @@ class circle_state_publisher():
                 cv2.putText(img, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
                             (0, 0, 0),
                             2)
+            
+            try:
+                msg_img = self.bridge.cv2_to_imgmsg(img, 'rgb8')
+            except CvBridgeError as e:
+                print(e)
+
+            # Publish
+            self.circle_state_annotation.publish(msg_img)
+
             msg_circle = ByteMultiArray()
-
-            if board == np.zeros((3,3)):
-                # msg_circle.data = board
-
-                # self.circle_board_state.publish(msg_circle)
-                # rospy.loginfo(msg_circle)
-                
-                print("No circles detected on Board")
-            else: 
-                try:
-                    msg_img = self.bridge.cv2_to_imgmsg(img, 'rgb8')
-                except CvBridgeError as e:
-                    print(e)
-
-                # Publish
-                self.circle_state_annotation.publish(msg_img)
-                msg_circle.data = board
-
-                self.pub_circle_board_state.publish(msg_circle)
-
-                # tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-                # filename = 'circle_board_state.npy'
-
-                # outputFilePath = tictactoe_pkg + '/' + filename
-                # np.save(outputFilePath, boardCode)
+            msg_circle.data = board
+            self.circle_board_state.publish(msg_circle)
+            rospy.loginfo(msg_circle)
 
         except rospy.ROSInterruptException:
             exit()
