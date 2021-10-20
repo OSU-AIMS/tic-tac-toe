@@ -39,6 +39,7 @@ import pyrealsense2 as rs
 import time
 from math import pi, radians, sqrt, atan
 import numpy as np
+import matplotlib.pyplot as plt 
 
 
 # Ref
@@ -179,24 +180,51 @@ def slide_window(image):
     # Green: (0,255,0)
     # Blue: (0,0,255)
     print("Your OpenCV version is: " + cv2.__version__)  
-    # make matrix size 50x50 with rgb values inside
-    red = [255,0,0]
-    green = [0,255,0]
-    blue = [0,0,255]
+    
+    # Uncomment below when using camera feed
+    # frame = image.copy()
 
-    win_im = np.ones((3,3))  # create 50x50 array window to slide over image 
+    # Uncomment below when using image
+    frame = cv2.imread('/sample_content/sample_images/CorrectedColoredSquares_Color.png')
+
+    # # make matrix size 50x50 with rgb values inside
+    # red = [255,0,0]
+    # green = [0,255,0]
+    # blue = [0,0,255]
+
+    # Ref: https://www.geeksforgeeks.org/image-filtering-using-convolution-in-opencv/amp/
+    # Plan as of 10/20/21: use read image into kernel matrix then perform convolutions 
+    # GeeksforGeeks use Python 3 (we have Python 2.7)
+    kernel_blue = cv2.imread('/sample_content/sample_images/blue_square_crop.png',0)
+    # Kernel size must by n x n where n- odd numbers
+    # blue, green, and red square crops are 55 x 55 pixels
+
+    blue_heatmap = cv2.filter2D(frame,-1,kernel_blue)
+    '''
+     Current Error: 
+    # error: [ERROR] [1634766620.878839]: bad callback: <function runner at 0x7f931fd92c50> 
+    # OpenCV(4.2.0) /io/opencv/modules/imgproc/src/filterengine.hpp:363: 
+    error: (-215:Assertion failed) anchor.inside(Rect(0, 0, ksize.width, ksize.height)) in function 'normalizeAnchor'
+    '''
+    # ^^ Convert image to matrix?
+
+    # cv2.imshow('Original Image',frame)
+    # cv2.waitKey(0)
+    plt.imshow('Blue Heat Map',blue_heatmap)
+    plt.show()
+
 
     # Finding Blue Square - origin
-    window = win_im.dot(blue)
-    print(window)
+    # window = win_im.dot(blue)
+    # print(window)
 
-    frame = image.copy()      # frame to slide window over
+    # frame = image.copy()      # frame to slide window over
 
-    # conv = cv2.convolve(frame,window)
-    # OpenCV docs: https://docs.opencv.org/4.2.0/d4/d25/classcv_1_1cuda_1_1Convolution.html
-    conv = cv2.filter2D(frame,-1,win_im)
-    cv2.imshow("Convolution",conv)
-    cv2.waitKey(0)
+    # # conv = cv2.convolve(frame,window)
+    # # OpenCV docs: https://docs.opencv.org/4.2.0/d4/d25/classcv_1_1cuda_1_1Convolution.html
+    # conv = cv2.filter2D(frame,-1,win_im)
+    # cv2.imshow("Convolution",conv)
+    # cv2.waitKey(0)
 
     # Uncomment below when using webcam
     # cap.release()
@@ -215,7 +243,7 @@ def runner(data):
         # Uncomment below to run HSV extraction code
         # color_HSV_extract(cv_image)
 
-        # Convolution Function
+        # Using Image Kernel to detect color
         slide_window(cv_image)
 
 
