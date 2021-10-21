@@ -182,10 +182,16 @@ def slide_window(image):
     print("Your OpenCV version is: " + cv2.__version__)  
     
     # Uncomment below when using camera feed
-    # frame = image.copy()
+    frame = image.copy()
 
     # Uncomment below when using image
-    frame = cv2.imread('/sample_content/sample_images/CorrectedColoredSquares_Color.png')
+    # frame = cv2.imread('/sample_content/sample_images/CorrectedColoredSquares_Color.png')
+    # ^^ Not finding above image, when using print(frame), output is 'None' instead of the RGB values
+    print(frame)
+    size = frame.shape
+
+    print(size)
+
 
     # # make matrix size 50x50 with rgb values inside
     # red = [255,0,0]
@@ -195,18 +201,40 @@ def slide_window(image):
     # Ref: https://www.geeksforgeeks.org/image-filtering-using-convolution-in-opencv/amp/
     # Plan as of 10/20/21: use read image into kernel matrix then perform convolutions 
     # GeeksforGeeks use Python 3 (we have Python 2.7)
-    kernel_blue = cv2.imread('/sample_content/sample_images/blue_square_crop.png',0)
+    kernel_blue = cv2.imread('/sample_content/sample_images/blue_square_crop.png')
+    
+    # print('Kerenel')
+    # print(kernel_blue) # Also not finding the Kernel
     # Kernel size must by n x n where n- odd numbers
     # blue, green, and red square crops are 55 x 55 pixels
 
     blue_heatmap = cv2.filter2D(frame,-1,kernel_blue)
+    print(blue_heatmap)
+    # opencv docs on filter2D:
+    # https://docs.opencv.org/4.2.0/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04
+    '''
+    void cv::filter2D(
+        InputArray src, 
+        OutputArray dst, 
+        int ddepth, 
+        InputArray kernel,
+        Point anchor = Point(-1,-1),
+        double delta = 0,
+        int borderType = BORDER_DEFAULT 
+    )   
+
+    '''
+
+
     '''
      Current Error: 
     # error: [ERROR] [1634766620.878839]: bad callback: <function runner at 0x7f931fd92c50> 
     # OpenCV(4.2.0) /io/opencv/modules/imgproc/src/filterengine.hpp:363: 
     error: (-215:Assertion failed) anchor.inside(Rect(0, 0, ksize.width, ksize.height)) in function 'normalizeAnchor'
     '''
-    # ^^ Convert image to matrix?
+    # 10/20:^^ Convert image to matrix?
+    # 10/21: nope. frame is not even being read properly using image.
+    # using camera feed, same error occurs. 
 
     # cv2.imshow('Original Image',frame)
     # cv2.waitKey(0)
