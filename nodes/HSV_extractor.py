@@ -202,6 +202,9 @@ def slide_window(image):
     # Plan as of 10/20/21: use read image into kernel matrix then perform convolutions 
     # GeeksforGeeks use Python 3 (we have Python 2.7)
     kernel_blue = cv2.imread('/sample_content/sample_images/blue_square_crop.png')
+    kernel_blue = np.asanyarray(kernel_blue,np.float32)
+    # ^ Kernel values need to be floating-point numbers
+    # numpy.asanyarray({insert Kernel variable}, np.float32)
     
     # print('Kerenel')
     # print(kernel_blue) # Also not finding the Kernel
@@ -224,13 +227,15 @@ def slide_window(image):
     )   
 
     '''
-
-
     '''
      Current Error: 
     # error: [ERROR] [1634766620.878839]: bad callback: <function runner at 0x7f931fd92c50> 
     # OpenCV(4.2.0) /io/opencv/modules/imgproc/src/filterengine.hpp:363: 
     error: (-215:Assertion failed) anchor.inside(Rect(0, 0, ksize.width, ksize.height)) in function 'normalizeAnchor'
+
+    ^^ filter2D isn't receiving the proper image type. 
+    Kernel values need to be floating-point numbers
+    numpy.asanyarray({insert Kernel variable}, np.float32)
     '''
     # 10/20:^^ Convert image to matrix?
     # 10/21: nope. frame is not even being read properly using image.
