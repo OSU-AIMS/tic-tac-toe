@@ -146,12 +146,16 @@ def detectBoard_contours(image):
     # shapeDetect.drawAxis(img, cntr, p2, (255, 80, 255), 1)
 
     # convert angle to a rotation matrix with rotation about z-axis
-    boardRotationMatrix = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
-                                    [math.sin(radians(z_orient)), math.cos(radians(z_orient)), 0],
-                                    [0, 0, 1]])
+    # boardRotationMatrix = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
+    #                                 [math.sin(radians(z_orient)), math.cos(radians(z_orient)), 0],
+    #                                 [0, 0, 1]])
+    boardRotationMatrix = np.array([[1, 0, 0],
+                                    [0,math.cos(radians(z_orient)), -math.sin(radians(z_orient))],
+                                    [0,math.sin(radians(z_orient)), math.cos(radians(z_orient))]])
 
     # Transformation (board from imageFrame to camera)
     tf_camera2board = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
+
 
     return scaledCenter, boardImage, tf_camera2board
 
@@ -459,15 +463,16 @@ class board_publisher():
 
             # Convert Image to CV2 Frame
             cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+
             boardImage = cv_image.copy()
 
             # characterize board location and orientation
 
             # Run using color (use HSV extraction to obtain accurate HSV values)
-            scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
+            # scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
             
             # Run using contours
-            # scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
+            scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
         
             
 
@@ -501,7 +506,6 @@ class board_publisher():
                 ]
             #TODO: Use native techniques. http://docs.ros.org/en/melodic/api/tf_conversions/html/python/
             tf_fixed2camera = tf_helper.quant_pose_to_tf_matrix(tf_fixed2camera_vector)
-
 
             rot_camera_hardcode = np.array([[0, -1, 0], [0, 0, 1], [-1, 0, 0]])
 
