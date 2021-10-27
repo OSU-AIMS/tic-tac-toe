@@ -5,7 +5,7 @@
     <include file="$(find realsense2_camera)/launch/rs_camera.launch" >
         <arg name="align_depth" value="true"/>
         <arg name="enable_pointcloud" value="true"/>
-        <arg name="mode" value="manual"/>
+        <!-- <arg name="mode" value="manual"/> -->
     </include>
 
     <!-- Setup Node for 'Board-TF-Publisher' -->

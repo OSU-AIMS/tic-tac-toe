@@ -29,7 +29,7 @@ def prepare_path_tf_ready():
     centerxDist = 0.0635
     centeryDist = -0.0635
 
-    pieceHeight = -0.03
+    pieceHeight = 0.03
 
     """
     tictactoe board order assignment:
@@ -172,7 +172,7 @@ class tictactoeMotion:
 
         # Convert tfs to robot poses (Quat)
         matr_rot = tileCenters2world[0][0:3, 0:3]
-        print('rotation matrix', matr_rot)
+        # print('rotation matrix', matr_rot)
 
         b = Quaternion(matrix=matr_rot)
 
@@ -180,7 +180,7 @@ class tictactoeMotion:
             trans_rot = tileCenters2world[i][0:3, 3:4]
             # print('Trans_rot in defineRobotPoses',trans_rot)
             new_pose = [trans_rot[0][0], trans_rot[1][0], trans_rot[2][0], b[1], b[2], b[3], b[0]]
-            print('New Pose:',new_pose)
+            # print('New Pose:',new_pose)
             self.robot_poses.append(new_pose)
 
     def moveToBoard(self, pose_number, update=True):
@@ -196,6 +196,7 @@ class tictactoeMotion:
 
         # print('self.robot_poses',self.robot_poses)
         print('Tile Number:',pose_number)
+        print('Pose:',self.robot_poses[pose_number])
         self.rc.goto_Quant_Orient(self.robot_poses[pose_number])
 
         # wpose = self.rc.move_group.get_current_pose().pose
@@ -206,8 +207,7 @@ class tictactoeMotion:
         
         # # As of 8/12/21,it doesn't reach the below lines
         # self.rc.send_io(0)        # open gripper
-        # print('Grippers are now open')
-        self.scanPos()
+        # print('Grippers are now open'
         # print('returned to scan position')
 
 

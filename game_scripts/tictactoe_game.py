@@ -61,8 +61,8 @@ CROSS_WIDTH = 25
 SPACE = 55
 # rgb: red green blue
 RED = (255, 0, 0)
-BG_COLOR = (28, 170, 156)
-LINE_COLOR = (23, 145, 135)
+BG_COLOR = (187, 0, 0)
+LINE_COLOR = (102, 102, 102)
 CIRCLE_COLOR = (239, 231, 200)
 CROSS_COLOR = (66, 66, 66)
 
@@ -74,7 +74,6 @@ screen.fill( BG_COLOR )
 # CONSOLE BOARD
 # -------------
 board = np.zeros( (BOARD_ROWS, BOARD_COLS) )
-print(board,"board")
 # -------------
 # FUNCTIONS
 # -------------
@@ -104,14 +103,12 @@ def circle_detect():
    
     board = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
     # print(board.data,'boardmsg')
-    boarda = np.array(board.data)
+    board_np = np.array(board.data)
 
-    boardO = boarda.reshape((3,3))
+    boardCountO = np.count_nonzero(board_np==-1)
 
-    for row in range(BOARD_ROWS):
-        for col in range(BOARD_COLS):
-            if boardO[row][col] == -1:
-                boardCountO =+ 1
+    boardO = board_np.reshape((3,3))
+
 
     return boardO, boardCountO
                 
@@ -122,17 +119,17 @@ def circle_detect():
     countX: number of X's expected on board
 """ 
 
-def combine_board(boardO,boardX):
+def combine_board(boardO,board):
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
-            if boardX[row][col] == 1:
-                if boardO[row][col] == 0:
-                    boardO[row][col] = 1
+            if boardO[row][col] == -1:
+                if board[row][col] == 0:
+                    board[row][col] = -1
                 else:
                     print("Overlapping O and X!") 
     return boardO    
 
-def AI_move(board):
+def AI_move(board,countX):
     '''
     params: 
     computer
@@ -149,10 +146,10 @@ def AI_move(board):
         Evaluate_Game(move, board)
 
     else:
-        blocksY = [.517, .5524, .5806, .609, .638, .671]
+        blocksY = [.517, .5524, .5806, .609, .638, .671] #hardcoded values for preplaced X's
+
         board[move[0]][move[1]] = 1
         
-
         # Uncomment below after fixing orientation
         print('attempting to get X:', countX)
         Y = blocksY[countX]
@@ -161,10 +158,28 @@ def AI_move(board):
         motion.defineRobotPoses()
         raw_input('To attempt to get X <press enter>')
         motion.xPickup(blocksX, Y)
-        motion.moveToBoard() #need to convert xy matrix to 1-9, how do we without 9 ifs?
+            # if move[0] = 0 and move[1] == 0:
+            #     pose_number = 0
+            # if move[0] = 0 and move[1] == 0:
+            #     pose_number = 0
+            # if move[0] = 0 and move[1] == 0:
+            #     pose_number = 0
+            # if move[0] = 0 and move[1] == 0:
+            #     pose_number = 0
+            # if move[0] = 0 and move[1] == 0:
+            #     pose_number = 0
+        
+        if move[0] == 0:
+            pose_number = move[1]
+        if move[0] == 1:
+            pose_number = 3 + move[1]
+        if move[0] == 2:
+            pose_number = 6 + move[1]
+        raw_input('To attempt to get pose{} <press enter>'.format(pose_number))
+        motion.moveToBoard(pose_number) #need to convert xy matrix to 1-9, how do we without 9 ifs?
 
     return board
-     
+
 
 
 def Evaluate_Game():
@@ -245,7 +260,8 @@ def main():
         countX = 0  # Number of X blocks 
 
         player=1
-        while game is True:
+        board = np.zeros( (BOARD_ROWS, BOARD_COLS) )
+        # while game is True:
               
             # #Define circles
             # boardO = circle_detect(countO)
@@ -258,41 +274,53 @@ def main():
 
             # # Board 
             # board = ai_turn(board)
-            while game is True:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        sys.exit()
-                    
+        while game is True:
+            motion.scanPos()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                
+                boardO, boardCountO = circle_detect()
+                while boardCountO != countO:
                     boardO, boardCountO = circle_detect()
-                    while boardCountO != countO:
-                        boardO, boardCountO = circle_detect()
-                    draw_figures(boardO)
 
-
-
-                    # if event.type == pygame.MOUSEBUTTONDOWN:
-                    #     mouseX = event.pos[0] # x
-                    #     mouseY = event.pos[1] # y
-
-                    #     clicked_row = int(mouseY // SQUARE_SIZE)
-                    #     clicked_col = int(mouseX // SQUARE_SIZE)
-
-                    #     if available_square( clicked_row, clicked_col ):
-
-                    #         mark_square( clicked_row, clicked_col, player )
-                    #         # if check_win( player ):
-                    #         #     game_over = True
-                    #         player = player % 2 + 1
-
-                    #         draw_figures()
-
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_r:
-                            restart()
-                            player = 1
-                            game_over = False
-                            board = np.zeros(( BOARD_ROWS, BOARD_COLS ))
+                draw_figures(boardO)
                 pygame.display.update()
+                board = combine_board(boardO,board)
+
+                print("Current Board:{}".format(board))
+
+                board = AI_move(board,countX)
+
+                countO += 1
+                countX += 1
+
+
+
+
+                # if event.type == pygame.MOUSEBUTTONDOWN:
+                #     mouseX = event.pos[0] # x
+                #     mouseY = event.pos[1] # y
+
+                #     clicked_row = int(mouseY // SQUARE_SIZE)
+                #     clicked_col = int(mouseX // SQUARE_SIZE)
+
+                #     if available_square( clicked_row, clicked_col ):
+
+                #         mark_square( clicked_row, clicked_col, player )
+                #         # if check_win( player ):
+                #         #     game_over = True
+                #         player = player % 2 + 1
+
+                #         draw_figures()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        restart()
+                        player = 1
+                        game_over = False
+                        board = np.zeros(( BOARD_ROWS, BOARD_COLS ))
+            pygame.display.update()
 
 
 

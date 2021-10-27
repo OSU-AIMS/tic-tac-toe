@@ -96,7 +96,7 @@ class circle_state_publisher():
                 
             
             closest_square = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-            closest = 10000
+            
 
             # for each circle found
             for i in range(len(centers)):
@@ -104,11 +104,14 @@ class circle_state_publisher():
 
                 if distanceFromCenter < 145:  # 100 * sqrt2
                     closest_index = None
+                    closest = 10000
                     for j in range(9):
                         distance = findDis(centers[i][0], centers[i][1], xyList[j][0], xyList[j][1])
+
+                        # print("Circle {} is {} from tile {}".format(i,distance,j))
                         # findDis params :(pt1x,pt1y, pt2x,pt2y)
 
-                        if distance < 50 and distance < closest:
+                        if distance < 40 and distance < closest:
                             # this creates a boundary just outside the ttt board of 40 pixels away from each tile
                             # any circle within this boundary is likely to be detected as a piece in one of the 9 tiles
                             closest = distance
@@ -158,8 +161,8 @@ class circle_state_publisher():
                         #     cv2.circle(img, centers[i], 15, (0, 200, 40), 13)
 
                         print("Circle {} is in tile {}.".format(i, closest_index))
-                else:
-                    print("Circle {} is not on the board".format(i))
+                    else:
+                        print("Circle {} is not on the board".format(i))
 
             # print('Physical Board: ', board)
             # print('Board Computer sees:', boardCode)
