@@ -30,10 +30,11 @@ sys.path.insert(1, path_2_game_scripts)
 
 import rospy
 import tf2_ros
+import tf2_msgs.msg
 
 # ROS Data Types
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import TransformStamped
+import geometry_msgs.msg 
 
 # Custom Tools
   # from Realsense_tools import *
@@ -137,21 +138,34 @@ def detectBoard_contours(image):
 
     # Define 3x1 array of board translation (x, y, z) in meters
     boardTranslation = np.array(
-        [[scaledCenter[0]], [scaledCenter[1]], [0.655]])  ## TODO use depth from camera data
+        [[.655], [-scaledCenter[0]], [-scaledCenter[1]]])  ## TODO use depth from camera data
+        # [[scaledCenter[0]], [scaledCenter[1]], [-0.655]])
 
     # Find rotation of board on the table plane, only a z-axis rotation angle
-    z_orient = shapeDetect.newOrientation(boardPoints)
+    z_orient = -shapeDetect.newOrientation(boardPoints)
 
     # shapeDetect.drawAxis(img, cntr, p1, (255, 255, 0), 1)
     # shapeDetect.drawAxis(img, cntr, p2, (255, 80, 255), 1)
 
     # convert angle to a rotation matrix with rotation about z-axis
-    # boardRotationMatrix = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
-    #                                 [math.sin(radians(z_orient)), math.cos(radians(z_orient)), 0],
-    #                                 [0, 0, 1]])
-    boardRotationMatrix = np.array([[1, 0, 0],
-                                    [0,math.cos(radians(z_orient)), -math.sin(radians(z_orient))],
-                                    [0,math.sin(radians(z_orient)), math.cos(radians(z_orient))]])
+    board_rot = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
+                                    [math.sin(radians(z_orient)), math.cos(radians(z_orient)), 0],
+                                    [0, 0, 1]])
+    y_neg90 = np.array([[ 0,  0, -1],
+                    [0,  1,  0],
+                    [1,  0,  0]])
+
+    z_neg90 = np.array([[0,1,0],
+                        [-1,0,0],
+                        [0,0,1]])
+
+    camera_rot = np.dot(y_neg90,z_neg90)
+
+    # board_rot = np.array([[1, 0, 0],
+    #                                 [0,math.cos(radians(z_orient)), -math.sin(radians(z_orient))],
+    #                                 [0,math.sin(radians(z_orient)), math.cos(radians(z_orient))]])
+
+    boardRotationMatrix = np.dot(camera_rot,board_rot)
 
     # Transformation (board from imageFrame to camera)
     tf_camera2board = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
@@ -494,7 +508,7 @@ class board_publisher():
                 # todo: Rewrite how the camera-tf is defined. Suggestion: grab from topic 'tf'
                 # ttt_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
                 # tf_fixed2camera_filepath = np.load(ttt_pkg + "/tf_fixed2camera.npy")
-            tf_matrix = self.tfBuffer.lookup_transform('camera_link', 'base_link', rospy.Time(0))
+            tf_matrix = self.tfBuffer.lookup_transform('base_link', 'camera_link', rospy.Time(0))
             tf_fixed2camera_vector = [ 
                 tf_matrix.transform.translation.x,
                 tf_matrix.transform.translation.y,
@@ -508,7 +522,7 @@ class board_publisher():
             tf_fixed2camera = tf_helper.quant_pose_to_tf_matrix(tf_fixed2camera_vector)
 
             rot_camera_hardcode = np.array([[0, -1, 0], [0, 0, 1], [-1, 0, 0]])
-
+            print("fixed to camera:",tf_fixed2camera)
 
             # Distance from Camera to Board
             # .. Hacky. Extract height from camera global transform.
@@ -520,26 +534,30 @@ class board_publisher():
 
             ## Build Board_2_World TF
             tf_fixed2board = np.matmul(tf_fixed2camera, tf_camera2board)
-
+            print("fixed to board:",tf_fixed2board)
             ## Convert TF (4x4) Array to Pose (7-element list)
-            pose_goal = tf_helper.transformToPose(tf_fixed2board)
+            pose_goal = tf_helper.transformToPose(tf_camera2board)
 
             ## Publish Board Pose
-            board_msg = TransformStamped()
-            board_msg.header.frame_id = 'base_link'# change to camera link frame id (then just lookup transform for board to origin)
+            board_msg = geometry_msgs.msg.TransformStamped()
+            board_msg.header.frame_id = 'camera_link'# change to camera link frame id (then just lookup transform for board to origin)
             board_msg.child_frame_id = 'ttt_board'
+            board_msg.header.stamp = rospy.Time.now()
+
             board_msg.transform.translation.x = pose_goal[0]
             board_msg.transform.translation.y = pose_goal[1]
             board_msg.transform.translation.z = pose_goal[2]
+
             board_msg.transform.rotation.x = pose_goal[3]
             board_msg.transform.rotation.y = pose_goal[4]
             board_msg.transform.rotation.z = pose_goal[5]
             board_msg.transform.rotation.w = pose_goal[6]
 
+            board_msg_tfm = tf2_msgs.msg.TFMessage([board_msg])
 
             # Publish
-            self.center_pub.publish(board_msg)
-            rospy.loginfo(board_msg)
+            self.center_pub.publish(board_msg_tfm)
+            # rospy.loginfo(board_msg)
 
 
             # Draw Tile Numbers onto Frame
@@ -609,7 +627,7 @@ def main():
 
 
     # Setup Publishers
-    pub_center = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
+    pub_center = rospy.Publisher("/tf", tf2_msgs.msg.TFMessage, queue_size=20)
     pub_camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
 
     # rate = rospy.Rate(0.1)
