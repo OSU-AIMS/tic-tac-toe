@@ -133,7 +133,7 @@ def kernel_color_detect(image):
     # opencv docs on filter2D:
     # https://docs.opencv.org/4.2.0/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04
     '''
-    void cv::filter2D(
+    filter2D parameters:
         InputArray src, 
         OutputArray dst, 
         int ddepth, 
@@ -150,16 +150,33 @@ def kernel_color_detect(image):
 
     cv2.destroyAllWindows()
 
-    # Finding Blue Square - origin
-    # window = win_im.dot(blue)
-    # print(window)
+    # finding center of contour from heatmap
+    # based on: https://learnopencv.com/contour-detection-using-opencv-python-c/
+    # using contour detection
 
-    # frame = image.copy()      # frame to slide window over
+    # conver to grayscale
+    blue_heatmap_gray = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2GRAY)
 
-    # # conv = cv2.convolve(frame,window)
-    # # OpenCV docs: https://docs.opencv.org/4.2.0/d4/d25/classcv_1_1cuda_1_1Convolution.html
-    # conv = cv2.filter2D(frame,-1,win_im)
-    # cv2.imshow("Convolution",conv)
+    # apply binary thresholding
+    ret, thresh = cv2.threshold(img_gray, 150, 255, cv2.THRESH_BINARY)
+
+    # visualize the binary image
+    cv2.imshow('Binary Blue HeatMap', thresh)
+
+    # detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
+    contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)                                      
+
+    # draw contours on the original image
+    image_copy = blue_heatmap.copy()
+
+    cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+
+    # see the results
+    cv2.imshow('None approximation', image_copy)
+    cv2.waitKey(0)
+    cv2.imwrite('contours_none_image1.jpg', image_copy)
+
+
     cv2.waitKey(0)
 
     # Uncomment below when using webcam
