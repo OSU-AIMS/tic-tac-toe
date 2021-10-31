@@ -150,7 +150,7 @@ def kernel_color_detect(image):
 
     cv2.destroyAllWindows()
 
-    # finding center of contour from heatmap
+    ############ finding center of contour from heatmap
     # based on: https://learnopencv.com/contour-detection-using-opencv-python-c/
     # using contour detection
 
