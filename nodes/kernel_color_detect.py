@@ -100,17 +100,21 @@ def kernel_color_detect(image):
     # 10/28: Blue square is not flipped
 
 
+    #Creating kernel
     kernel_blue = np.zeros((51,51))  # creating an empty array
-    # Uncomment below to use RGB values
-    kernel_blue = np.append(kernel_blue,[0,0,255])
-    # Uncomment below to use image
-    # kernel_blue = np.append(kernel_blue,blue_square)
     
-    print('kernel_blue:',kernel_blue) # --> 10/26: image being read
-    kernel_blue = np.asanyarray(kernel_blue,np.float32)
+    # Uncomment below to use RGB values in Kernel
+    kernel_blue = np.append(kernel_blue,[0,0,255])
 
-    # kernel_blue = cv2.flip(kernel_blue,-1) # flipping kernel horizontally and vertically
+    # Uncomment below to use Image as Kernel
+    # kernel_blue = np.append(kernel_blue,blue_square)
+    # print('kernel_blue:',kernel_blue)
+    # kernel_blue = np.asanyarray(kernel_blue,np.float32)
+
+    # Flipping the Kernel
+    # kernel_blue = cv2.flip(kernel_blue,0)
     # can't assume kernel to be symmetric matrix, need to flip it before passing it to filter2D
+    # cv2.flip()
     # negative number: flips about both axes
     #  0: flip around x-axis
     # postive number: flip around y-axis
@@ -118,10 +122,12 @@ def kernel_color_detect(image):
  
     '''
     ISSUE: 10/28:
-    - how to obtain pixel location:
+    - how to obtain pixel location from heatmap:
     potential help: https://stackoverflow.com/questions/59599568/find-sub-pixel-maximum-on-a-2d-array
 
     '''
+    # frame = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+    # kernel_blue = cv2.cvtColor(kernel_blue,cv2.COLOR_RGB2GRAY)
 
 
     # print('Kerenel')
@@ -129,9 +135,6 @@ def kernel_color_detect(image):
     # Kernel size must by n x n where n- odd numbers
     # blue, green, and red square crops are 55 x 55 pixels
     blue_heatmap = cv2.filter2D(frame,-3,kernel_blue)
-    print('Blue HeatMap: ',blue_heatmap)
-    # opencv docs on filter2D:
-    # https://docs.opencv.org/4.2.0/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04
     '''
     filter2D parameters:
         InputArray src, 
@@ -140,44 +143,64 @@ def kernel_color_detect(image):
         InputArray kernel,
         Point anchor = Point(-1,-1),
         double delta = 0,
-        int borderType = BORDER_DEFAULT 
-    )   
+        int borderType = BORDER_DEFAULT   
     '''
-    # cv2.imshow('Original Image',frame)
-    # cv2.waitKey(0)
-    plt.imshow(blue_heatmap)
+    # opencv docs on filter2D:
+    # https://docs.opencv.org/4.2.0/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04
+
+    # blue_heatmap = cv2.applyColorMap(blue_heatmap,cv2.COLORMAP_HOT)
+    # cv2.applyColorMap() changes color of heatmap
+
+    # print('Blue HeatMap: ',blue_heatmap)
+
+    # Possibly for Later: Motion HeatMap
+    # https://towardsdatascience.com/build-a-motion-heatmap-videousing-opencv-with-python-fd806e8a2340
+
+
+    # Attention: OpenCV uses BGR color ordering per default whereas
+    # Matplotlib assumes RGB color ordering!
+    plt.figure(1) # Realsense Frame
+    plt.imshow(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB))
+    plt.figure(2) # HeatMap Output
+    # Maybe try a translation upward -480 px
+    # https://stackoverflow.com/questions/54274185/shifting-an-image-by-x-pixels-to-left-while-maintaining-the-original-shape/54274222
+    
+    plt.imshow(cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB))
     plt.show()
+    # plt.legend('Realsense Frame','HeatMap Output')
+    # 
+    
 
-    cv2.destroyAllWindows()
-
-    ############ finding center of contour from heatmap
+    ############ finding center of contour from heatmap #######################################
+    # might move to a separate function & just have this one output heatmaps
     # based on: https://learnopencv.com/contour-detection-using-opencv-python-c/
     # using contour detection
 
-    # conver to grayscale
-    blue_heatmap_gray = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2GRAY)
+    # # conver to grayscale
+    # blue_heatmap_gray = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2GRAY)
 
-    # apply binary thresholding
-    ret, thresh = cv2.threshold(img_gray, 150, 255, cv2.THRESH_BINARY)
+    # # apply binary thresholding
+    # ret, thresh = cv2.threshold(img_gray, 150, 255, cv2.THRESH_BINARY)
 
-    # visualize the binary image
-    cv2.imshow('Binary Blue HeatMap', thresh)
+    # # visualize the binary image
+    # cv2.imshow('Binary Blue HeatMap', thresh)
 
-    # detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
-    contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)                                      
+    # # detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
+    # contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)                                      
 
-    # draw contours on the original image
-    image_copy = blue_heatmap.copy()
+    # # draw contours on the original image
+    # image_copy = blue_heatmap.copy()
 
-    cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+    # cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
 
-    # see the results
-    cv2.imshow('None approximation', image_copy)
-    cv2.waitKey(0)
-    cv2.imwrite('contours_none_image1.jpg', image_copy)
+    # # see the results
+    # cv2.imshow('None approximation', image_copy)
+    # cv2.waitKey(0)
+    # cv2.imwrite('contours_none_image1.jpg', image_copy)
 
 
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     # Uncomment below when using webcam
     # cap.release()
@@ -453,7 +476,7 @@ def runner(data):
     try:
         # Convert Image to CV2 Frame
         bridge = CvBridge()
-        cv_image = bridge.imgmsg_to_cv2(data, "rgb8") 
+        cv_image = bridge.imgmsg_to_cv2(data, "bgr8") 
         # OpenCV:BGR / RealSense: RGB / RGB: to get proper colors --> also filps colors in frame
 
         # Using Image Kernel to detect color
