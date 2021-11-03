@@ -34,8 +34,7 @@ import pyrealsense2 as rs
 import time
 from math import pi, radians, sqrt, atan
 import numpy as np
-import matplotlib.pyplot as plt 
-# import scipy.signal as sig
+import matplotlib.pyplot as plt
 
 
 def kernel_color_detect(image):
@@ -101,7 +100,7 @@ def kernel_color_detect(image):
 
 
     #Creating kernel
-    kernel_blue = np.zeros((51,51))  # creating an empty array
+    kernel_blue = np.zeros((5,5))  # creating an empty array
     
     # Uncomment below to use RGB values in Kernel
     kernel_blue = np.append(kernel_blue,[0,0,255])
@@ -111,8 +110,9 @@ def kernel_color_detect(image):
     # print('kernel_blue:',kernel_blue)
     # kernel_blue = np.asanyarray(kernel_blue,np.float32)
 
-    # Flipping the Kernel
-    # kernel_blue = cv2.flip(kernel_blue,0)
+    ####### Flipping the Kernel ###############################
+    # kernel_blue = cv2.flip(kernel_blue,-1)
+
     # can't assume kernel to be symmetric matrix, need to flip it before passing it to filter2D
     # cv2.flip()
     # negative number: flips about both axes
@@ -159,13 +159,46 @@ def kernel_color_detect(image):
 
     # Attention: OpenCV uses BGR color ordering per default whereas
     # Matplotlib assumes RGB color ordering!
+
+    frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+    blue_heatmap = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB)
+    overlay_img = cv2.addWeighted(blue_heatmap,0.5,frame,1,0)
+    # opencv: addweighted docs
+    # https://docs.opencv.org/4.2.0/d2/de8/group__core__array.html#gafafb2513349db3bcff51f54ee5592a19
+    plt.figure(3)
+    plt.imshow(overlay_img)    
+
+    # 11/3:
+    # Need to remove white background to properly overlay the images
+    # need to extract the contours from the image, store as image, then overlay
+    
+    # from: https://docs.opencv.org/3.4.15/d1/dc5/tutorial_background_subtraction.html
+    fgMask = backSub.apply(frame) 
+    cv.rectangle(frame, (10, 2), (100,20), (255,255,255), -1)
+    cv.putText(frame, str(capture.get(cv.CAP_PROP_POS_FRAMES)), (15, 15),
+               cv.FONT_HERSHEY_SIMPLEX, 0.5 , (0,0,0))
+    
+
+
+
     plt.figure(1) # Realsense Frame
-    plt.imshow(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB))
+    plt.imshow(frame)
     plt.figure(2) # HeatMap Output
+    
+    # blue_heatmap_resize = cv2.resize(blue_heatmap,(640,480),interpolation = cv2.INTER_LINEAR)
+    # note: OpenCV uses (y,x)
+
     # Maybe try a translation upward -480 px
     # https://stackoverflow.com/questions/54274185/shifting-an-image-by-x-pixels-to-left-while-maintaining-the-original-shape/54274222
+    # https://www.pyimagesearch.com/2021/02/03/opencv-image-translation/
+    # height,width = blue_heatmap.shape[:2]
+    # translation_matrix = np.float32([[1,0,0],[0,1,width]])
+    # blue_heatmap_shifted = cv2.warpAffine(blue_heatmap,translation_matrix,(width,height))
+
     
-    plt.imshow(cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB))
+
+
+    plt.imshow(blue_heatmap)
     plt.show()
     # plt.legend('Realsense Frame','HeatMap Output')
     # 
