@@ -14,6 +14,8 @@ from geometry_msgs.msg import TransformStamped
 from transformations import transformations
 import subprocess
 from pyquaternion import Quaternion
+import tf2_ros
+import tf2_msgs.msg
 
 
 def prepare_path_tf_ready():
@@ -78,30 +80,27 @@ class tictactoeMotion:
     Finds the correct board positions based on current camera and board center topics.
 
     """
-    def __init__(self, planning_group='bot_mh5l_pgn64'):
+    def __init__(self,rc, tf, tfBuffer):
         """
         Loads moveManipulator class and transformations class
         @param planning_group: str; User's srdf planning group that should be loaded onto moveManipulator node
         """
-        self.rc = moveManipulator(planning_group)
-        self.tf = transformations()
+        self.rc = rc
+        self.tf = tf
         self.robot_poses = []
+
+        # tfBuffer: listener for all all transforms in ROS
+        self.tfBuffer = tfBuffer
+        # self.tfBuffer = tfBuffer
 
     def listener(self):
         """
         "listener" function that loads board center data TODO: reload camera subscriber as well.
         :return data_list: Outputs board_center transform in quaternion (x,y,z,w,x,y,z)
         """
-        # find tictactoe pkg dir
-        # tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-
-        # tf_listener = str(tictactoe_pkg) + '/nodes/board_center_subscriber.py'
-        # subprocess.call([tf_listener])
-
-        # tf_filename = 'tf_board2world.npy'
-        # data_list = np.load(str(tictactoe_pkg) + '/' + tf_filename)
-
-        data = rospy.wait_for_message('ttt_board_origin', TransformStamped, timeout=None)
+        
+        data = self.tfBuffer.lookup_transform('base_link','ttt_board', rospy.Time(0),rospy.Duration(1.0))
+        # data = rospy.wait_for_message('ttt_board', TransformStamped, timeout=None)
 
         data_list = [ 
             data.transform.translation.x,
@@ -212,12 +211,21 @@ class tictactoeMotion:
 
 
 def main():
-    # UnComment main function for demo of robot reaching all nine centers for each tile on the board
+    # main function for demo of robot reaching all nine centers for each tile on the board
     # Will scan the board once and run through the 9 board center positions
 
     try:
-        ttt = tictactoeMotion()  # initiate movement class, starts manipulator node
+        # rospy.init_node('ttt_board_listener')
+        
+        tf = transformations()
+        rc = moveManipulator('bot_mh5l_pgn64')
+        tfBuffer = tf2_ros.Buffer()
+        listener = tf2_ros.TransformListener(tfBuffer)
+
+        ttt = tictactoeMotion(rc,tf,tfBuffer)  # initiate movement class, starts manipulator node
         ttt.defineRobotPoses()   # Defines all robot poses once
+
+        
         for i in range(9):       # go to board positions 0-8
             try:
                 raw_input('>> Next Pose <enter>')
