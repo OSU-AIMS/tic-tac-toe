@@ -28,6 +28,7 @@ from geometry_msgs.msg import TransformStamped
 from transformations import *
 from shape_detector import *
 from cv_bridge import CvBridge, CvBridgeError
+# from color_finder import *  # 11/8: not working
 
 # System Tools
 import pyrealsense2 as rs
@@ -35,6 +36,12 @@ import time
 from math import pi, radians, sqrt, atan
 import numpy as np
 import matplotlib.pyplot as plt
+import imutils
+
+tf_helper = transformations()
+shapeDetect = ShapeDetector()
+# colorFinder = ColorFinder() # 11/8: not working
+
 
 
 def kernel_color_detect(image):
@@ -82,7 +89,6 @@ def kernel_color_detect(image):
     # blue = [0,0,255]
 
     # Ref: https://www.geeksforgeeks.org/image-filtering-using-convolution-in-opencv/amp/
-    # Plan as of 10/20/21: use read image into kernel matrix then perform convolutions 
     # GeeksforGeeks use Python 3 (we have Python 2.7)
 
     # Obtain directory for blue, green, red square crops
@@ -96,7 +102,6 @@ def kernel_color_detect(image):
     # Uncomment: Checking to see if original image is flipped
     # cv2.imshow('Blue Square',blue_square)
     # cv2.waitKey(0)
-    # 10/28: Blue square is not flipped
 
 
     #Creating kernel
@@ -105,38 +110,27 @@ def kernel_color_detect(image):
     # Uncomment below to use RGB values in Kernel
     kernel_blue = np.append(kernel_blue,[0,0,255])
 
-    # Uncomment below to use Image as Kernel
+    # Uncomment below to use Image as Kernel # Attempted 11/1: heatmap appeared blank
     # kernel_blue = np.append(kernel_blue,blue_square)
     # print('kernel_blue:',kernel_blue)
     # kernel_blue = np.asanyarray(kernel_blue,np.float32)
 
-    ####### Flipping the Kernel ###############################
+######### Flipping the Kernel ###############################
     # kernel_blue = cv2.flip(kernel_blue,-1)
-
     # can't assume kernel to be symmetric matrix, need to flip it before passing it to filter2D
     # cv2.flip()
     # negative number: flips about both axes
     #  0: flip around x-axis
     # postive number: flip around y-axis
     # docs on cv2.flip: https://docs.opencv.org/4.5.3/d2/de8/group__core__array.html#gaca7be533e3dac7feb70fc60635adf441
- 
-    '''
-    ISSUE: 10/28:
-    - how to obtain pixel location from heatmap:
-    potential help: https://stackoverflow.com/questions/59599568/find-sub-pixel-maximum-on-a-2d-array
 
-    '''
-    # frame = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-    # kernel_blue = cv2.cvtColor(kernel_blue,cv2.COLOR_RGB2GRAY)
-
-
+    # Uncomment for Debugging Kernel_blue
     # print('Kerenel')
-    # print(kernel_blue) # Also not finding the Kernel
+    # print(kernel_blue)
     # Kernel size must by n x n where n- odd numbers
     # blue, green, and red square crops are 55 x 55 pixels
     blue_heatmap = cv2.filter2D(frame,-3,kernel_blue)
-    '''
-    filter2D parameters:
+    '''filter2D parameters:
         InputArray src, 
         OutputArray dst, 
         int ddepth, 
@@ -144,9 +138,9 @@ def kernel_color_detect(image):
         Point anchor = Point(-1,-1),
         double delta = 0,
         int borderType = BORDER_DEFAULT   
-    '''
     # opencv docs on filter2D:
     # https://docs.opencv.org/4.2.0/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04
+    '''
 
     # blue_heatmap = cv2.applyColorMap(blue_heatmap,cv2.COLORMAP_HOT)
     # cv2.applyColorMap() changes color of heatmap
@@ -157,54 +151,124 @@ def kernel_color_detect(image):
     # https://towardsdatascience.com/build-a-motion-heatmap-videousing-opencv-with-python-fd806e8a2340
 
 
+######### Overlay Heatmap on frame to see if they match well ##################
+
+    ''' 
+    Plan of attack: as of 11/8
+    - Get Contour of detected square in heatmap
+    - Create a mask of the contour
+    - overlay mask on realsense frame
+    '''
+### Contour from Heatmap: 
+    
+    # # # conver to grayscale
+    # blue_heatmap_gray = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2GRAY)
+
+    # # Uncomment below for debugging
+    # cv2.imshow('Grayscale heatmap',blue_heatmap_gray)
+    # cv2.waitKey(0)
+
+    # # # apply binary thresholding
+    # ret, thresh = cv2.threshold(blue_heatmap_gray, 150, 200, cv2.THRESH_BINARY)
+    ''' 
+    Parameters:
+        src input array.
+        dst output array of the same size and type and the same number of channels as src.
+        thresh  threshold value.
+        maxval  maximum value to use with the cv.THRESH_BINARY and cv.THRESH_BINARY_INV thresholding types.
+        type    thresholding type(see cv.ThresholdTypes).
+    '''
+    # docs for cv2.threshold
+    # https://docs.opencv.org/4.2.0/d7/dd0/tutorial_js_thresholding.html
+    # split image to rgb channels
+
+##### 
+    # From Color_finder.py script: replace with function when imported correctly
+    # gray_merge = colorFinder.ColorFilter(blue_heatmap)
+
+    b, g, r = cv2.split(blue_heatmap)
+
+    #For black block: binary threshold any color values above "60", greater than 60 -> 255, less than 60 -> 0
+    _, mask_b = cv2.threshold(b, thresh=160, maxval=255, type=cv2.THRESH_BINARY_INV)
+
+    _, mask_g = cv2.threshold(g, thresh=160, maxval=255, type=cv2.THRESH_BINARY_INV)
+
+    _, mask_r = cv2.threshold(r, thresh=160, maxval=255, type=cv2.THRESH_BINARY_INV)
+
+    # merge the threshold rgb channels together to create a mask of cube
+    merged_mask = cv2.merge([mask_b,mask_g,mask_r])
+
+    # grayscale merged_mask
+    gray_merge = cv2.cvtColor(merged_mask, cv2.COLOR_BGR2GRAY)
+#####
+    # Uncomment below for debugging
+    # cv2.imshow('Gray Scale from ColorFinder function',merged_mask)
+    # cv2.waitKey(0)
+
+    # # detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
+    contours, _ = cv2.findContours(gray_merge,cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)                                      
+
+    # draw contours on the original image
+    blue_heatmap_contours = blue_heatmap.copy()
+
+    cv2.drawContours(blue_heatmap_contours,contours, -1, (0, 255, 0), 2,cv2.LINE_AA)
+
+# #### Obtain centers of contours
+    # Reference: https://ai-pool.com/d/how-to-find-the-center-of-the-contour
+    cnts = imutils.grab_contours(contours)
+    for c in cnts:
+        # compute the center of the contour
+        M = cv2.moments(c)
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+
+        # draw the center of the shape on the image
+        cv2.circle(mask, (cX, cY), 7, (0, 0, 255), -1)
+
+        # show the image
+        plt.imshow(mask, cmap='gray')
+        plt.show()
+    
+
+    # Uncomment below for debugging
+    # cv2.imshow('heatmap with contours',blue_heatmap_contours)
+    # cv2.waitKey(0)
+
+
+
+### Overlay mask on image frame    
     # Attention: OpenCV uses BGR color ordering per default whereas
     # Matplotlib assumes RGB color ordering!
-
+    # below 2 lines makes sure frame & heatmap are in RGB when viewed
     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
     blue_heatmap = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB)
-    overlay_img = cv2.addWeighted(blue_heatmap,0.5,frame,1,0)
+    blue_heatmap_contours = cv2.cvtColor(blue_heatmap_contours,cv2.COLOR_BGR2RGB)
+
+    # blue_heatmap_resize = cv2.resize(blue_heatmap,(640,480),interpolation = cv2.INTER_LINEAR)
+    # resize does not affect overlay --> 11/8: overlay slightly off
+    # note: OpenCV uses (y,x)
+
+    overlay_img = cv2.addWeighted(frame,1.0,blue_heatmap_contours,0.5,0)
     # opencv: addweighted docs
-    # https://docs.opencv.org/4.2.0/d2/de8/group__core__array.html#gafafb2513349db3bcff51f54ee5592a19
-    plt.figure(3)
-    plt.imshow(overlay_img)    
+    # https://docs.opencv.org/4.2.0/d2/de8/group__core__array.html#gafafb2513349db3bcff51f54ee5592a19 
 
     # 11/3:
     # Need to remove white background to properly overlay the images
     # need to extract the contours from the image, store as image, then overlay
     
-    # from: https://docs.opencv.org/3.4.15/d1/dc5/tutorial_background_subtraction.html
-    fgMask = backSub.apply(frame) 
-    cv.rectangle(frame, (10, 2), (100,20), (255,255,255), -1)
-    cv.putText(frame, str(capture.get(cv.CAP_PROP_POS_FRAMES)), (15, 15),
-               cv.FONT_HERSHEY_SIMPLEX, 0.5 , (0,0,0))
-    
-
-
 
     plt.figure(1) # Realsense Frame
     plt.imshow(frame)
-    plt.figure(2) # HeatMap Output
-    
-    # blue_heatmap_resize = cv2.resize(blue_heatmap,(640,480),interpolation = cv2.INTER_LINEAR)
-    # note: OpenCV uses (y,x)
-
-    # Maybe try a translation upward -480 px
-    # https://stackoverflow.com/questions/54274185/shifting-an-image-by-x-pixels-to-left-while-maintaining-the-original-shape/54274222
-    # https://www.pyimagesearch.com/2021/02/03/opencv-image-translation/
-    # height,width = blue_heatmap.shape[:2]
-    # translation_matrix = np.float32([[1,0,0],[0,1,width]])
-    # blue_heatmap_shifted = cv2.warpAffine(blue_heatmap,translation_matrix,(width,height))
-
-    
-
-
-    plt.imshow(blue_heatmap)
+    plt.figure(2) # HeatMap Output with Contours
+    plt.imshow(blue_heatmap_contours)
+    plt.figure(3) # Heatmap overlay on Realsense Frame
+    plt.imshow(overlay_img)   
     plt.show()
     # plt.legend('Realsense Frame','HeatMap Output')
     # 
     
-
-    ############ finding center of contour from heatmap #######################################
+############### finding center of contour from heatmap to get pixel location #######################################
+   
     # might move to a separate function & just have this one output heatmaps
     # based on: https://learnopencv.com/contour-detection-using-opencv-python-c/
     # using contour detection
