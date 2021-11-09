@@ -109,6 +109,7 @@ def kernel_color_detect(image):
     
     # Uncomment below to use RGB values in Kernel
     kernel_blue = np.append(kernel_blue,[0,0,255])
+    kernel_blue = np.asanyarray(kernel_blue,np.float32)
 
     # Uncomment below to use Image as Kernel # Attempted 11/1: heatmap appeared blank
     # kernel_blue = np.append(kernel_blue,blue_square)
@@ -128,9 +129,27 @@ def kernel_color_detect(image):
     # print('Kerenel')
     # print(kernel_blue)
     # Kernel size must by n x n where n- odd numbers
-    # blue, green, and red square crops are 55 x 55 pixels
-    blue_heatmap = cv2.filter2D(frame,-3,kernel_blue)
-    '''filter2D parameters:
+    # blue, green, and red square crops are 55 x 55 pixels 
+    # changed kernel_blue size to 5x5 
+
+
+
+    gray_frame = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
+    colorMap = cv2.applyColorMap(gray_frame,cv2.COLORMAP_JET)
+
+    # Convert Colors if needed
+    colorMap = cv2.cvtColor(colorMap,cv2.COLOR_RGB2BGR)
+    # cv2.applyColorMap() changes color of heatmap
+    plt.figure(3)
+    plt.imshow(colorMap)
+
+    blue_heatmap = cv2.filter2D(colorMap,-1,kernel_blue)
+    # # blue_heatmap = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB)
+    plt.figure(4)
+    plt.imshow(blue_heatmap)
+    # 11/9: heatmap doesn't return gradient
+    '''
+    filter2D parameters:
         InputArray src, 
         OutputArray dst, 
         int ddepth, 
@@ -142,10 +161,7 @@ def kernel_color_detect(image):
     # https://docs.opencv.org/4.2.0/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04
     '''
 
-    # blue_heatmap = cv2.applyColorMap(blue_heatmap,cv2.COLORMAP_HOT)
-    # cv2.applyColorMap() changes color of heatmap
-
-    # print('Blue HeatMap: ',blue_heatmap)
+    # print('Blue HeatMap: ',colorMap)
 
     # Possibly for Later: Motion HeatMap
     # https://towardsdatascience.com/build-a-motion-heatmap-videousing-opencv-with-python-fd806e8a2340
@@ -214,25 +230,25 @@ def kernel_color_detect(image):
     cv2.drawContours(blue_heatmap_contours,contours, -1, (0, 255, 0), 2,cv2.LINE_AA)
 
 # #### Obtain centers of contours
-    # Reference: https://ai-pool.com/d/how-to-find-the-center-of-the-contour
-    cnts = imutils.grab_contours(contours)
-    for c in cnts:
-        # compute the center of the contour
-        M = cv2.moments(c)
-        cX = int(M["m10"] / M["m00"])
-        cY = int(M["m01"] / M["m00"])
+    # # Reference: https://ai-pool.com/d/how-to-find-the-center-of-the-contour
+    # cnts = imutils.grab_contours(contours)
+    # for c in cnts:
+    #     # compute the center of the contour
+    #     M = cv2.moments(c)
+    #     cX = int(M["m10"] / M["m00"])
+    #     cY = int(M["m01"] / M["m00"])
 
-        # draw the center of the shape on the image
-        cv2.circle(mask, (cX, cY), 7, (0, 0, 255), -1)
+    #     # draw the center of the shape on the image
+    #     cv2.circle(mask, (cX, cY), 7, (0, 0, 255), -1)
 
-        # show the image
-        plt.imshow(mask, cmap='gray')
-        plt.show()
+    #     # show the image
+    #     plt.imshow(mask, cmap='gray')
+    #     plt.show()
     
 
-    # Uncomment below for debugging
-    # cv2.imshow('heatmap with contours',blue_heatmap_contours)
-    # cv2.waitKey(0)
+    # # Uncomment below for debugging
+    # # cv2.imshow('heatmap with contours',blue_heatmap_contours)
+    # # cv2.waitKey(0)
 
 
 
@@ -242,13 +258,13 @@ def kernel_color_detect(image):
     # below 2 lines makes sure frame & heatmap are in RGB when viewed
     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
     blue_heatmap = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB)
-    blue_heatmap_contours = cv2.cvtColor(blue_heatmap_contours,cv2.COLOR_BGR2RGB)
+    # blue_heatmap_contours = cv2.cvtColor(blue_heatmap_contours,cv2.COLOR_BGR2RGB)
 
-    # blue_heatmap_resize = cv2.resize(blue_heatmap,(640,480),interpolation = cv2.INTER_LINEAR)
+    blue_heatmap_resize = cv2.resize(blue_heatmap,(640,480),interpolation = cv2.INTER_LINEAR)
     # resize does not affect overlay --> 11/8: overlay slightly off
     # note: OpenCV uses (y,x)
 
-    overlay_img = cv2.addWeighted(frame,1.0,blue_heatmap_contours,0.5,0)
+    # overlay_img = cv2.addWeighted(frame,1.0,blue_heatmap,0.5,0)
     # opencv: addweighted docs
     # https://docs.opencv.org/4.2.0/d2/de8/group__core__array.html#gafafb2513349db3bcff51f54ee5592a19 
 
@@ -260,9 +276,11 @@ def kernel_color_detect(image):
     plt.figure(1) # Realsense Frame
     plt.imshow(frame)
     plt.figure(2) # HeatMap Output with Contours
-    plt.imshow(blue_heatmap_contours)
-    plt.figure(3) # Heatmap overlay on Realsense Frame
-    plt.imshow(overlay_img)   
+    plt.imshow(blue_heatmap_resize)
+    # plt.figure(3) # Heatmap overlay on Realsense Frame
+    # plt.imshow(overlay_img)
+    # plt.figure(4)   
+    # plt.imshow(blue_heatmap_contours) # Contours
     plt.show()
     # plt.legend('Realsense Frame','HeatMap Output')
     # 
