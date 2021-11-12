@@ -33,7 +33,7 @@ from cv_bridge import CvBridge, CvBridgeError
 # System Tools
 import pyrealsense2 as rs
 import time
-from math import pi, radians, sqrt, atan
+from math import pi, radians, sqrt, atan, ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import imutils
@@ -99,13 +99,24 @@ def kernel_color_detect(image):
     # Numpy: uses (y,x) / OpenCv (x,y)
     blue_square = cv2.imread(blue_square_crop)
     
+    # Uncomment below to obtain pixel size
+    # testImage = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/sample_content/sample_images/CorrectedColoredSquares_Color.png'
+    # test_Image = cv2.imread(testImage)
+    # test_Image = cv2.resize(test_Image,(640,480),interpolation = cv2.INTER_LINEAR)
+    # cv2.imshow('Get Pixel size of Blue square',test_Image)
+    # cv2.waitKey(0)
+    # Pixel area of blue square = 408px^2 (17x24 px)
+
     # Uncomment: Checking to see if original image is flipped
     # cv2.imshow('Blue Square',blue_square)
     # cv2.waitKey(0)
 
 
+
     #Creating kernel
-    kernel_blue = np.zeros((5,5))  # creating an empty array
+    kernel_size = 25
+    kernel_blue = np.zeros((kernel_size,kernel_size))  # creating an empty array
+    # 11/11: increased size from 5x5
     
     # Uncomment below to use RGB values in Kernel
     kernel_blue = np.append(kernel_blue,[0,0,255])
@@ -117,7 +128,7 @@ def kernel_color_detect(image):
     # kernel_blue = np.asanyarray(kernel_blue,np.float32)
 
 ######### Flipping the Kernel ###############################
-    # kernel_blue = cv2.flip(kernel_blue,-1)
+    kernel_blue = cv2.flip(kernel_blue,-1)
     # can't assume kernel to be symmetric matrix, need to flip it before passing it to filter2D
     # cv2.flip()
     # negative number: flips about both axes
@@ -132,21 +143,31 @@ def kernel_color_detect(image):
     # blue, green, and red square crops are 55 x 55 pixels 
     # changed kernel_blue size to 5x5 
 
-
-
-    gray_frame = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
-    colorMap = cv2.applyColorMap(gray_frame,cv2.COLORMAP_JET)
+    # gray_frame = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
+    # colorMap = cv2.applyColorMap(gray_frame,cv2.COLORMAP_JET)
 
     # Convert Colors if needed
-    colorMap = cv2.cvtColor(colorMap,cv2.COLOR_RGB2BGR)
+    # colorMap = cv2.cvtColor(colorMap,cv2.COLOR_RGB2BGR)
     # cv2.applyColorMap() changes color of heatmap
-    plt.figure(3)
-    plt.imshow(colorMap)
+    # plt.figure(3)
+    # plt.imshow(colorMap)
+    # frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+    blue_heatmap = cv2.filter2D(frame,-3,kernel_blue,((kernel_size / 2.0,kernel_size / 2.0)))
+    # math.ceil() returns rounded up number
+    # print('Kernel Size')
+    # print(kernel_size/2)
+    # print('Kernel anchor location')
+    # print(math.ceil(kernel_size/2))
 
-    blue_heatmap = cv2.filter2D(colorMap,-1,kernel_blue)
+    # 11/1: add anchor point
+    # "//" - floor division- rounds down to the nearest whole number
+    # "%" - modulus - gives remainder value
+    # blue_heatmap = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB)
+
+
     # # blue_heatmap = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB)
-    plt.figure(4)
-    plt.imshow(blue_heatmap)
+    # plt.figure(3)
+    # plt.imshow(blue_heatmap)
     # 11/9: heatmap doesn't return gradient
     '''
     filter2D parameters:
@@ -260,7 +281,7 @@ def kernel_color_detect(image):
     blue_heatmap = cv2.cvtColor(blue_heatmap,cv2.COLOR_BGR2RGB)
     # blue_heatmap_contours = cv2.cvtColor(blue_heatmap_contours,cv2.COLOR_BGR2RGB)
 
-    blue_heatmap_resize = cv2.resize(blue_heatmap,(640,480),interpolation = cv2.INTER_LINEAR)
+    # blue_heatmap_resize = cv2.resize(blue_heatmap,(640,480),interpolation = cv2.INTER_LINEAR)
     # resize does not affect overlay --> 11/8: overlay slightly off
     # note: OpenCV uses (y,x)
 
@@ -276,7 +297,7 @@ def kernel_color_detect(image):
     plt.figure(1) # Realsense Frame
     plt.imshow(frame)
     plt.figure(2) # HeatMap Output with Contours
-    plt.imshow(blue_heatmap_resize)
+    plt.imshow(blue_heatmap)
     # plt.figure(3) # Heatmap overlay on Realsense Frame
     # plt.imshow(overlay_img)
     # plt.figure(4)   
