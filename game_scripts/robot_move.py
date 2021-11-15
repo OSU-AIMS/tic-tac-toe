@@ -178,7 +178,7 @@ class tictactoeMotion:
         for i in range(9):
             trans_rot = tileCenters2world[i][0:3, 3:4]
             # print('Trans_rot in defineRobotPoses',trans_rot)
-            new_pose = [trans_rot[0][0], trans_rot[1][0], trans_rot[2][0], b[1], b[2], b[3], b[0]]
+            new_pose = [trans_rot[0][0], trans_rot[1][0], trans_rot[2][0], .707, -.707, 0, 0]
             # print('New Pose:',new_pose)
             self.robot_poses.append(new_pose)
 
@@ -204,7 +204,6 @@ class tictactoeMotion:
         # self.rc.goto_Quant_Orient(wpose)
         # raw_input('Open gripper <press enter>')
         
-        # # As of 8/12/21,it doesn't reach the below lines
         # self.rc.send_io(0)        # open gripper
         # print('Grippers are now open'
         # print('returned to scan position')

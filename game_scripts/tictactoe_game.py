@@ -18,20 +18,6 @@ import math
 import pygame
 import numpy as np
 
-"""
-A class used to plan and execute robot poses for the tictactoe game.
-Finds the correct board positions based on current camera and board center topics.
-
-"""
-
-brain = tictactoeBrain()
-motion = tictactoeMotion()
-
-# array for code to know which player went where
-# Human: -1 (circles)
-# Computer: +1 (X's)`
-# board filled with -1 & +1
-
 
 BOARD_ROWS = 3
 BOARD_COLS = 3
@@ -252,11 +238,19 @@ def restart():
 
 
 def main():
+
+    tf = transformations()
+    rc = moveManipulator('bot_mh5l_pgn64')
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
+    brain = tictactoeBrain()
+    motion = tictactoeMotion(rc,tf,tfBuffer)
+
     try:
         game = True;  # decides when game is over
         draw_lines()
         
-        countO = 1  # Number of O blocks, player goes first
+        countO = 0  # Number of O blocks, player goes first
         countX = 0  # Number of X blocks 
 
         player=1

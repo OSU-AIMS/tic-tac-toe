@@ -160,7 +160,7 @@ def detectBoard_contours(image):
     #contours = shapeDetect.getContours(image)
 
     # Find the board contour, create visual, define board center and points
-    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=40000)
+    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=23000)
 
     # Scale from image pixels to m (pixels/m)
     scale = .664/640          # res: (640x480)
