@@ -2,42 +2,29 @@
 
 # Script to test smaller kernel convolutions
 
-import rospy
-import tf2_ros
 import cv2
 
-# ROS Data Types
-from sensor_msgs.msg import Image
-from geometry_msgs.msg import TransformStamped
-
-# Custom Tools
-    # from Realsense_tools import *
-from transformations import *
-from shape_detector import *
-from cv_bridge import CvBridge, CvBridgeError
-# from color_finder import *  # 11/8: not working
-
 # System Tools
-import pyrealsense2 as rs
-import time
 from math import pi, radians, sqrt, atan, ceil
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 def kernel_runner(image):
     # Create kernel (format - "BGR")
-    kernel_size  = 3
-    kernel_b     = 255*np.ones((kernel_size, kernel_size, 1), dtype='uint8')
-    kernel_gr    = np.zeros((kernel_size, kernel_size, 2), dtype='uint8')
-    kernel       = np.dstack((kernel_b,kernel_gr))
-
-    output = cv2.filter2D(image,kernel,-1)
-
-    # Next: 
-    # Apply convolution of 3x3
+    kernel_size = 3
+    kernel = np.dstack((255 * np.ones((kernel_size, kernel_size, 1), dtype='uint8'),np.zeros((kernel_size, kernel_size, 3), dtype='uint8'))) # format: BGR
+    # numpy dstack docs: https://numpy.org/doc/stable/reference/generated/numpy.dstack.html
+    kernel_b = 255 * np.ones((kernel_size, kernel_size), dtype='uint8')
 
 
+    # Method: Filter2D
+    dst = image.copy()
+    output = cv2.filter2D(src=image, dst=dst, ddepth=-1, kernel=kernel_b)
+    cv2.imshow('Heatmap',output)
+    cv2.imshow('Output Array dst', dst)
+    cv2.imwrite("dst.tiff", dst)
+    cv2.imwrite("result.tff", output)
     '''
     filter2D parameters:
         InputArray src, 
@@ -52,7 +39,7 @@ def kernel_runner(image):
     '''
 
 
-
-
-def main():
-    image = cv2.imread('test_grid.tif')
+if __name__ == '__main__':
+    image = cv2.imread("images_10x10/test_angle.tif")
+    # image = image[:, :, 0]
+    kernel_runner(image.copy())
