@@ -22,6 +22,7 @@ def kernel_runner(image):
 
 
     # Method: Filter2D
+<<<<<<< Updated upstream
     # dst = image.copy()
     # output = cv2.filter2D(src=image, dst=dst, ddepth=-1, kernel=kernel_b)
     # cv2.imshow('Input Array',image)
@@ -32,6 +33,14 @@ def kernel_runner(image):
     # wouldn't output = dst??
     # 11/18: Result is not a gradient
 
+=======
+    dst = image.copy()
+    output = cv2.filter2D(src=image, dst=dst, ddepth=-1, kernel=kernel_b)
+    cv2.imshow('Heatmap',output)
+    cv2.imshow('Output Array dst', dst)
+    cv2.imwrite('dst.tiff', dst)
+    cv2.imwrite('output.tiff', output)
+>>>>>>> Stashed changes
     '''
     filter2D parameters:
         InputArray src, 
