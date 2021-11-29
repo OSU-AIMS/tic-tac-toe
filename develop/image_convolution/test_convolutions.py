@@ -26,6 +26,10 @@ def kernel_runner(image):
     # kernel_b = np.dstack((255 * np.ones((kernel_size, kernel_size,1), dtype='uint8'), np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
     kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
 
+    kernel_r = cv2.imread('tic_tac_toe_images/red_square_crop.tiff')
+
+    kernel_g = cv2.imread('tic_tac_toe_images/green_square_crop.tiff')
+
     # print('Kernel Matrix: 3x3x1')
     # print(kernel_b)
 
@@ -86,33 +90,87 @@ def kernel_runner(image):
                mask: mask of serached template. Same datatype & size as templ. Not set by default
     '''
 
-
-    res = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
-    cv2.imwrite('res_match_template.tiff',res)
-    
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-    print('min_val')
-    print(min_val)
-    print('max_val')
-    print(max_val)
-    print('min_loc')
-    print(min_loc)
-    print('max_loc')
-    # print(max_loc)
+    # # Recognizing Blue Square
+    res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
+    cv2.imwrite('res_match_template_B.tiff',res_B)
+    min_val_B, max_val_B, min_loc_B, max_loc_B = cv2.minMaxLoc(res_B)
+    # print('min_val_B')
+    # print(min_val_B)
+    # print('max_val_B')
+    # print(max_val_B)
+    print('min_loc_B')
+    print(min_loc_B)
+    print('max_loc_B')
+    print(max_loc_B)
 
     # Drawing Bounding Box around detected shape
     # determine the starting and ending (x, y)-coordinates of the bounding box
     # From: https://www.pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/
-    (startX, startY) = max_loc
-    endX = startX + kernel_b.shape[1]
-    endY = startY + kernel_b.shape[0]
-    
+    (startX_B, startY_B) = max_loc_B
+    endX_B = startX_B + kernel_b.shape[1]
+    endY_B = startY_B + kernel_b.shape[0]
+
     # draw the bounding box on the image
-    b_box_image = cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 1)
+    b_box_image = cv2.rectangle(image, (startX_B, startY_B), (endX_B, endY_B), (255, 0, 0), 3)
     # show the output image
     # cv2.imshow("Output based on matchTemplate", b_box_image)
-    cv2.imwrite('res_match_template_BoundingBox.tiff',b_box_image)
+    cv2.imwrite('res_match_template_Blue_BoundingBox.tiff', b_box_image)
     cv2.waitKey(0)
+
+    #### Recognizing Red Square
+    res_R = cv2.matchTemplate(image=image,templ= kernel_r,method=5)
+    cv2.imwrite('res_match_template_R.tiff', res_R)
+    min_val_R, max_val_R, min_loc_R, max_loc_R = cv2.minMaxLoc(res_R)
+    # print('min_val_R')
+    # print(min_val_R)
+    # print('max_val_R')
+    # print(max_val_R)
+    print('min_loc_R')
+    print(min_loc_R)
+    print('max_loc_R')
+    print(max_loc_R)
+
+    # Drawing Bounding Box around detected shape
+    # determine the starting and ending (x, y)-coordinates of the bounding box
+    # From: https://www.pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/
+    (startX_R, startY_R) = max_loc_R
+    endX_R = startX_R + kernel_r.shape[1]
+    endY_R = startY_R + kernel_r.shape[0]
+
+    # draw the bounding box on the image
+    r_box_image = cv2.rectangle(image, (startX_R, startY_R), (endX_R, endY_R), (0, 0, 255), 3)
+    # show the output image
+    # cv2.imshow("Output based on matchTemplate", r_box_image)
+    cv2.imwrite('res_match_template_RED_BoundingBox.tiff', r_box_image)
+    cv2.waitKey(0)
+
+    #### Recognizing Green Square
+    res_G = cv2.matchTemplate(image=image,templ= kernel_g,method=5)
+    cv2.imwrite('res_match_template_G.tiff', res_G)
+    min_val_G, max_val_G, min_loc_G, max_loc_G = cv2.minMaxLoc(res_G)
+    # print('min_val_G')
+    # print(min_val_G)
+    # print('max_val_G')
+    # print(max_val_G)
+    print('min_loc_G')
+    print(min_loc_G)
+    print('max_loc_G')
+    print(max_loc_G)
+
+    # Drawing Bounding Box around detected shape
+    # determine the starting and ending (x, y)-coordinates of the bounding box
+    # From: https://www.pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/
+    (startX_G, startY_G) = max_loc_G
+    endX_G = startX_G + kernel_g.shape[1]
+    endY_G = startY_G + kernel_g.shape[0]
+
+    # draw the bounding box on the image
+    g_box_image = cv2.rectangle(image, (startX_G, startY_G), (endX_G, endY_G), (0, 255, 0), 3)
+    # show the output image
+    # cv2.imshow("Output based on matchTemplate", r_box_image)
+    cv2.imwrite('res_match_template_GREEN_BoundingBox.tiff', g_box_image)
+    cv2.waitKey(0)
+
 
 '''
     cv::TemplateMatchModes 
