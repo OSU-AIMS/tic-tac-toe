@@ -18,9 +18,16 @@ def kernel_runner(image):
     # Changed np.zeros(kernel_size,kernel_size,3)  to np.zeros(kernel_size,kernel_size,2) so kernel is 3 channels instead of 4
     # format: BGR
     # numpy dstack docs: https://numpy.org/doc/stable/reference/generated/numpy.dstack.html
-    kernel_b = 255 * np.ones((kernel_size, kernel_size), dtype='uint8')
-    print('Kernel Matrix: 3x3x1')
-    print((kernel_b))
+
+    # Uncomment below to use white kernel 3x3x3
+    # kernel_b = 255 * np.ones((kernel_size, kernel_size), dtype='uint8')
+
+    # Attempting to Create a blue (255,0,0) 3x3x3 Kernel
+    # kernel_b = np.dstack((255 * np.ones((kernel_size, kernel_size,1), dtype='uint8'), np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
+    kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
+
+    # print('Kernel Matrix: 3x3x1')
+    # print(kernel_b)
 
 
     # Method: Filter2D
@@ -61,7 +68,7 @@ def kernel_runner(image):
 
     # # # Method: Template Matching
     # # image = image[:, :, 0]
-    img_gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+    # img_gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     # # resb = cv2.matchTemplate(image=image[:, :, 0], templ=kernel_b, method=1)
     # # resg = cv2.matchTemplate(image=image[:, :, 1], templ=kernel_b, method=1)
     # # resr = cv2.matchTemplate(image=image[:, :, 2], templ=kernel_b, method=1)
@@ -80,7 +87,7 @@ def kernel_runner(image):
     '''
 
 
-    res = cv2.matchTemplate(image=img_gray,templ=kernel_b,method=3)
+    res = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
     cv2.imwrite('res_match_template.tiff',res)
     
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
@@ -117,9 +124,6 @@ def kernel_runner(image):
     cv::TM_CCOEFF_NORMED = 5
 '''
 
-
-
-
     # # Filter Results ##############
     # result = (resb*255) - (resg*255) - (resr*255)
     # flag_negatives = result < 0
@@ -130,7 +134,9 @@ def kernel_runner(image):
 
 if __name__ == '__main__':
     print("Your OpenCV version is: " + cv2.__version__)  
-    image = cv2.imread("images_10x10/test_angle.tif")
+    # image = cv2.imread("images_10x10/diamond.tif")
+    image = cv2.imread("tic_tac_toe_images/twistCorrectedColoredSquares_Color.tiff")
+
     # image = cv2.imread("images_20x20/test_box_20x20.tif")
     # image = image[:, :, 0]
     kernel_runner(image.copy())
