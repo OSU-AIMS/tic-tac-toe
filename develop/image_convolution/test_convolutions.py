@@ -34,7 +34,7 @@ def kernel_runner(image):
     # print(kernel_b)
 
 
-    # Method: Filter2D
+##### Method: Filter2D
 # <<<<<<< Updated upstream
     # dst = image.copy()
     # output = cv2.filter2D(src=image, dst=dst, ddepth=-1, kernel=kernel_b)
@@ -115,7 +115,7 @@ def kernel_runner(image):
     # show the output image
     # cv2.imshow("Output based on matchTemplate", b_box_image)
     cv2.imwrite('res_match_template_Blue_BoundingBox.tiff', b_box_image)
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
 
     #### Recognizing Red Square
     res_R = cv2.matchTemplate(image=image,templ= kernel_r,method=5)
@@ -142,7 +142,7 @@ def kernel_runner(image):
     # show the output image
     # cv2.imshow("Output based on matchTemplate", r_box_image)
     cv2.imwrite('res_match_template_RED_BoundingBox.tiff', r_box_image)
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
 
     #### Recognizing Green Square
     res_G = cv2.matchTemplate(image=image,templ= kernel_g,method=5)
@@ -167,10 +167,9 @@ def kernel_runner(image):
     # draw the bounding box on the image
     g_box_image = cv2.rectangle(image, (startX_G, startY_G), (endX_G, endY_G), (0, 255, 0), 3)
     # show the output image
-    # cv2.imshow("Output based on matchTemplate", r_box_image)
+    # cv2.imshow("Output based on matchTemplate", g_box_image)
     cv2.imwrite('res_match_template_GREEN_BoundingBox.tiff', g_box_image)
-    cv2.waitKey(0)
-
+    # cv2.waitKey(0)
 
 '''
     cv::TemplateMatchModes 
@@ -181,14 +180,15 @@ def kernel_runner(image):
     cv::TM_CCOEFF = 4,
     cv::TM_CCOEFF_NORMED = 5
 '''
+#### Using Bounding-Box Coordinates to get orientation of the board
+# note this likely will be done in a separate function but test it here
+# center_B = (np.subtract(max_loc_B[0], min_loc_B[0]),np.subtract(max_loc_B[1],min_loc_B[1]))
+# center_G = np.subtract(max_loc_G, min_loc_G)
+# center_R = np.subtract(max_loc_R, min_loc_R)
 
-    # # Filter Results ##############
-    # result = (resb*255) - (resg*255) - (resr*255)
-    # flag_negatives = result < 0
-    # result[flag_negatives] = 0
-    # cv2.imshow('Result', result/255)
-    # cv2.imwrite("res.tiff", result)
-
+# print('Center_B Square:')
+# print(center_B)
+# shapeDetect.drawAxis()
 
 if __name__ == '__main__':
     print("Your OpenCV version is: " + cv2.__version__)  
