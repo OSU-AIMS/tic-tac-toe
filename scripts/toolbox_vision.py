@@ -18,8 +18,7 @@ class TOOLBOX_VISION(object):
     """
 
     def __init__(self):
-        self.bridge = CvBridge()
-
+        pass
 
     def camera_info_to_intrinsics(self,cameraInfo):
 
