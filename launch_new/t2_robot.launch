@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Tier2 Launch File: Robot Connections -->
+
+<launch>
+
+    <!-- Parameters -->
+    <arg name="sim" default="true"/>
+    <arg name="robot_ip" unless="$(arg sim)"/>
+    <arg name="controller" unless="$(arg sim)" default="fs100" />
+
+    <!-- Launch Physical Robot w/ Lab Connection Defaults -->
+    <include file="$(find robot_with_camera_config)/launch/moveit_planning_execution.launch" >
+        <arg name="sim" value="$(arg sim)"/>
+        <arg name="robot_ip" unless="$(arg sim)" value="$(arg robot_ip)" />
+        <arg name="controller" unless="$(arg sim)" value="$(arg controller)" />
+    </include>
+
+    <!-- TF Listener & Publisher for the Transform between Origin and Camera -->
+    <!-- <include file="$(find tic_tac_toe)/launch/camera_transform.launch" /> -->
+
+</launch>
