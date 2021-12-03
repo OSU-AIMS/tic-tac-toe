@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Tier2 Launch File: Setup Tools -->
+
+<launch>
+
+    <!-- Parameters -->
+    <arg name="iRS_info_topic" default="/camera/aligned_depth_to_color/camera_info" />
+
+    <!-- Load Intel Realsense "Camera_Info" topic into ROS Parameter Server -->
+    <node name="vision_server" ns="ttt" pkg="tic_tac_toe" type="camera_info_server.py" args="$(arg iRS_info_topic)" respawn="false" />
+
+</launch>
