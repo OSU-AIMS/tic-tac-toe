@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- Tier2 Launch File: Setup Tools -->
+<!-- Tier2 Launch File: Vision -->
 
 <launch>
 
     <!-- Parameters -->
     <arg name="iRS_info_topic" default="/camera/aligned_depth_to_color/camera_info" />
+
+    <!-- Launch Camera Topics -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch" >
+        <arg name="align_depth" value="true"/>
+        <arg name="enable_pointcloud" value="true"/>
+        <!-- <arg name="mode" value="manual"/> -->
+    </include>
 
     <!-- Load Intel Realsense "Camera_Info" topic into ROS Parameter Server -->
     <node name="vision_server" ns="ttt" pkg="tic_tac_toe" type="camera_info_server.py" args="$(arg iRS_info_topic)" respawn="false" />
