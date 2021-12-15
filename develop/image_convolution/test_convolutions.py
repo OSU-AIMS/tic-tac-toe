@@ -7,7 +7,7 @@ import cv2
 # System Tools
 from math import pi, radians, sqrt, atan, ceil
 import numpy as np
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def kernel_runner(image):
@@ -15,7 +15,7 @@ def kernel_runner(image):
     kernel_size = 5
     print('Image Parameter')
     # print(image)
-    print('Shape of image')
+    print('Shape of Input image')
     print(np.shape(image))
     # kernel = np.dstack((255 * np.ones((kernel_size, kernel_size, 1), dtype='uint8'),np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
     # 11/22: changed dtype from uinut8 to np.float32 --> didn't change anything
@@ -29,7 +29,9 @@ def kernel_runner(image):
     # Uncomment below to create blue array
     ch1 = 255*np.ones((kernel_size, kernel_size), dtype='uint8')
     ch2 = np.zeros((kernel_size, kernel_size), dtype='uint8')
-    kernel_b = np.array([ch2, ch2, ch1], ndmin=3, dtype='uint8')
+    kernel_b = np.array([ch1, ch2, ch2], ndmin=3, dtype='uint8')
+    # might be BGR
+
     # kernel_b = np.stack((ch2,ch2,ch1),axis=-1)
     # 12/6: issue with creating 3 channel array
     # need (0,0,255) 3 channel array
@@ -50,7 +52,7 @@ def kernel_runner(image):
 
     print('Kernel Matrix: should be 3x3x3')
     print(np.shape(kernel_b)) # returns 3x3x3
-    # print(kernel_b)
+    print(kernel_b)
 
 
 ##### Method: Filter2D
@@ -110,10 +112,11 @@ def kernel_runner(image):
     '''
 
     # # Recognizing Blue Square
+    print('Using matchTemplate() function')
     res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
     # Use method=5 when using the square images as kernels
     # Use method= when using arrays as kernels
-    cv2.imwrite('res_match_template_B.tiff',res_B)
+    cv2.imwrite('res_match_template_B.tiff', res_B)
     min_val_B, max_val_B, min_loc_B, max_loc_B = cv2.minMaxLoc(res_B)
     # print('min_val_B')
     # print(min_val_B)
@@ -136,6 +139,9 @@ def kernel_runner(image):
     # show the output image
     # cv2.imshow("Output based on matchTemplate", b_box_image)
     cv2.imwrite('res_match_template_Blue_BoundingBox.tiff', b_box_image)
+    plt.figure(1)
+    plt.imshow(b_box_image)
+    plt.show()
     # cv2.waitKey(0)
 
     #### Recognizing Red Square
