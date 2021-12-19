@@ -30,7 +30,11 @@ def kernel_runner(image):
     ch1 = 255*np.ones((kernel_size, kernel_size), dtype='uint8')
     ch2 = np.zeros((kernel_size, kernel_size), dtype='uint8')
     kernel_b = np.array([ch1, ch2, ch2], ndmin=3, dtype='uint8')
-    # might be BGR
+    # might be BGR format
+
+    # RGB --> Grayscale: R*0.299, G*0.587, B*0.114
+    # kernel_b_gray = np.array([ch1*0.114, ch2*0.587, ch2*0.299])
+    # Grayscale input template array
 
     # kernel_b = np.stack((ch2,ch2,ch1),axis=-1)
     # 12/6: issue with creating 3 channel array
@@ -40,7 +44,6 @@ def kernel_runner(image):
 
     # Attempting to Create a blue (255,0,0) 3x3x3 Kernel
     # kernel_b = np.dstack((255 * np.ones((kernel_size, kernel_size,1), dtype='uint8'), np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
-
 
 
     # Uncomment below to use square images as kernels
@@ -113,7 +116,9 @@ def kernel_runner(image):
 
     # # Recognizing Blue Square
     print('Using matchTemplate() function')
+    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
+    # res_B = cv2.matchTemplate(image=img_gray,templ=kernel_b_gray,method=5)
     # Use method=5 when using the square images as kernels
     # Use method= when using arrays as kernels
     cv2.imwrite('res_match_template_B.tiff', res_B)
