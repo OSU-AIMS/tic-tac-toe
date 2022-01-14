@@ -27,9 +27,9 @@ def kernel_runner(image):
     # kernel_b = 255 * np.ones((kernel_size, kernel_size), dtype='uint8')
 
     # Uncomment below to create blue array
-    ch1 = 255*np.ones((kernel_size, kernel_size), dtype='uint8')
-    ch2 = np.zeros((kernel_size, kernel_size), dtype='uint8')
-    kernel_b = np.array([ch1, ch2, ch2], ndmin=3, dtype='uint8')
+    # ch1 = 255*np.ones((kernel_size, kernel_size), dtype='uint8')
+    # ch2 = np.zeros((kernel_size, kernel_size), dtype='uint8')
+    # kernel_b = np.array([ch1, ch2, ch2], ndmin=3, dtype='uint8')
     # might be BGR format
 
     # RGB --> Grayscale: R*0.299, G*0.587, B*0.114
@@ -47,11 +47,11 @@ def kernel_runner(image):
 
 
     # Uncomment below to use square images as kernels
-    # kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
+    kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
 
-    # kernel_r = cv2.imread('tic_tac_toe_images/red_square_crop.tiff')
+    kernel_r = cv2.imread('tic_tac_toe_images/red_square_crop.tiff')
 
-    # kernel_g = cv2.imread('tic_tac_toe_images/green_square_crop.tiff')
+    kernel_g = cv2.imread('tic_tac_toe_images/green_square_crop.tiff')
 
     print('Kernel Matrix: should be 3x3x3')
     print(np.shape(kernel_b)) # returns 3x3x3
@@ -114,9 +114,9 @@ def kernel_runner(image):
                mask: mask of serached template. Same datatype & size as templ. Not set by default
     '''
 
-    # # Recognizing Blue Square
+    # # Recognizing Blue Square --- Everything needed to run matchTemplate below
     print('Using matchTemplate() function')
-    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
     # res_B = cv2.matchTemplate(image=img_gray,templ=kernel_b_gray,method=5)
     # Use method=5 when using the square images as kernels
@@ -147,7 +147,7 @@ def kernel_runner(image):
     plt.figure(1)
     plt.imshow(b_box_image)
     plt.show()
-    # cv2.waitKey(0)
+    # cv2.waitKey(0) ------------ Everything needed for matchTemplate() ^^^
 
     #### Recognizing Red Square
     # res_R = cv2.matchTemplate(image=image,templ= kernel_r,method=5)
