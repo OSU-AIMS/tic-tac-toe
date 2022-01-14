@@ -6,7 +6,7 @@
     <!-- Opens a Static Image Publisher to stand in for real camera -->
     <!-- ns set to match RealSense namespace design. Explicitly matched for testing purposes -->
     <node pkg="image_publisher" type="image_publisher" name="color" ns="camera"
-        args="$(find tic_tac_toe)/test/iRS_sample_capture.png" >
+        args="$(find tic_tac_toe)/test/new_table_sample_capture.png" >
         <param name="flip_horizontal" value="false" />
         <param name="flip_vertical" value="false" />
         <param name="frame_id" value="camera_link" />
@@ -17,7 +17,7 @@
     <include file="$(find robot_with_camera_config)/launch/moveit_planning_execution.launch" />
 
     <!-- Launch actual code to test -->
-    <node pkg="tic_tac_toe" type="board_tf_publisher.py" name="board_tf_publisher" output="screen" />
+    <node pkg="tic_tac_toe" type="camera2board_tf_publisher.py" name="camera2board_tf_publisher" output="screen" />
 
     <!-- Open RQT for analysis with a custom perspective -->
    <node name = "RQT_TestViewer" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" 
