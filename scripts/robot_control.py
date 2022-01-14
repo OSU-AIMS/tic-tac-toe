@@ -94,4 +94,34 @@ class moveManipulator(object):
         current_joints = self.move_group.get_current_joint_values()
         return all_close(joint_goal, current_joints, 0.01)
 
+    def send_io(self, request):
+    ## Wrapper for rosservice to open/close gripper using Read/Write IO
+
+    # Wait for ros services to come up
+    rospy.wait_for_service('read_single_io')
+    rospy.wait_for_service('write_single_io')
+
+    # Create Handle for Service Proxy's
+    try:
+        read_single_io = rospy.ServiceProxy('read_single_io', ReadSingleIO)
+        write_single_io = rospy.ServiceProxy('write_single_io', WriteSingleIO)
+    except rospy.ServiceException as e:
+        print("Gripper IO Service Call failed: %s"%e)
+
+    # Send 'Write' IO Message
+    try:
+      write_status = write_single_io(10010, request)
+    except:
+      print("An exception occured. Unable to write to Single IO.")
+
+
+    # Call Read Service to check current position
+    read_status = read_single_io(10011).value
+    if read_status:
+        print('Gripper is Closed')
+    else:
+        print('Gripper is Open')
+
+    return read_status
+
 
