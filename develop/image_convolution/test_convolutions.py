@@ -3,6 +3,10 @@
 # Script to test smaller kernel convolutions
 
 import cv2
+import rospy
+
+# ROS Data Types
+from sensor_msgs.msg import Image
 
 # System Tools
 from math import pi, radians, sqrt, atan, ceil
@@ -10,11 +14,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+
 def kernel_runner(image):
     # Create kernel (format - "BGR")
     kernel_size = 5
     print('Image Parameter')
-    # print(image)
+    print(image)
     print('Shape of Input image')
     print(np.shape(image))
     # kernel = np.dstack((255 * np.ones((kernel_size, kernel_size, 1), dtype='uint8'),np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
@@ -49,63 +54,16 @@ def kernel_runner(image):
     # Uncomment below to use square images as kernels
     kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
 
-    # Uncomment below to use images as the kernels
-    # kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
+    # kernel_g = cv2.imread('tic_tac_toe_images/green_square_crop.tiff')
 
     # kernel_r = cv2.imread('tic_tac_toe_images/red_square_crop.tiff')
 
-    print('Kernel Matrix: should be 3x3x3')
-    print(np.shape(kernel_b)) # returns 3x3x3
-    print(kernel_b)
+    # Uncomment below to see Kernel size
+    # print('Kernel Matrix: should be 3x3x3')
+    # print(np.shape(kernel_b)) # returns 3x3x3
+    # print(kernel_b)
 
-
-
-##### Method: Filter2D
-# <<<<<<< Updated upstream
-    # dst = image.copy()
-    # output = cv2.filter2D(src=image, dst=dst, ddepth=-1, kernel=kernel_b)
-    # cv2.imshow('Input Array',image)
-    # cv2.imshow('Heatmap',output)
-    # cv2.imshow('Output Array dst', dst)
-    # cv2.imwrite("dst.tiff", dst)
-    # cv2.imwrite("output.tiff", output)
-    # wouldn't output = dst??
-    # 11/18: Result is not a gradient
-    # kernel_b=cv2.flip(kernel_b,-1)
-    # dst = image.copy()
-    # image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # output = cv2.filter2D(src=image, ddepth=-1, kernel=kernel_b)
-    # 11/22: removed dst=dst
-    # cv2.imshow('Heatmap',output)
-    # cv2.imshow('Output Array dst', dst)
-    # cv2.imwrite('dst.tiff', dst) dst & output are the same
-    # cv2.imwrite('output_filter2D.tif', output)
-
-    '''
-    filter2D parameters:
-        InputArray src, 
-        OutputArray dst, of same size & same number of channels as src
-        int ddepth, desired depth of destination img
-        InputArray kernel, 
-        Point anchor = Point(-1,-1),
-        double delta = 0,
-        int borderType = BORDER_DEFAULT   
-    # opencv docs on filter2D:
-    # https://docs.opencv.org/4.2.0/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04
-    '''
-
- # Uncomment below after testing out filter2D function & get a consistent output
-
-    # # # Method: Template Matching
-    # # image = image[:, :, 0]
-    # img_gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-    # # resb = cv2.matchTemplate(image=image[:, :, 0], templ=kernel_b, method=1)
-    # # resg = cv2.matchTemplate(image=image[:, :, 1], templ=kernel_b, method=1)
-    # # resr = cv2.matchTemplate(image=image[:, :, 2], templ=kernel_b, method=1)
-    # # cv2.imwrite('resb.tiff',resb)
-    # # cv2.imwrite('resg.tiff',resg)
-    # # cv2.imwrite('resr.tiff',resr)
-    # # template = kernel_b[1,:,:]
+### MatchTemplate()
     '''
     matchTemplate docs
     https://docs.opencv.org/4.2.0/df/dfb/group__imgproc__object.html#gga3a7850640f1fe1f58fe91a2d7583695dac6677e2af5e0fae82cc5339bfaef5038
@@ -122,7 +80,7 @@ def kernel_runner(image):
     res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
     # res_B = cv2.matchTemplate(image=img_gray,templ=kernel_b_gray,method=5)
     # Use method=5 when using the square images as kernels
-    # Use method= when using arrays as kernels
+    # Use method=3 when using arrays as kernels
     cv2.imwrite('res_match_template_B.tiff', res_B)
     min_val_B, max_val_B, min_loc_B, max_loc_B = cv2.minMaxLoc(res_B)
     # print('min_val_B')
@@ -225,11 +183,44 @@ def kernel_runner(image):
 # print(center_B)
 # shapeDetect.drawAxis()
 
+
+def runner(data):
+    """
+    Callback function for image subscriber, every frame gets scanned for board and publishes to board_center topic
+    (for robot movement) and board tile centers (for game state updates)
+    :param camera_data: Camera data input from subscriber
+    """
+    try:
+        print("Inside Runner")
+        # Convert Image to CV2 Frame
+        bridge = CvBridge()
+        cv_image = bridge.imgmsg_to_cv2(data, "bgr8") 
+        # OpenCV:BGR / RealSense: RGB / RGB: to get proper colors --> also filps colors in frame
+
+        # Using Image Kernel to detect color
+        kernel_runner(cv_image)
+
+
+    except rospy.ROSInterruptException:
+        exit()
+    except KeyboardInterrupt:
+        exit()
+    except CvBridgeError as e:
+        print(e)
+
 if __name__ == '__main__':
     print("Your OpenCV version is: " + cv2.__version__)  
-    image = cv2.imread("images_10x10/test_box_50x50.tif")
-    # image = cv2.imread("tic_tac_toe_images/twistCorrectedColoredSquares_Color.tiff")
 
+    # create subscriber to ros Image Topic - pulled from kernel_color_detect
+    image_sub = rospy.Subscriber("/camera/color/image_raw", Image, runner)
+    print("Subscribed to image_raw!")
+    # kernel_runner(image_sub)
+
+
+
+
+
+    # image = cv2.imread("images_10x10/test_box_50x50.tif")
+    # image = cv2.imread("tic_tac_toe_images/twistCorrectedColoredSquares_Color.tiff")
     # image = cv2.imread("images_20x20/test_box_20x20.tif")
     # image = image[:, :, 0]
-    kernel_runner(image.copy())
