@@ -49,13 +49,15 @@ def kernel_runner(image):
     # Uncomment below to use square images as kernels
     kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
 
-    kernel_r = cv2.imread('tic_tac_toe_images/red_square_crop.tiff')
+    # Uncomment below to use images as the kernels
+    # kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
 
-    kernel_g = cv2.imread('tic_tac_toe_images/green_square_crop.tiff')
+    # kernel_r = cv2.imread('tic_tac_toe_images/red_square_crop.tiff')
 
     print('Kernel Matrix: should be 3x3x3')
     print(np.shape(kernel_b)) # returns 3x3x3
     print(kernel_b)
+
 
 
 ##### Method: Filter2D
@@ -142,7 +144,8 @@ def kernel_runner(image):
     # draw the bounding box on the image
     b_box_image = cv2.rectangle(image, (startX_B, startY_B), (endX_B, endY_B), (255, 0, 0), 4) # BGR for openCV
     # show the output image
-    # cv2.imshow("Output based on matchTemplate", b_box_image)
+    cv2.imshow("Orignal Image",image)
+    cv2.imshow("Output based on matchTemplate", b_box_image)
     cv2.imwrite('res_match_template_Blue_BoundingBox.tiff', b_box_image)
     plt.figure(1)
     plt.imshow(b_box_image)
@@ -212,7 +215,7 @@ def kernel_runner(image):
     cv::TM_CCOEFF = 4,
     cv::TM_CCOEFF_NORMED = 5
 '''
-#### Using Bounding-Box Coordinates to get orientation of the board
+#### Using Bounding-Box Coordinates to get orientation of the board ## Output Bounding Box centers to different function
 # note this likely will be done in a separate function but test it here
 # center_B = (np.subtract(max_loc_B[0], min_loc_B[0]),np.subtract(max_loc_B[1],min_loc_B[1]))
 # center_G = np.subtract(max_loc_G, min_loc_G)
