@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 #####################################################
 #   Support Node to Output Board Position           #
@@ -128,16 +128,10 @@ class board_publisher():
      4. creates a live feed that visualizes where the camera thinks the board is located
     """
 
-    def __init__(self, camera2board_pub, camera_tile_annotation, tfBuffer):
+    def __init__(self, camera2board_pub):
 
         # Inputs
         self.camera2board_pub = camera2board_pub
-
-        self.camera_tile_annotation = camera_tile_annotation
-        # camera_tile_annotation: publishes the numbers & arrows displayed on the image
-
-        self.tfBuffer = tfBuffer
-        # tfBuffer: listener for all all transforms in ROS
 
         # Tools
         self.bridge = CvBridge()
@@ -158,21 +152,9 @@ class board_publisher():
             cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
 
             boardImage = cv_image.copy()
-
-            # characterize board location and orientation
-
-            # Run using color (use HSV extraction to obtain accurate HSV values)
-            # scaledCenter, boardImage, tf_camera2board = detectBoard_coloredSquares(cv_image)
-            
+           
             # Run using contours
             scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
-
-
-            
-            # Distance from Camera to Board
-            # .. Hacky. Extract height from camera global transform.
-            # standoff_z_axis = tf_matrix.transform.translation.z
-
 
             pose_goal = tf_helper.transformToPose(tf_camera2board)
 
@@ -226,9 +208,7 @@ def main():
     pub_camera2board = rospy.Publisher("/tf", tf2_msgs.msg.TFMessage, queue_size=20)
 
     # Setup Listeners
-    tfBuffer = tf2_ros.Buffer()
-    listener = tf2_ros.TransformListener(tfBuffer)
-    bp_callback = board_publisher(pub_camera2board, pub_center, pub_camera_tile_annotation, tfBuffer)
+    bp_callback = board_publisher(pub_camera2board)
     image_sub = rospy.Subscriber("/camera/color/image_raw", Image, bp_callback.runner)
 
 

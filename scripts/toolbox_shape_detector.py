@@ -39,7 +39,7 @@ def getContours(cv_image):
 
 		# Finds all contours on image (using threshold image)
 		contours, _ = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+		
 		return contours
 
 def momentCenter(contour):
@@ -54,12 +54,12 @@ def filterQuadrilaterals(contour):
 
 	# approxPolyDP smooths and approximates the shape of the contour and outputs a set of vertices
 	approx = cv2.approxPolyDP(contour, .03 * perimeter, True)
-
+	quad_area = 0
 	# filter quadrilaterals
 	if len(approx) == 4:
 
 		# Find area of quadrilateral
-		quad_area = cv2.contourArea(c)
+		quad_area = cv2.contourArea(contour)
 
 	return quad_area, approx
 
