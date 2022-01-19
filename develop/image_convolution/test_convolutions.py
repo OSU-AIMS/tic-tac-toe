@@ -3,23 +3,27 @@
 # Script to test smaller kernel convolutions
 
 import cv2
-import rospy
+# import rospy
 
 # ROS Data Types
-from sensor_msgs.msg import Image
+# from sensor_msgs.msg import Image
 
 # System Tools
 from math import pi, radians, sqrt, atan, ceil
 import numpy as np
 import matplotlib.pyplot as plt
 
+# RealSense Pipeline
+import pyrealsense2 as rs 
+import time
+import sys
 
 
 def kernel_runner(image):
     # Create kernel (format - "BGR")
     kernel_size = 5
-    print('Image Parameter')
-    print(image)
+    # print('Image Parameter')
+    # print(image)
     print('Shape of Input image')
     print(np.shape(image))
     # kernel = np.dstack((255 * np.ones((kernel_size, kernel_size, 1), dtype='uint8'),np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
@@ -209,12 +213,43 @@ def runner(data):
         print(e)
 
 if __name__ == '__main__':
-    print("Your OpenCV version is: " + cv2.__version__)  
+    try:
+        print("Your OpenCV version is: " + cv2.__version__)  
 
-    # create subscriber to ros Image Topic - pulled from kernel_color_detect
-    image_sub = rospy.Subscriber("/camera/color/image_raw", Image, runner)
-    print("Subscribed to image_raw!")
-    # kernel_runner(image_sub)
+        # create subscriber to ros Image Topic - pulled from kernel_color_detect
+        # image_sub = rospy.Subscriber("/camera/color/image_raw", Image, runner)
+        # print("Subscribed to image_raw!")
+        
+        # Setting Exposure to differnet value
+        # profile = pipeline.start(config)
+        # sensor_dep = profile.get_device().first_depth_sensor()
+        # print "Trying to set Exposure"
+        # exp = sensor_dep.get_option(rs.option.exposure)
+        # print "exposure = %d" % exp
+        # print "Setting exposure to new value"
+        # exp = sensor_dep.set_option(rs.option.exposure, 25000)
+        # exp = sensor_dep.get_option(rs.option.exposure)
+        # print "New exposure = %d" % exp
+        # profile = pipeline.stop
+
+
+
+        cap = cv2.VideoCapture(4)
+        # refer to this github issue for why I used VideoCapture(4)
+        # https://github.com/OSU-AIMS/tic-tac-toe/issues/10#issuecomment-1016505927
+
+        # allowing the camera time to boot up and auto set exposure
+        time.sleep(30) # seconds
+
+        while(1):
+            res,frame = cap.read()
+            frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+            kernel_runner(frame)
+        cap.release()
+    except KeyboardInterrupt:
+        exit()
+
+    
 
 
 
