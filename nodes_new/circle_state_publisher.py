@@ -1,18 +1,10 @@
 #!/usr/bin/env python
-
-#####################################################
-#   Support Node to Output Board Position           #
-#                                                   #
-#   * Works Primarily in transforms                 #
-#   * Relies upon camera input topic                #
-#   * Publishes multiple output topics for results  #
-#                                                   #
-#####################################################
-# Software License Agreement (Apache 2.0 License)
 #
-# Copyright (c) 2021, The Ohio State University
+# Software License Agreement (Apache 2.0 License)
+# Copyright (c) 2022, The Ohio State University
 # The Artificially Intelligent Manufacturing Systems Lab (AIMS)
-#####################################################
+#
+# Author: LuisC18
 
 
 #####################################################

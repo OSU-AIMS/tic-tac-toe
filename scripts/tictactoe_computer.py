@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Software License Agreement (Apache 2.0 License)
-# Copyright (c) 2021, The Ohio State University
+# Copyright (c) 2022, The Ohio State University
 # The Artificially Intelligent Manufacturing Systems Lab (AIMS)
 #
 # Author: LuisC18
