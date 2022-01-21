@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 #
 # Software License Agreement (Apache 2.0 License)
 # Copyright (c) 2022, The Ohio State University
@@ -6,6 +7,14 @@
 #
 # Author: LuisC18
 from cv_bridge import CvBridge, CvBridgeError
+
+import rospy
+import tf2_ros
+import tf2_msgs.msg
+
+# ROS Data Types
+from sensor_msgs.msg import Image
+from std_msgs.msg import ByteMultiArray
 
 
 class tile_locations_publisher():
@@ -29,7 +38,7 @@ class tile_locations_publisher():
         
         #### insert tile locations relative to ttt_board
 
-        self.tile_locations.publish(fixed2tileCenters)
+        # self.tile_locations.publish(fixed2tileCenters)
 
 
 
