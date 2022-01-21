@@ -66,11 +66,11 @@ def detectBoard_contours(image):
     image = image.copy()
 
     # Find the board contour, create visual, define board center and points
-    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=23000)
+    boardImage, boardCenter, boardPoints = shapeDetect.detectSquare(image, area=54600)
 
     # Scale from image pixels to m (pixels/m)
-    scale = .664/640          # res: (640x480)
-    # scale = .895 / 1280         # res: (1280x730)
+    # scale = .664/640          # res: (640x480)
+    scale = 1.14 / 1280         # res: (1280x730)
     # TODO: use camera intrinsics
 
     scaledCenter = [0, 0]
@@ -80,16 +80,16 @@ def detectBoard_contours(image):
     # scaledCenter[1] = (boardCenter[1]-data.height / 2) * scale
 
     # Convert board center pixel values to meters (and move origin to center of image)
-    scaledCenter[0] = (boardCenter[0] - 320) * scale
-    scaledCenter[1] = (boardCenter[1] - 240) * scale
+    scaledCenter[0] = (boardCenter[0] - 640) * scale
+    scaledCenter[1] = (boardCenter[1] - 360) * scale
 
     # Define 3x1 array of board translation (x, y, z) in meters
     boardTranslation = np.array(
-        [[.819], [-scaledCenter[0]], [-scaledCenter[1]]])  ## TODO use depth from camera data
+        [[.819], [scaledCenter[0]], [-scaledCenter[1]]])  ## TODO use depth from camera data
         # [[scaledCenter[0]], [scaledCenter[1]], [-0.655]])
 
     # Find rotation of board on the table plane, only a z-axis rotation angle
-    z_orient = -shapeDetect.newOrientation(boardPoints)
+    z_orient = -shapeDetect.findAngle(boardPoints)
 
     # convert angle to a rotation matrix with rotation about z-axis
     board_rot = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
@@ -113,11 +113,43 @@ def detectBoard_contours(image):
     boardRotationMatrix = np.dot(camera_rot,board_rot)
 
     # Transformation (board from imageFrame to camera)
-    tf_camera2board = tf_helper.generateTransMatrix(boardRotationMatrix, boardTranslation)
 
+    # Build new tf matrix
+
+    tf_camera2board = np.zeros((4, 4))
+    tf_camera2board[0:3, 0:3] = boardRotationMatrix
+    tf_camera2board[0:3, 3:4] = boardTranslation
+    tf_camera2board[3, 3] = 1
 
     return scaledCenter, boardImage, tf_camera2board
 
+def transformToPose(transform):
+        # Location Vector
+        pose_goal = []
+        point = transform
+        x, y, z = point[:-1, 3]
+        x = np.asscalar(x)
+        y = np.asscalar(y)
+        z = np.asscalar(z)
+
+        # Quant Calculation Support Variables
+        # Only find trace for the rotational matrix.
+        t = np.trace(point) - point[3, 3]
+        r = np.sqrt(1 + t)
+
+        # Primary Diagonal Elements
+        Qxx = point[0, 0]
+        Qyy = point[1, 1]
+        Qzz = point[2, 2]
+
+        # Quant Calculation
+        qx = np.copysign(0.5 * np.sqrt(1 + Qxx - Qyy - Qzz), point[2, 1] - point[1, 2])
+        qy = np.copysign(0.5 * np.sqrt(1 - Qxx + Qyy - Qzz), point[0, 2] - point[2, 0])
+        qz = np.copysign(0.5 * np.sqrt(1 - Qxx - Qyy + Qzz), point[1, 0] - point[0, 1])
+        qw = 0.5 * r
+
+        pose_goal = [x, y, z, qx, qy, qz, qw]
+        return pose_goal
 
 class board_publisher():
     """
@@ -156,7 +188,7 @@ class board_publisher():
             # Run using contours
             scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
 
-            pose_goal = tf_helper.transformToPose(tf_camera2board)
+            pose_goal = transformToPose(tf_camera2board)
 
             ## Publish Board Pose
             camera2board_msg = geometry_msgs.msg.TransformStamped()
@@ -176,9 +208,7 @@ class board_publisher():
             camera2board_msg = tf2_msgs.msg.TFMessage([camera2board_msg])
 
             # Publish
-            self.camera2board_pub.publish(camera2board_msg)
-
-            
+            self.camera2board_pub.publish(camera2board_msg)            
 
         except rospy.ROSInterruptException:
             exit()

@@ -39,13 +39,16 @@ def getContours(cv_image):
 
 		# Finds all contours on image (using threshold image)
 		contours, _ = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		
+		# cv2.drawContours(cv_image, contours, -1, (0,255,0), 3)
+		# cv2.imshow("test",cv_image)
+		# cv2.waitKey(0)
 		return contours
 
 def momentCenter(contour):
 	moments = cv2.moments(contour)
 
 	center_x = int((moments['m10'] / (moments['m00'] + 1e-7)))
+	center_y = int((moments['m01'] / (moments['m00'] + 1e-7)))
 	return [center_x,center_y]
 
 def filterQuadrilaterals(contour):
@@ -63,20 +66,25 @@ def filterQuadrilaterals(contour):
 
 	return quad_area, approx
 
-def orderPoints(pts):
-	# sort the points based on their x-coordinates
-	xSorted = pts[np.argsort(pts[:, 0]), :]
-
-	leftMost = xSorted[:2, :]
-	rightMost = xSorted[2:, :]
-
-	leftMost = leftMost[np.argsort(leftMost[:, 1]), :]
-	(tl, bl) = leftMost
-	
-	D = dist.cdist(tl[np.newaxis], rightMost, "euclidean")[0]
-	(br, tr) = rightMost[np.argsort(D)[::-1], :]
-	
-	return np.array([tl, tr, bl, br], dtype="float32")
+def orderPoints(points):
+	"""
+	Function used to reorder points of a detect shape or contour.
+	Current application is to consistently reorder bounding box values.
+	@param points: List of (x, y) points, corners of shape.
+	@return: List of (x, y) reordered points. Order for a square -> (top left, top right, bottom left, bottom right)
+	"""
+	try:
+		NewPoints = np.zeros_like(points)
+		points = points.reshape((4, 2))
+		add = points.sum(1)
+		NewPoints[0] = points[np.argmin(add)]
+		NewPoints[3] = points[np.argmax(add)]
+		diff = np.diff(points, axis=1)
+		NewPoints[1] = points[np.argmin(diff)]
+		NewPoints[2] = points[np.argmax(diff)]
+		return NewPoints
+	except:
+		return []
 
 class TOOLBOX_SHAPE_DETECTOR(object):
 	"""
@@ -94,10 +102,10 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 		@return square_center: (x, y) center pixel location of square on image.
 		@return square_points: (x, y) pixel points of the square (top left, top right, bottom left, bottom right)
 		"""
-		
-		min_area = (1-tolerance/100) * area 
-		max_area = (1+tolerance/100) * area 
-
+		tolerance = float(tolerance)/100
+		min_area = (1-tolerance) * area 
+		max_area = (1+tolerance) * area
+	
 		contours = getContours(cv_image)
 
 		for c in contours:
@@ -105,14 +113,12 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 
 			(x, y, width, height) = cv2.boundingRect(quad_points)
 			aspect_ratio = float(width) / float(height)
-
 			# aspect_ratio of 1 is a square
 			if 0.95 <= aspect_ratio <= 1.05 and min_area < quad_area < max_area:
-
 				image_with_square = cv2.drawContours(cv_image, [c], -1, (255, 36, 0), 3)
 				square_points = orderPoints(quad_points)
 				square_center = momentCenter(c)
-				
+
 				return image_with_square, square_center, square_points
 
 
@@ -184,6 +190,31 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 				center_list.append(center)
 
 		return center_list, circles_image
+
+	def findAngle(self, pts):
+		"""
+		Custom orientation function for tictactoe. Takes bounding box reordered approx output points.
+		@param pts: reordered points from the boundingRect opencv function.
+		@return: Z-axis angle of the board
+		"""
+		
+		sz = len(pts)
+		data_pts = np.empty((sz, 2), dtype=np.float64)
+		for i in range(data_pts.shape[0]):
+			data_pts[i, 0] = pts[i, 0, 0]
+			data_pts[i, 1] = pts[i, 0, 1]
+
+		# define top right and left points
+		topleft = [pts[0][0][0], pts[0][0][1]]
+		topright = [pts[1][0][0], pts[1][0][1]]
+
+		# use point-slope formula
+		slope1_2 = (float(topleft[1]) - float(topright[1])) / (float(topleft[0]) - float(topright[0]))
+
+		# convert to radians
+		angle = math.degrees(math.atan(slope1_2))
+
+		return angle
 
 
 def main():
