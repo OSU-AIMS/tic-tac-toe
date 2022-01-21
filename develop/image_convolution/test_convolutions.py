@@ -3,15 +3,23 @@
 # Script to test smaller kernel convolutions
 
 import cv2
-# import rospy
+import rospy
+from os.path import join, abspath, dirname
 
 # ROS Data Types
-# from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image
+from geometry_msgs.msg import TransformStamped
+import tf2_ros
+
 
 # System Tools
 from math import pi, radians, sqrt, atan, ceil
 import numpy as np
 import matplotlib.pyplot as plt
+
+# Custom Tool
+from cv_bridge import CvBridge, CvBridgeError
+
 
 # RealSense Pipeline
 import pyrealsense2 as rs 
@@ -24,8 +32,11 @@ def kernel_runner(image):
     kernel_size = 5
     # print('Image Parameter')
     # print(image)
+    print('Inside Kernel_Runner Function')
     print('Shape of Input image')
     print(np.shape(image))
+    print('Type for Input Image')
+    print(type(image))
     # kernel = np.dstack((255 * np.ones((kernel_size, kernel_size, 1), dtype='uint8'),np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
     # 11/22: changed dtype from uinut8 to np.float32 --> didn't change anything
     # Changed np.zeros(kernel_size,kernel_size,3)  to np.zeros(kernel_size,kernel_size,2) so kernel is 3 channels instead of 4
@@ -56,7 +67,15 @@ def kernel_runner(image):
 
 
     # Uncomment below to use square images as kernels
-    kernel_b = cv2.imread('tic_tac_toe_images/blue_square_crop.tiff')
+    CWD = dirname(abspath(__file__))
+    RESOURCES = join(CWD,'tic_tac_toe_images')
+    blue_square = 'blue_square_crop.tiff'
+
+    kernel_b = cv2.imread(join(RESOURCES,blue_square))
+    # print('Join Resources')
+    # print(join(RESOURCES,blue_square))
+    print('Type for Kernel_b Template img')
+    print(type(kernel_b))
 
     # kernel_g = cv2.imread('tic_tac_toe_images/green_square_crop.tiff')
 
@@ -80,7 +99,7 @@ def kernel_runner(image):
 
     # # Recognizing Blue Square --- Everything needed to run matchTemplate below
     print('Using matchTemplate() function')
-    # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
     # res_B = cv2.matchTemplate(image=img_gray,templ=kernel_b_gray,method=5)
     # Use method=5 when using the square images as kernels
@@ -112,7 +131,7 @@ def kernel_runner(image):
     plt.figure(1)
     plt.imshow(b_box_image)
     plt.show()
-    # cv2.waitKey(0) ------------ Everything needed for matchTemplate() ^^^
+    cv2.waitKey(1) #------------ Everything needed for matchTemplate() ^^^
 
     #### Recognizing Red Square
     # res_R = cv2.matchTemplate(image=image,templ= kernel_r,method=5)
@@ -201,6 +220,10 @@ def runner(data):
         cv_image = bridge.imgmsg_to_cv2(data, "bgr8") 
         # OpenCV:BGR / RealSense: RGB / RGB: to get proper colors --> also filps colors in frame
 
+        # Type for cv_image
+        print('Type for cv_image:')
+        print(type(cv_image))
+
         # Using Image Kernel to detect color
         kernel_runner(cv_image)
 
@@ -213,41 +236,71 @@ def runner(data):
         print(e)
 
 if __name__ == '__main__':
+    print("Your OpenCV version is: " + cv2.__version__)  
+
+    # Initialize a Node:
+    rospy.init_node('Colored Square Detect', anonymous=False)
+    rospy.loginfo(">> Colored Square Detect Node Successfully Created")
+
+    # Setup Publishers
+    pub_center = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
+    # pub_camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
+    
+    # Setup Listeners
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
+
+
+
+    # create subscriber to ros Image Topic - pulled from kernel_color_detect
+    image_sub = rospy.Subscriber("/camera/color/image_raw", Image, runner)
+
+    print('Type of Image from image_sub')
+    print(type(image_sub)) # type 'numpy.ndarray'
+
+    print("Subscribed to image_raw!")
+
+    # kernel_runner(image_sub)
+    
+    # Setting Exposure to differnet value
+    # pipeline = rs.pipeline()
+    # config = rs.config()
+    # profile = pipeline.start(config)
+    # sensor_dep = profile.get_device().first_depth_sensor()
+    # print "Trying to set Exposure"
+    # exp = sensor_dep.get_option(rs.option.exposure)
+    # print "exposure = %d" % exp
+    # print "Setting exposure to new value"
+    # exp = sensor_dep.set_option(rs.option.exposure, 25000)
+    # exp = sensor_dep.get_option(rs.option.exposure)
+    # print "New exposure = %d" % exp
+    # profile = pipeline.stop
+
+    
+
+
+    # depth_sensor = profile.get_device().query_sensors()[1]
+    # depth_sensor.set_option(rs.option.enable_auto_exposure, True)
+
+    # cap = cv2.VideoCapture(5)
+    # # refer to this github issue for why I used VideoCapture(4)
+    # # https://github.com/OSU-AIMS/tic-tac-toe/issues/10#issuecomment-1016505927
+
+    # # allowing the camera time to boot up and auto set exposure
+    # time.sleep(1) # seconds
+
+    # while(1):
+    #     res,frame = cap.read()
+    #     print('Type for Frame from VideoCapture()')
+    #     print(type(frame))
+    #     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+    #     kernel_runner(frame)
+    # cap.release()
     try:
-        print("Your OpenCV version is: " + cv2.__version__)  
-
-        # create subscriber to ros Image Topic - pulled from kernel_color_detect
-        # image_sub = rospy.Subscriber("/camera/color/image_raw", Image, runner)
-        # print("Subscribed to image_raw!")
-        
-        # Setting Exposure to differnet value
-        # profile = pipeline.start(config)
-        # sensor_dep = profile.get_device().first_depth_sensor()
-        # print "Trying to set Exposure"
-        # exp = sensor_dep.get_option(rs.option.exposure)
-        # print "exposure = %d" % exp
-        # print "Setting exposure to new value"
-        # exp = sensor_dep.set_option(rs.option.exposure, 25000)
-        # exp = sensor_dep.get_option(rs.option.exposure)
-        # print "New exposure = %d" % exp
-        # profile = pipeline.stop
-
-
-
-        cap = cv2.VideoCapture(4)
-        # refer to this github issue for why I used VideoCapture(4)
-        # https://github.com/OSU-AIMS/tic-tac-toe/issues/10#issuecomment-1016505927
-
-        # allowing the camera time to boot up and auto set exposure
-        time.sleep(30) # seconds
-
-        while(1):
-            res,frame = cap.read()
-            frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
-            kernel_runner(frame)
-        cap.release()
+        rospy.spin()
     except KeyboardInterrupt:
-        exit()
+        print("Shutting down")
+    cv2.destroyAllWindows()
 
     
 
