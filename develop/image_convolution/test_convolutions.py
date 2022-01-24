@@ -32,50 +32,25 @@ def kernel_runner(image):
     kernel_size = 5
     # print('Image Parameter')
     # print(image)
-    print('Inside Kernel_Runner Function')
-    print('Shape of Input image')
-    print(np.shape(image))
-    print('Type for Input Image')
-    print(type(image))
-    # kernel = np.dstack((255 * np.ones((kernel_size, kernel_size, 1), dtype='uint8'),np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
-    # 11/22: changed dtype from uinut8 to np.float32 --> didn't change anything
-    # Changed np.zeros(kernel_size,kernel_size,3)  to np.zeros(kernel_size,kernel_size,2) so kernel is 3 channels instead of 4
-    # format: BGR
-    # numpy dstack docs: https://numpy.org/doc/stable/reference/generated/numpy.dstack.html
-
-    # Uncomment below to use white kernel 3x3x3
-    # kernel_b = 255 * np.ones((kernel_size, kernel_size), dtype='uint8')
-
-    # Uncomment below to create blue array
-    # ch1 = 255*np.ones((kernel_size, kernel_size), dtype='uint8')
-    # ch2 = np.zeros((kernel_size, kernel_size), dtype='uint8')
-    # kernel_b = np.array([ch1, ch2, ch2], ndmin=3, dtype='uint8')
-    # might be BGR format
-
-    # RGB --> Grayscale: R*0.299, G*0.587, B*0.114
-    # kernel_b_gray = np.array([ch1*0.114, ch2*0.587, ch2*0.299])
-    # Grayscale input template array
-
-    # kernel_b = np.stack((ch2,ch2,ch1),axis=-1)
-    # 12/6: issue with creating 3 channel array
-    # need (0,0,255) 3 channel array
-    # Currently makes [0,0,255],[0,0,255]. Need [0,0,0],[0,0,0],[255,255,255]
-
-
-    # Attempting to Create a blue (255,0,0) 3x3x3 Kernel
-    # kernel_b = np.dstack((255 * np.ones((kernel_size, kernel_size,1), dtype='uint8'), np.zeros((kernel_size, kernel_size, 2), dtype='uint8')))
+    # print('Inside Kernel_Runner Function')
+    # print('Shape of Input image')
+    # print(np.shape(image))
+    # print('Type for Input Image')
+    # print(type(image))
 
 
     # Uncomment below to use square images as kernels
-    CWD = dirname(abspath(__file__))
-    RESOURCES = join(CWD,'tic_tac_toe_images')
-    blue_square = 'blue_square_crop.tiff'
+    CWD = dirname(abspath(__file__)) # Control Working Directory - goes to script location
+    RESOURCES = join(CWD,'tic_tac_toe_images') # combine script location with folder name
+    # blue_square = 'blue_square_crop.tiff'  - Used for Static Image and other images at the same depth & focal Length
+    blue_square = 'in-lab_straight_blue_square_crop.tiff'
 
-    kernel_b = cv2.imread(join(RESOURCES,blue_square))
+    kernel_b = cv2.imread(join(RESOURCES,blue_square)) # combine folder name with picture name inside folder
     # print('Join Resources')
     # print(join(RESOURCES,blue_square))
-    print('Type for Kernel_b Template img')
-    print(type(kernel_b))
+
+    # print('Type for Kernel_b Template img')
+    # print(type(kernel_b))
 
     # kernel_g = cv2.imread('tic_tac_toe_images/green_square_crop.tiff')
 
@@ -92,28 +67,28 @@ def kernel_runner(image):
     https://docs.opencv.org/4.2.0/df/dfb/group__imgproc__object.html#gga3a7850640f1fe1f58fe91a2d7583695dac6677e2af5e0fae82cc5339bfaef5038
         Input Array: image (must be 8 bit or 32 bit floating point)
         Input array: Templ (serached template)
-       output array: result
+        output array: result
                int: method (https://docs.opencv.org/4.2.0/df/dfb/group__imgproc__object.html#ga3a7850640f1fe1f58fe91a2d7583695d)
                mask: mask of serached template. Same datatype & size as templ. Not set by default
     '''
 
     # # Recognizing Blue Square --- Everything needed to run matchTemplate below
-    print('Using matchTemplate() function')
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
+    # print('Using matchTemplate() function')
+    image = image.copy()
+    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=4)
     # res_B = cv2.matchTemplate(image=img_gray,templ=kernel_b_gray,method=5)
     # Use method=5 when using the square images as kernels
-    # Use method=3 when using arrays as kernels
     cv2.imwrite('res_match_template_B.tiff', res_B)
     min_val_B, max_val_B, min_loc_B, max_loc_B = cv2.minMaxLoc(res_B)
     # print('min_val_B')
     # print(min_val_B)
     # print('max_val_B')
     # print(max_val_B)
-    print('min_loc_B')
-    print(min_loc_B)
-    print('max_loc_B')
-    print(max_loc_B)
+    # print('min_loc_B')
+    # print(min_loc_B)
+    # print('max_loc_B')
+    # print(max_loc_B)
 
     # Drawing Bounding Box around detected shape
     # determine the starting and ending (x, y)-coordinates of the bounding box
@@ -125,12 +100,16 @@ def kernel_runner(image):
     # draw the bounding box on the image
     b_box_image = cv2.rectangle(image, (startX_B, startY_B), (endX_B, endY_B), (255, 0, 0), 4) # BGR for openCV
     # show the output image
-    cv2.imshow("Orignal Image",image)
-    cv2.imshow("Output based on matchTemplate", b_box_image)
-    cv2.imwrite('res_match_template_Blue_BoundingBox.tiff', b_box_image)
-    plt.figure(1)
-    plt.imshow(b_box_image)
-    plt.show()
+    # plt.figure(1)
+    cv2.imshow("Detection",b_box_image)
+    # plt.figure(2)
+    # plt.imshow(image)
+    # plt.figure(3)
+    # plt.imshow(b_box_image)
+    # cv2.imwrite('res_match_template_Blue_BoundingBox.tiff', b_box_image)
+    # for viewing the heatmap result
+    
+    # plt.show()
     cv2.waitKey(1) #------------ Everything needed for matchTemplate() ^^^
 
     #### Recognizing Red Square
@@ -214,15 +193,15 @@ def runner(data):
     :param camera_data: Camera data input from subscriber
     """
     try:
-        print("Inside Runner")
+        # print("Inside Runner")
         # Convert Image to CV2 Frame
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(data, "bgr8") 
         # OpenCV:BGR / RealSense: RGB / RGB: to get proper colors --> also filps colors in frame
 
         # Type for cv_image
-        print('Type for cv_image:')
-        print(type(cv_image))
+        # print('Type for cv_image:')
+        # print(type(cv_image))
 
         # Using Image Kernel to detect color
         kernel_runner(cv_image)
@@ -239,7 +218,7 @@ if __name__ == '__main__':
     print("Your OpenCV version is: " + cv2.__version__)  
 
     # Initialize a Node:
-    rospy.init_node('Colored Square Detect', anonymous=False)
+    rospy.init_node('Colored_Square_Detect', anonymous=False)
     rospy.loginfo(">> Colored Square Detect Node Successfully Created")
 
     # Setup Publishers
@@ -255,27 +234,10 @@ if __name__ == '__main__':
     # create subscriber to ros Image Topic - pulled from kernel_color_detect
     image_sub = rospy.Subscriber("/camera/color/image_raw", Image, runner)
 
-    print('Type of Image from image_sub')
-    print(type(image_sub)) # type 'numpy.ndarray'
+    # print('Type of Image from image_sub')
+    # print(type(image_sub)) # type 'numpy.ndarray'
 
-    print("Subscribed to image_raw!")
-
-    # kernel_runner(image_sub)
-    
-    # Setting Exposure to differnet value
-    # pipeline = rs.pipeline()
-    # config = rs.config()
-    # profile = pipeline.start(config)
-    # sensor_dep = profile.get_device().first_depth_sensor()
-    # print "Trying to set Exposure"
-    # exp = sensor_dep.get_option(rs.option.exposure)
-    # print "exposure = %d" % exp
-    # print "Setting exposure to new value"
-    # exp = sensor_dep.set_option(rs.option.exposure, 25000)
-    # exp = sensor_dep.get_option(rs.option.exposure)
-    # print "New exposure = %d" % exp
-    # profile = pipeline.stop
-
+    print("Subscribed to image_raw!")   
     
 
 
@@ -301,14 +263,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
-
-    
-
-
-
-
-
-    # image = cv2.imread("images_10x10/test_box_50x50.tif")
-    # image = cv2.imread("tic_tac_toe_images/twistCorrectedColoredSquares_Color.tiff")
-    # image = cv2.imread("images_20x20/test_box_20x20.tif")
-    # image = image[:, :, 0]
