@@ -14,6 +14,7 @@ path_2_nodes = ttt_pkg + '/nodes'
 sys.path.insert(1, path_2_nodes) 
 
 from cv_bridge import CvBridge, CvBridgeError
+import cv2
 
 import rospy
 import tf2_ros
@@ -22,6 +23,7 @@ import tf2_msgs.msg
 # ROS Data Types
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseArray
+from transformations import *
 
 def prepare_tiles():
     """
@@ -62,21 +64,25 @@ class tile_locations_publisher():
      Custom tictactoe publisher class that finds circles on image and identifies if/where the circles are on the board.
     """
 
-    def __init__(self, tile_annotation, tile_locations, tfBuffer, tf):
+    def __init__(self, tile_annotation, tile_locations, tf):
 
         # Inputs
 
         self.tile_annotation = tile_annotation
         self.tile_locations = tile_locations
-        self.tfBuffer = tfBuffer
         # Tools
         self.bridge = CvBridge()
         self.tf = tf
 
-    def runner(self,data):
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
-        fixed2board = self.tfBuffer.lookup_transform('base_link', 'ttt_board', rospy.Time(0))
-        
+    def runner(self,data):
+        robot_link = 'base_link'
+        target_link = 'ttt_board'
+
+        fixed2board = self.tfBuffer.lookup_transform(robot_link, target_link, rospy.Time())
+            
         fixed2board_pose = [ 
             fixed2board.transform.translation.x,
             fixed2board.transform.translation.y,
@@ -90,42 +96,59 @@ class tile_locations_publisher():
 
         matrix_tile_centers = prepare_tiles()
 
-        tf_fixed2board = self.tf.quant_pose_to_tf_matrix(quant_board2world)
+        tf_fixed2board = self.tf.quant_pose_to_tf_matrix(fixed2board_pose)
 
         tf_fixed2tiles = self.tf.convertPath2FixedFrame(matrix_tile_centers, tf_fixed2board)
 
-        matr_rot = tileCenters2world[0][0:3, 0:3]
-
-        b = Quaternion(matrix=matr_rot)
+        robot_poses = []
 
         for i in range(9):
-            trans_rot = tileCenters2world[i][0:3, 3:4]
+            trans_rot = tf_fixed2tiles[i][0:3, 3:4]
             new_pose = [trans_rot[0][0], trans_rot[1][0], trans_rot[2][0], .707, -.707, 0, 0]
             robot_poses.append(new_pose)
 
-        poses_msg = geometry_msgs.msg.PoseArray()
+        poses_msg = PoseArray()
         poses_msg.poses = robot_poses
 
         self.tile_locations.publish(poses_msg)
+        rospy.loginfo(poses_msg)
 
+        #######
+        camera2board = self.tfBuffer.lookup_transform('camera_link', target_link, rospy.Time())
 
+        camera2board_pose = [ 
+            camera2board.transform.translation.x,
+            camera2board.transform.translation.y,
+            camera2board.transform.translation.z,
+            camera2board.transform.rotation.w,
+            camera2board.transform.rotation.x,
+            camera2board.transform.rotation.y,
+            camera2board.transform.rotation.z
+            ]
+
+        tf_camera2board = self.tf.quant_pose_to_tf_matrix(fixed2board_pose)
+
+        tf_camera2tiles = self.tf.convertPath2FixedFrame(matrix_tile_centers, tf_camera2board)
 
         cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         boardImage = cv_image.copy()
+        print(boardImage.shape)
         
         xyList = [[] for i in range(9)]
-        # scale = .895 / 1280  # todo: set to camera intrinsics
-        scale = .664 / 640
+        # todo: set to camera intrinsics
+        scale = 1.14 / 1280
         for i in range(9):
-            xyzCm = (tileCenters2camera[i][0:2, 3:4])  # in cm
-            x = xyzCm[0] / scale + 320
-            y = xyzCm[1] / scale + 240  # in pixels
+            xyzCm = (tf_camera2tiles[i][0:2, 3:4])  # in cm
+            x = -xyzCm[0] / scale + 640
+            y = -xyzCm[1] / scale + 360  # in pixels
+    
             xyList[i].append(int(x))
             xyList[i].append(int(y))
-            cv2.putText(boardImage, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
-                        (0, 0, 0),
-                        2)
 
+            boardImage = cv2.putText(boardImage, str(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
+                        (100, 0, 0),
+                        2)
+        print(xyList)
         try:
             msg_img = self.bridge.cv2_to_imgmsg(boardImage, 'bgr8')
         except CvBridgeError as e:
@@ -152,9 +175,8 @@ def main():
     pub_tile_locations = rospy.Publisher("tile_locations", PoseArray, queue_size=20)
 
     # Setup Listeners
-    tfBuffer = tf2_ros.Buffer()
-    listener = tf2_ros.TransformListener(tfBuffer)
-    tl_callback = tile_locations_publisher(pub_tile_annotation, pub_tile_locations, tfBuffer,tf)
+    
+    tl_callback = tile_locations_publisher(pub_tile_annotation, pub_tile_locations, tf)
     image_sub = rospy.Subscriber("/camera/color/image_raw", Image, tl_callback.runner)
 
     # Auto-Run until launch file is shutdown
