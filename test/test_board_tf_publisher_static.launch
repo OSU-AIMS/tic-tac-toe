@@ -6,7 +6,7 @@
     <!-- Opens a Static Image Publisher to stand in for real camera -->
     <!-- ns set to match RealSense namespace design. Explicitly matched for testing purposes -->
     <node pkg="image_publisher" type="image_publisher" name="color" ns="camera"
-        args="$(find tic_tac_toe)/test/new_table_sample_capture.png" >
+        args="$(find tic_tac_toe)/test/iRS_sample_capture_contours_1280p.png" >
         <param name="flip_horizontal" value="false" />
         <param name="flip_vertical" value="false" />
         <param name="frame_id" value="camera_link" />
@@ -14,8 +14,11 @@
     </node>
 
     <!-- Launch Sim Robot -->
-    <include file="$(find robot_with_camera_config)/launch/moveit_planning_execution.launch" />
+    <include file="$(find aims_mh5l_pgn64_moveit_config)/launch/moveit_planning_execution.launch" />
 
+    <!-- Add Camera link tf -->
+    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0.34445 0.0175 -0.1151 0 1.5707963 0 link_4_r camera_link 100" />   
+    
     <!-- Launch actual code to test -->
     <node pkg="tic_tac_toe" type="camera2board_tf_publisher.py" name="camera2board_tf_publisher" output="screen" />
 
