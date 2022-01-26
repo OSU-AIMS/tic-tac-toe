@@ -43,7 +43,9 @@ def kernel_runner(image):
     CWD = dirname(abspath(__file__)) # Control Working Directory - goes to script location
     RESOURCES = join(CWD,'tic_tac_toe_images') # combine script location with folder name
     # blue_square = 'blue_square_crop.tiff'  - Used for Static Image and other images at the same depth & focal Length
-    blue_square = 'in-lab_straight_blue_square_crop.tiff'
+    blue_square = 'blue_CIRCLES.tiff'
+    red_square = 'red_CIRCLES.tiff'
+    green_square = 'green_CIRCLES.tiff'
 
     kernel_b = cv2.imread(join(RESOURCES,blue_square)) # combine folder name with picture name inside folder
     # print('Join Resources')
@@ -52,9 +54,9 @@ def kernel_runner(image):
     # print('Type for Kernel_b Template img')
     # print(type(kernel_b))
 
-    # kernel_g = cv2.imread('tic_tac_toe_images/green_square_crop.tiff')
+    kernel_g = cv2.imread(join(RESOURCES,green_square))
 
-    # kernel_r = cv2.imread('tic_tac_toe_images/red_square_crop.tiff')
+    kernel_r = cv2.imread(join(RESOURCES,red_square))
 
     # Uncomment below to see Kernel size
     # print('Kernel Matrix: should be 3x3x3')
@@ -76,7 +78,7 @@ def kernel_runner(image):
     # print('Using matchTemplate() function')
     image = image.copy()
     # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=4)
+    res_B = cv2.matchTemplate(image=image,templ=kernel_b,method=5)
     # res_B = cv2.matchTemplate(image=img_gray,templ=kernel_b_gray,method=5)
     # Use method=5 when using the square images as kernels
     cv2.imwrite('res_match_template_B.tiff', res_B)
@@ -85,10 +87,11 @@ def kernel_runner(image):
     # print(min_val_B)
     # print('max_val_B')
     # print(max_val_B)
-    # print('min_loc_B')
-    # print(min_loc_B)
-    # print('max_loc_B')
-    # print(max_loc_B)
+    print(' ')
+    print('min_loc_B')
+    print(min_loc_B)
+    print('max_loc_B')
+    print(max_loc_B)
 
     # Drawing Bounding Box around detected shape
     # determine the starting and ending (x, y)-coordinates of the bounding box
@@ -101,7 +104,7 @@ def kernel_runner(image):
     b_box_image = cv2.rectangle(image, (startX_B, startY_B), (endX_B, endY_B), (255, 0, 0), 4) # BGR for openCV
     # show the output image
     # plt.figure(1)
-    cv2.imshow("Detection",b_box_image)
+    # cv2.imshow("Blue Detection",b_box_image)
     # plt.figure(2)
     # plt.imshow(image)
     # plt.figure(3)
@@ -113,77 +116,85 @@ def kernel_runner(image):
     cv2.waitKey(1) #------------ Everything needed for matchTemplate() ^^^
 
     #### Recognizing Red Square
-    # res_R = cv2.matchTemplate(image=image,templ= kernel_r,method=5)
+    res_R = cv2.matchTemplate(image=image,templ= kernel_r,method=5)
     # cv2.imwrite('res_match_template_R.tiff', res_R)
-    # min_val_R, max_val_R, min_loc_R, max_loc_R = cv2.minMaxLoc(res_R)
+    min_val_R, max_val_R, min_loc_R, max_loc_R = cv2.minMaxLoc(res_R)
     # # print('min_val_R')
     # # print(min_val_R)
     # # print('max_val_R')
     # # print(max_val_R)
-    # print('min_loc_R')
-    # print(min_loc_R)
-    # print('max_loc_R')
-    # print(max_loc_R)
-    #
+    print(' ')
+    print('min_loc_R')
+    print(min_loc_R)
+    print('max_loc_R')
+    print(max_loc_R)
+    
     # # Drawing Bounding Box around detected shape
     # # determine the starting and ending (x, y)-coordinates of the bounding box
     # # From: https://www.pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/
-    # (startX_R, startY_R) = max_loc_R
-    # endX_R = startX_R + kernel_r.shape[1]
-    # endY_R = startY_R + kernel_r.shape[0]
-    #
+    (startX_R, startY_R) = max_loc_R
+    endX_R = startX_R + kernel_r.shape[1]
+    endY_R = startY_R + kernel_r.shape[0]
+    
     # # draw the bounding box on the image
-    # r_box_image = cv2.rectangle(image, (startX_R, startY_R), (endX_R, endY_R), (0, 0, 255), 3)
+    r_box_image = cv2.rectangle(image, (startX_R, startY_R), (endX_R, endY_R), (0, 0, 255), 3)
     # # show the output image
-    # # cv2.imshow("Output based on matchTemplate", r_box_image)
+    # cv2.imshow("Red Detect", r_box_image)
     # cv2.imwrite('res_match_template_RED_BoundingBox.tiff', r_box_image)
     # # cv2.waitKey(0)
 
     #### Recognizing Green Square
-    # res_G = cv2.matchTemplate(image=image,templ= kernel_g,method=5)
+    res_G = cv2.matchTemplate(image=image,templ= kernel_g,method=5)
     # cv2.imwrite('res_match_template_G.tiff', res_G)
-    # min_val_G, max_val_G, min_loc_G, max_loc_G = cv2.minMaxLoc(res_G)
+    min_val_G, max_val_G, min_loc_G, max_loc_G = cv2.minMaxLoc(res_G)
     # # print('min_val_G')
     # # print(min_val_G)
     # # print('max_val_G')
     # # print(max_val_G)
-    # print('min_loc_G')
-    # print(min_loc_G)
-    # print('max_loc_G')
-    # print(max_loc_G)
+    print(' ')
+    print('min_loc_G')
+    print(min_loc_G)
+    print('max_loc_G')
+    print(max_loc_G)
     #
     # # Drawing Bounding Box around detected shape
     # # determine the starting and ending (x, y)-coordinates of the bounding box
     # # From: https://www.pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/
-    # (startX_G, startY_G) = max_loc_G
-    # endX_G = startX_G + kernel_g.shape[1]
-    # endY_G = startY_G + kernel_g.shape[0]
+    (startX_G, startY_G) = max_loc_G
+    endX_G = startX_G + kernel_g.shape[1]
+    endY_G = startY_G + kernel_g.shape[0]
     #
     # # draw the bounding box on the image
-    # g_box_image = cv2.rectangle(image, (startX_G, startY_G), (endX_G, endY_G), (0, 255, 0), 3)
+    g_box_image = cv2.rectangle(image, (startX_G, startY_G), (endX_G, endY_G), (0, 255, 0), 3)
     # # show the output image
-    # # cv2.imshow("Output based on matchTemplate", g_box_image)
+    cv2.imshow("Green Detect", g_box_image)
     # cv2.imwrite('res_match_template_GREEN_BoundingBox.tiff', g_box_image)
     # # cv2.waitKey(0)
 
-'''
-    cv::TemplateMatchModes 
-    cv::TM_SQDIFF = 0,
-    cv::TM_SQDIFF_NORMED = 1,
-    cv::TM_CCORR = 2,
-    cv::TM_CCORR_NORMED = 3,
-    cv::TM_CCOEFF = 4,
-    cv::TM_CCOEFF_NORMED = 5
-'''
-#### Using Bounding-Box Coordinates to get orientation of the board ## Output Bounding Box centers to different function
-# note this likely will be done in a separate function but test it here
-# center_B = (np.subtract(max_loc_B[0], min_loc_B[0]),np.subtract(max_loc_B[1],min_loc_B[1]))
-# center_G = np.subtract(max_loc_G, min_loc_G)
-# center_R = np.subtract(max_loc_R, min_loc_R)
+    '''
+        cv::TemplateMatchModes 
+        cv::TM_SQDIFF = 0,
+        cv::TM_SQDIFF_NORMED = 1,
+        cv::TM_CCORR = 2,
+        cv::TM_CCORR_NORMED = 3,
+        cv::TM_CCOEFF = 4,
+        cv::TM_CCOEFF_NORMED = 5
+    '''
+    #### Using Bounding-Box Coordinates to get orientation of the board ## Output Bounding Box centers to different function
+    # note this likely will be done in a separate function but test it here
+    # center_B = (np.subtract(max_loc_B[0], min_loc_B[0]),np.subtract(max_loc_B[1],min_loc_B[1]))
+    # center_G = np.subtract(max_loc_G, min_loc_G)
+    # center_R = np.subtract(max_loc_R, min_loc_R)
 
-# print('Center_B Square:')
-# print(center_B)
-# shapeDetect.drawAxis()
+    # print('Center_B Square:')
+    # print(center_B)
+    # shapeDetect.drawAxis()
+
+    center_blue = [min_loc_B,max_loc_B]
+    center_green = [min_loc_G, max_loc_G]
+    center_red = [min_loc_R, max_loc_R]
+
+    return center_blue, center_green, center_red
 
 
 def runner(data):
