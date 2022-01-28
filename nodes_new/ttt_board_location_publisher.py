@@ -1,14 +1,23 @@
 #!/usr/bin/env python
+#
+# Software License Agreement (Apache 2.0 License)
+# Copyright (c) 2022, The Ohio State University
+# The Artificially Intelligent Manufacturing Systems Lab (AIMS)
+#
+# Author: MohammadKhan-3
 
-# Script to test smaller kernel convolutions
 
+#####################################################
+
+# Imports
 import cv2
 import rospy
 from os.path import join, abspath, dirname
 
 # ROS Data Types
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import TransformStamped
+from std_msgs.msg import ByteMultiArray
+# from geometry_msgs.msg import TransformStamped
 import tf2_ros
 
 
@@ -41,7 +50,7 @@ def kernel_runner(image):
 
     # Uncomment below to use square images as kernels
     CWD = dirname(abspath(__file__)) # Control Working Directory - goes to script location
-    RESOURCES = join(CWD,'tic_tac_toe_images') # combine script location with folder name
+    RESOURCES = join(CWD,'image_kernels') # combine script location with folder name
     # blue_square = 'blue_square_crop.tiff'  - Used for Static Image and other images at the same depth & focal Length
     blue_square = 'blue-circle-square.tiff'
     red_square = 'red-circle-square.tiff'
@@ -65,7 +74,6 @@ def kernel_runner(image):
     # print(np.shape(kernel_b)) # returns 3x3x3
     # print(kernel_b)
 
-### MatchTemplate()
     '''
     matchTemplate docs
     https://docs.opencv.org/4.2.0/df/dfb/group__imgproc__object.html#gga3a7850640f1fe1f58fe91a2d7583695dac6677e2af5e0fae82cc5339bfaef5038
@@ -90,8 +98,8 @@ def kernel_runner(image):
     # print('max_val_B')
     # print(max_val_B)
     print(' ')
-    print('min_loc_B')
-    print(min_loc_B)
+    # print('min_loc_B')
+    # print(min_loc_B)
     print('max_loc_B')
     print(max_loc_B)
 
@@ -116,8 +124,8 @@ def kernel_runner(image):
     # # print('max_val_R')
     # # print(max_val_R)
     print(' ')
-    print('min_loc_R')
-    print(min_loc_R)
+    # print('min_loc_R')
+    # print(min_loc_R)
     print('max_loc_R')
     print(max_loc_R)
     
@@ -140,8 +148,8 @@ def kernel_runner(image):
     # # print('max_val_G')
     # # print(max_val_G)
     print(' ')
-    print('min_loc_G')
-    print(min_loc_G)
+    # print('min_loc_G')
+    # print(min_loc_G)
     print('max_loc_G')
     print(max_loc_G)
     #
@@ -181,60 +189,75 @@ def kernel_runner(image):
     # print(center_B)
     # shapeDetect.drawAxis()
 
-    center_blue = [min_loc_B,max_loc_B]
-    center_green = [min_loc_G, max_loc_G]
-    center_red = [min_loc_R, max_loc_R]
+    center_blue = [max_loc_B]
+    center_green = [max_loc_G]
+    center_red = [max_loc_R]
 
     return center_blue, center_green, center_red
+    # Centers of the blue, green, red squares --> to be outputted 
 
 
-def runner(data):
+
+class board_location_publisher():
     """
-    Callback function for image subscriber, every frame gets scanned for board and publishes to board_center topic
-    (for robot movement) and board tile centers (for game state updates)
-    :param camera_data: Camera data input from subscriber
+    Using image kernel to detect location of the blue, red, green circles of TTT board
     """
-    try:
-        # print("Inside Runner")
-        # Convert Image to CV2 Frame
-        bridge = CvBridge()
-        cv_image = bridge.imgmsg_to_cv2(data, "bgr8") 
-        # OpenCV:BGR / RealSense: RGB / RGB: to get proper colors --> also filps colors in frame
+    def __init__(self, board_location):
+        self.bridge = CvBridge()
+        self.board_location =  board_location
+ 
+    def runner(self, data):
+        """
+        Callback function for image subscriber, every frame gets scanned for board and publishes to board_center topic
+        (for robot movement) and board tile centers (for game state updates)
+        :param camera_data: Camera data input from subscriber
+        """
+        try:
+            board_location = [0,0,0,0,0,0]
+            # print("Inside Runner")
+            # Convert Image to CV2 Frame
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8") 
+            # OpenCV:BGR / RealSense: RGB / RGB: to get proper colors --> also filps colors in frame
 
-        # Type for cv_image debugging
-        # print('Type for cv_image:')
-        # print(type(cv_image))
+            # Type for cv_image debugging
+            # print('Type for cv_image:')
+            # print(type(cv_image))
 
-        # Using Image Kernel to detect color
-        kernel_runner(cv_image)
+            # Using Image Kernel to detect color
+            blue,green,red = kernel_runner(cv_image)
+            board_location = ByteMultiArray()
+            board_location.data = [blue[0], green[0], red[0]]
+            print('board locationd data')
+            print(board_location.data)
+
+            # Publish location of highest value in BGR
+            self.board_location.publish(board_location)
+            rospy.loginfo(board_location)
 
 
-    except rospy.ROSInterruptException:
-        exit()
-    except KeyboardInterrupt:
-        exit()
-    except CvBridgeError as e:
-        print(e)
+        except rospy.ROSInterruptException:
+            exit()
+        except KeyboardInterrupt:
+            exit()
+        except CvBridgeError as e:
+            print(e)
 
-if __name__ == '__main__':
+def main():
     print("Your OpenCV version is: " + cv2.__version__)  
 
     # Initialize a Node:
-    rospy.init_node('Colored_Square_Detect', anonymous=False)
-    rospy.loginfo(">> Colored Square Detect Node Successfully Created")
+    rospy.init_node('Board_Location', anonymous=False)
+    rospy.loginfo(">> Board Location Node Successfully Created")
 
     # Setup Publishers
-    pub_center = rospy.Publisher("ttt_board_origin", TransformStamped, queue_size=20)
-    # pub_camera_tile_annotation = rospy.Publisher("camera_tile_annotation", Image, queue_size=20)
-    
-    # Setup Listeners
-    tfBuffer = tf2_ros.Buffer()
-    listener = tf2_ros.TransformListener(tfBuffer)
+    pub_board_location = rospy.Publisher("ttt_board_orientation", ByteMultiArray, queue_size=20)
 
 
+    bl_callback = board_location_publisher(pub_board_location)
 
     # create subscriber to ros Image Topic - pulled from kernel_color_detect
-    image_sub = rospy.Subscriber("/camera/color/image_raw", Image, runner)
+    image_sub = rospy.Subscriber("/camera/color/image_raw", Image, bl_callback.runner)
+
 
     # print('Type of Image from image_sub')
     # print(type(image_sub)) # type 'numpy.ndarray'
@@ -246,3 +269,9 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
+
+
+
+if __name__ == '__main__':
+    main()
+
