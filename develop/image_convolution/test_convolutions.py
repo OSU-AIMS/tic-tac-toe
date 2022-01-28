@@ -43,11 +43,13 @@ def kernel_runner(image):
     CWD = dirname(abspath(__file__)) # Control Working Directory - goes to script location
     RESOURCES = join(CWD,'tic_tac_toe_images') # combine script location with folder name
     # blue_square = 'blue_square_crop.tiff'  - Used for Static Image and other images at the same depth & focal Length
-    blue_square = 'blue_CIRCLES.tiff'
-    red_square = 'red_CIRCLES.tiff'
-    green_square = 'green_CIRCLES.tiff'
+    blue_square = 'blue-circle-square.tiff'
+    red_square = 'red-circle-square.tiff'
+    green_square = 'green-circle-square.tiff'
 
     kernel_b = cv2.imread(join(RESOURCES,blue_square)) # combine folder name with picture name inside folder
+    
+    # Uncomment to check if the file path to the image kernel is correct
     # print('Join Resources')
     # print(join(RESOURCES,blue_square))
 
@@ -102,18 +104,8 @@ def kernel_runner(image):
 
     # draw the bounding box on the image
     b_box_image = cv2.rectangle(image, (startX_B, startY_B), (endX_B, endY_B), (255, 0, 0), 4) # BGR for openCV
-    # show the output image
-    # plt.figure(1)
-    # cv2.imshow("Blue Detection",b_box_image)
-    # plt.figure(2)
-    # plt.imshow(image)
-    # plt.figure(3)
-    # plt.imshow(b_box_image)
-    # cv2.imwrite('res_match_template_Blue_BoundingBox.tiff', b_box_image)
-    # for viewing the heatmap result
-    
-    # plt.show()
-    cv2.waitKey(1) #------------ Everything needed for matchTemplate() ^^^
+
+ #------------ Everything needed for matchTemplate() ^^^
 
     #### Recognizing Red Square
     res_R = cv2.matchTemplate(image=image,templ= kernel_r,method=5)
@@ -138,10 +130,6 @@ def kernel_runner(image):
     
     # # draw the bounding box on the image
     r_box_image = cv2.rectangle(image, (startX_R, startY_R), (endX_R, endY_R), (0, 0, 255), 3)
-    # # show the output image
-    # cv2.imshow("Red Detect", r_box_image)
-    # cv2.imwrite('res_match_template_RED_BoundingBox.tiff', r_box_image)
-    # # cv2.waitKey(0)
 
     #### Recognizing Green Square
     res_G = cv2.matchTemplate(image=image,templ= kernel_g,method=5)
@@ -166,10 +154,13 @@ def kernel_runner(image):
     #
     # # draw the bounding box on the image
     g_box_image = cv2.rectangle(image, (startX_G, startY_G), (endX_G, endY_G), (0, 255, 0), 3)
-    # # show the output image
-    cv2.imshow("Green Detect", g_box_image)
+    
+    # # show the output image - uncomment to show all 3 squares detected
+    # if you want to see just red and blue, then use cv2.imshow('Red Detect',r_box_image) beneath the red square detection
+    # cv2.imshow("Green Detect", g_box_image)
+
     # cv2.imwrite('res_match_template_GREEN_BoundingBox.tiff', g_box_image)
-    # # cv2.waitKey(0)
+    # cv2.waitKey(1)
 
     '''
         cv::TemplateMatchModes 
@@ -210,7 +201,7 @@ def runner(data):
         cv_image = bridge.imgmsg_to_cv2(data, "bgr8") 
         # OpenCV:BGR / RealSense: RGB / RGB: to get proper colors --> also filps colors in frame
 
-        # Type for cv_image
+        # Type for cv_image debugging
         # print('Type for cv_image:')
         # print(type(cv_image))
 
@@ -249,26 +240,7 @@ if __name__ == '__main__':
     # print(type(image_sub)) # type 'numpy.ndarray'
 
     print("Subscribed to image_raw!")   
-    
 
-
-    # depth_sensor = profile.get_device().query_sensors()[1]
-    # depth_sensor.set_option(rs.option.enable_auto_exposure, True)
-
-    # cap = cv2.VideoCapture(5)
-    # # refer to this github issue for why I used VideoCapture(4)
-    # # https://github.com/OSU-AIMS/tic-tac-toe/issues/10#issuecomment-1016505927
-
-    # # allowing the camera time to boot up and auto set exposure
-    # time.sleep(1) # seconds
-
-    # while(1):
-    #     res,frame = cap.read()
-    #     print('Type for Frame from VideoCapture()')
-    #     print(type(frame))
-    #     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
-    #     kernel_runner(frame)
-    # cap.release()
     try:
         rospy.spin()
     except KeyboardInterrupt:
