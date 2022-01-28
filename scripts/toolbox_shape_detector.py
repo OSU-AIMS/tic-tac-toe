@@ -11,7 +11,6 @@
 import numpy as np
 import math
 import cv2
-from scipy.spatial import distance as dist
 
 def getContours(cv_image):
 		"""

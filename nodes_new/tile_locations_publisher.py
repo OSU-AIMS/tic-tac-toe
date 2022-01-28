@@ -170,7 +170,6 @@ def main():
     rospy.loginfo(">> Tile Locator Node Successfully Created")
 
     # Setup Publishers
-    pub_tile_annotation = rospy.Publisher("tile_annotation", Image, queue_size=20)
 
     pub_tile_locations = rospy.Publisher("tile_locations", PoseArray, queue_size=20)
 

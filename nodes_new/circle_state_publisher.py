@@ -49,18 +49,52 @@ def findDis(pt1x, pt1y, pt2x, pt2y):
     dis = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** (0.5)
     return dis
 
+def prepare_tiles():
+    """
+    Adam Buynak's Convenience Function to Convert Path from a List of xyz points to Transformation Matrices
+    @return: List of Transformation Matrices
+    """
+    
+    # Values for 3D printed tictactoe board
+    centerxDist = 0.0635
+    centeryDist = -0.0635
+
+    pieceHeight = 0.03
+
+    """
+    tictactoe board order assignment:
+    [0 1 2]
+    [3 4 5]
+    [6 7 8]
+    """ 
+    tf = transformations()
+    centers =[[-centerxDist ,centeryDist,pieceHeight],[0,centeryDist,pieceHeight],[centerxDist,centeryDist,pieceHeight],
+                        [-centerxDist,0,pieceHeight],[0,0,pieceHeight],[centerxDist,0,pieceHeight],
+                        [-centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[centerxDist,-centeryDist,pieceHeight]]
+
+    tictactoe_center_list = np.array(centers,dtype=np.float)
+    # print('tictactoe_center_list:\n',tictactoe_center_list)
+    rot_default = np.identity((3))
+    new_list = []
+
+    for vector in tictactoe_center_list:
+        item = np.matrix(vector)
+        new_list.append( tf.generateTransMatrix(rot_default, item) )
+
+    return new_list
 
 class circle_state_publisher():
     """
      Custom tictactoe publisher class that finds circles on image and identifies if/where the circles are on the board.
     """
 
-    def __init__(self, circle_state_annotation, circle_board_state):
+    def __init__(self, circle_state_annotation, circle_board_state,tfBuffer):
 
         # Inputs
 
         self.circle_state_annotation = circle_state_annotation
         self.circle_board_state = circle_board_state
+        self.tfBuffer = tfBuffer
         # camera_tile_annotation: publishes the numbers & arrows displayed on the image
 
         # Tools
@@ -72,6 +106,35 @@ class circle_state_publisher():
         :param data: Camera data input from subscriber
         """
         try:
+            camera2board = self.tfBuffer.lookup_transform('camera_link', 'ttt_board', rospy.Time(0))
+            camera2board_pose = [ 
+                camera2board.transform.translation.x,
+                camera2board.transform.translation.y,
+                camera2board.transform.translation.z,
+                camera2board.transform.rotation.w,
+                camera2board.transform.rotation.x,
+                camera2board.transform.rotation.y,
+                camera2board.transform.rotation.z
+                ]
+
+            board_tiles = prepare_tiles()
+            tf_camera2tiles = tf.convertPath2FixedFrame(board_tiles,camera2board_pose)
+
+            xyList = [[] for i in range(9)]
+            scale = 1.14 / 1280
+
+            for i in range(9):
+                xyzCm = (tf_camera2tiles[i][0:2, 3:4])  # in cm
+                x = xyzCm[0] / scale + 640
+                y = xyzCm[1] / scale + 360  # in pixels
+
+                xyList[i].append(int(x))
+                xyList[i].append(int(y))
+                cv2.putText(boardImage, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
+                            (0, 0, 0),
+                            2)
+
+
             board = [0,0,0,0,0,0,0,0,0]
             # array for game board 0 -> empty tile, 1 -> X, -1 -> O
             
@@ -81,11 +144,6 @@ class circle_state_publisher():
 
             centers = shapeDetect.detectCircle(img, radius=15, tolerance=5)
 
-            tictactoe_pkg = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-            tf_filename = 'tile_centers_pixel.npy'
-            xyList = np.load(tictactoe_pkg + '/' + tf_filename)
-
-                
             
             closest_square = [0, 0, 0, 0, 0, 0, 0, 0, 0]
             
@@ -94,14 +152,11 @@ class circle_state_publisher():
             for i in range(len(centers)):
                 distanceFromCenter = findDis(centers[i][0], centers[i][1], xyList[4][0], xyList[4][1])
 
-                if distanceFromCenter < 145:  # 100 * sqrt2
+                if distanceFromCenter < 140:  # 100 * sqrt2
                     closest_index = None
                     closest = 10000
                     for j in range(9):
                         distance = findDis(centers[i][0], centers[i][1], xyList[j][0], xyList[j][1])
-
-                        # print("Circle {} is {} from tile {}".format(i,distance,j))
-                        # findDis params :(pt1x,pt1y, pt2x,pt2y)
 
                         if distance < 40 and distance < closest:
                             # this creates a boundary just outside the ttt board of 40 pixels away from each tile
@@ -170,7 +225,9 @@ def main():
     pub_circle_board_state = rospy.Publisher("circle_board_state", ByteMultiArray, queue_size=20)
 
     # Setup Listeners
-    cs_callback = circle_state_publisher(pub_circle_state_annotation,pub_circle_board_state)
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
+    cs_callback = circle_state_publisher(pub_circle_state_annotation,pub_circle_board_state,tfBuffer)
     image_sub = rospy.Subscriber("/camera/color/image_raw", Image, cs_callback.runner)
 
     # Auto-Run until launch file is shutdown
