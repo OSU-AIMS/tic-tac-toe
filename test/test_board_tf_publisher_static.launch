@@ -26,4 +26,6 @@
    <node name = "RQT_TestViewer" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" 
         args = "--perspective-file $(find tic_tac_toe)/config/test_static_image.perspective"/>  
 
+    <node name="$(anon rviz)" pkg="rviz" type="rviz" respawn="false" args = "-d $(find tic_tac_toe)/config/moveit.rviz" />
+   
 </launch>
