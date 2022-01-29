@@ -97,11 +97,11 @@ def kernel_runner(image):
     # print(min_val_B)
     # print('max_val_B')
     # print(max_val_B)
-    print(' ')
+    # print(' ')
     # print('min_loc_B')
     # print(min_loc_B)
-    print('max_loc_B')
-    print(max_loc_B)
+    # print('max_loc_B')
+    # print(max_loc_B)
 
     # Drawing Bounding Box around detected shape
     # determine the starting and ending (x, y)-coordinates of the bounding box
@@ -123,11 +123,11 @@ def kernel_runner(image):
     # # print(min_val_R)
     # # print('max_val_R')
     # # print(max_val_R)
-    print(' ')
+    # print(' ')
     # print('min_loc_R')
     # print(min_loc_R)
-    print('max_loc_R')
-    print(max_loc_R)
+    # print('max_loc_R')
+    # print(max_loc_R)
     
     # # Drawing Bounding Box around detected shape
     # # determine the starting and ending (x, y)-coordinates of the bounding box
@@ -147,11 +147,11 @@ def kernel_runner(image):
     # # print(min_val_G)
     # # print('max_val_G')
     # # print(max_val_G)
-    print(' ')
+    # print(' ')
     # print('min_loc_G')
     # print(min_loc_G)
-    print('max_loc_G')
-    print(max_loc_G)
+    # print('max_loc_G')
+    # print(max_loc_G)
     #
     # # Drawing Bounding Box around detected shape
     # # determine the starting and ending (x, y)-coordinates of the bounding box
@@ -227,8 +227,8 @@ class board_location_publisher():
             blue,green,red = kernel_runner(cv_image)
             board_location = ByteMultiArray()
             board_location.data = [blue[0], green[0], red[0]]
-            print('board locationd data')
-            print(board_location.data)
+            # print('board locationd data')
+            # print(board_location.data)
 
             # Publish location of highest value in BGR
             self.board_location.publish(board_location)
@@ -250,7 +250,7 @@ def main():
     rospy.loginfo(">> Board Location Node Successfully Created")
 
     # Setup Publishers
-    pub_board_location = rospy.Publisher("ttt_board_orientation", ByteMultiArray, queue_size=20)
+    pub_board_location = rospy.Publisher("Fiducial_Centers", ByteMultiArray, queue_size=20)
 
 
     bl_callback = board_location_publisher(pub_board_location)

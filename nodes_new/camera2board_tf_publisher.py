@@ -32,7 +32,7 @@ import tf2_msgs.msg
 # ROS Data Types
 from sensor_msgs.msg import Image
 import geometry_msgs.msg
-# from geometry_msgs import TransformStamped 
+from std_msgs.msg import ByteMultiArray
 
 # Custom Tools
   # from Realsense_tools import *
@@ -48,6 +48,7 @@ import numpy as np
 # http://wiki.ros.org/tf2/Tutorials/Writing%20a%20tf2%20listener%20%28Python%29
 # http://docs.ros.org/en/jade/api/geometry_msgs/html/msg/Transform.html
 shapeDetect = TOOLBOX_SHAPE_DETECTOR()
+
 
 
 def detectBoard_contours(image):
@@ -186,7 +187,7 @@ class board_publisher():
             boardImage = cv_image.copy()
            
             # Run using contours
-            scaledCenter, boardImage, tf_camera2board = detectBoard_contours(cv_image)
+            scaledCenter, boardImage, tf_camera2board = self.detectColored_Markers(cv_image)
 
             pose_goal = transformToPose(tf_camera2board)
 
@@ -217,6 +218,9 @@ class board_publisher():
         except CvBridgeError as e:
             print(e)
 
+    def detectColored_Markers(self,image):
+        colored_marker_centers = rospy.wait_for_message('Fiducial_Centers',ByteMultiArray,timeout =None)
+        print(colored_marker_centers)
 
 #####################################################
 ## MAIN()
