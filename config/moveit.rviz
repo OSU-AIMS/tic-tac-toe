@@ -1,12 +1,11 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 84
+    Help Height: 70
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /MotionPlanning1
-      Splitter Ratio: 0.7425600290298462
-    Tree Height: 528
+      Expanded: ~
+      Splitter Ratio: 0.6041666865348816
+    Tree Height: 129
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -22,9 +21,9 @@ Visualization Manager:
   Class: ""
   Displays:
     - Alpha: 0.5
-      Cell Size: 0.10000000149011612
+      Cell Size: 0.20000000298023224
       Class: rviz/Grid
-      Color: 0; 0; 0
+      Color: 160; 160; 164
       Enabled: true
       Line Style:
         Line Width: 0.029999999329447746
@@ -36,40 +35,10 @@ Visualization Manager:
         Y: 0
         Z: 0
       Plane: XY
-      Plane Cell Count: 20
+      Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: RGB8
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: PtCld2 - RealSense
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.009999999776482582
-      Style: Points
-      Topic: /camera/depth/color/points
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
-    - Acceleration_Scaling_Factor: 1
+    - Acceleration_Scaling_Factor: 0.2
       Class: moveit_rviz_plugin/MotionPlanning
       Enabled: true
       Move Group Namespace: ""
@@ -102,25 +71,11 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          back_wall:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           base:
             Alpha: 1
             Show Axes: false
             Show Trail: false
           base_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          camera_bottom_screw_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -168,26 +123,7 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          mount_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          side_wall:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          table_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           tool0:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          tool0_camera:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -211,13 +147,13 @@ Visualization Manager:
         Colliding Link Color: 255; 0; 0
         Goal State Alpha: 1
         Goal State Color: 250; 128; 0
-        Interactive Marker Size: 0
+        Interactive Marker Size: 0.20000000298023224
         Joint Violation Color: 255; 0; 255
-        Planning Group: bot_mh5l
+        Planning Group: mh5l
         Query Goal State: true
         Query Start State: false
         Show Workspace: false
-        Start State Alpha: 0.3
+        Start State Alpha: 1
         Start State Color: 0; 255; 0
       Planning Scene Topic: move_group/monitored_planning_scene
       Robot Description: robot_description
@@ -236,25 +172,11 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          back_wall:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           base:
             Alpha: 1
             Show Axes: false
             Show Trail: false
           base_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          camera_bottom_screw_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -302,37 +224,77 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          mount_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          side_wall:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          table_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           tool0:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          tool0_camera:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-        Robot Alpha: 1
+        Robot Alpha: 0.5
         Show Robot Collision: false
         Show Robot Visual: true
       Value: true
-      Velocity_Scaling_Factor: 1
+      Velocity_Scaling_Factor: 0.2
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        base:
+          Value: true
+        base_link:
+          Value: true
+        camera_link:
+          Value: true
+        eef_link:
+          Value: true
+        eef_tcp:
+          Value: true
+        flange:
+          Value: true
+        link_1_s:
+          Value: true
+        link_2_l:
+          Value: true
+        link_3_u:
+          Value: true
+        link_4_r:
+          Value: true
+        link_5_b:
+          Value: true
+        link_6_t:
+          Value: true
+        tool0:
+          Value: true
+        ttt_board:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        base_link:
+          base:
+            {}
+          link_1_s:
+            link_2_l:
+              link_3_u:
+                link_4_r:
+                  camera_link:
+                    ttt_board:
+                      {}
+                  link_5_b:
+                    link_6_t:
+                      flange:
+                        {}
+                      tool0:
+                        eef_link:
+                          eef_tcp:
+                            {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
-    Background Color: 243; 243; 243
+    Background Color: 238; 238; 236
     Default Light: true
     Fixed Frame: base_link
     Frame Rate: 30
@@ -346,30 +308,30 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 2.7996418476104736
+      Distance: 2.121325731277466
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.5527811050415039
-        Y: 0.7304530739784241
-        Z: 4.6193656544346595e-7
+        X: 0.05373704433441162
+        Y: 0.03410881757736206
+        Z: 2.2351800055275817e-7
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5347972512245178
+      Pitch: 0.40979713201522827
       Target Frame: base_link
       Value: XYOrbit (rviz)
-      Yaw: 0.8667600750923157
+      Yaw: 5.569967269897461
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1337
+  Height: 862
   Help:
     collapsed: false
   Hide Left Dock: false
@@ -378,9 +340,9 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002a2000004dffc0200000007fb000000100044006900730070006c006100790073010000003d000002a1000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000002e4000002380000017d00ffffff0000047c000004df00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000001000000000000020500000304fc0200000007fb000000100044006900730070006c006100790073010000003d00000104000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670100000147000001fa0000017d00ffffff000003c30000030400000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
-  Width: 1828
-  X: 459
-  Y: -243
+  Width: 1486
+  X: 124
+  Y: 73

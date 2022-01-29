@@ -64,11 +64,9 @@ class tile_locations_publisher():
      Custom tictactoe publisher class that finds circles on image and identifies if/where the circles are on the board.
     """
 
-    def __init__(self, tile_annotation, tile_locations, tf):
+    def __init__(self,tile_locations, tf):
 
         # Inputs
-
-        self.tile_annotation = tile_annotation
         self.tile_locations = tile_locations
         # Tools
         self.bridge = CvBridge()
@@ -113,51 +111,6 @@ class tile_locations_publisher():
         self.tile_locations.publish(poses_msg)
         rospy.loginfo(poses_msg)
 
-        #######
-        camera2board = self.tfBuffer.lookup_transform('camera_link', target_link, rospy.Time())
-
-        camera2board_pose = [ 
-            camera2board.transform.translation.x,
-            camera2board.transform.translation.y,
-            camera2board.transform.translation.z,
-            camera2board.transform.rotation.w,
-            camera2board.transform.rotation.x,
-            camera2board.transform.rotation.y,
-            camera2board.transform.rotation.z
-            ]
-
-        tf_camera2board = self.tf.quant_pose_to_tf_matrix(fixed2board_pose)
-
-        tf_camera2tiles = self.tf.convertPath2FixedFrame(matrix_tile_centers, tf_camera2board)
-
-        cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-        boardImage = cv_image.copy()
-        print(boardImage.shape)
-        
-        xyList = [[] for i in range(9)]
-        # todo: set to camera intrinsics
-        scale = 1.14 / 1280
-        for i in range(9):
-            xyzCm = (tf_camera2tiles[i][0:2, 3:4])  # in cm
-            x = -xyzCm[0] / scale + 640
-            y = -xyzCm[1] / scale + 360  # in pixels
-    
-            xyList[i].append(int(x))
-            xyList[i].append(int(y))
-
-            boardImage = cv2.putText(boardImage, str(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
-                        (100, 0, 0),
-                        2)
-        print(xyList)
-        try:
-            msg_img = self.bridge.cv2_to_imgmsg(boardImage, 'bgr8')
-        except CvBridgeError as e:
-            print(e)
-
-        # Publish
-        self.tile_annotation.publish(msg_img)
-
-
 
 def main():
     """
@@ -175,7 +128,7 @@ def main():
 
     # Setup Listeners
     
-    tl_callback = tile_locations_publisher(pub_tile_annotation, pub_tile_locations, tf)
+    tl_callback = tile_locations_publisher(pub_tile_locations, tf)
     image_sub = rospy.Subscriber("/camera/color/image_raw", Image, tl_callback.runner)
 
     # Auto-Run until launch file is shutdown
