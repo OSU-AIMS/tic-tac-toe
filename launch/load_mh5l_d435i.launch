@@ -1,3 +1,0 @@
-<launch>
-	<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find tic_tac_toe)/urdf/mh5l_d435i_pgn64_table.xacro' use_nominal_extrinsics:=true" />
-</launch>
