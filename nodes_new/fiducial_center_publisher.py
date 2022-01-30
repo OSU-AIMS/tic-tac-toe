@@ -17,7 +17,7 @@ from os.path import join, abspath, dirname
 # ROS Data Types
 from sensor_msgs.msg import Image
 from std_msgs.msg import ByteMultiArray
-# from geometry_msgs.msg import TransformStamped
+from std_msgs.msg import MultiArrayDimension
 import tf2_ros
 
 
@@ -192,7 +192,7 @@ def kernel_runner(image):
     center_blue = [max_loc_B]
     center_green = [max_loc_G]
     center_red = [max_loc_R]
-
+    
     return center_blue, center_green, center_red
     # Centers of the blue, green, red squares --> to be outputted 
 
@@ -226,9 +226,14 @@ class board_location_publisher():
             # Using Image Kernel to detect color
             blue,green,red = kernel_runner(cv_image)
             board_location = ByteMultiArray()
-            board_location.data = [blue[0], green[0], red[0]]
-            # print('board locationd data')
-            # print(board_location.data)
+            data = (blue[0][0], blue[0][1], green[0][0],green[0][1], red[0][0],red[0][1])
+            board_location.data = list(bytearray(data))
+            board_location.layout.dim.append(MultiArrayDimension())
+            board_location.dim[0].label = 'colored_centers'
+            board_location.dim[0].size = len(board_location.data)
+            board_location.dim[0].stride = len(board_location.data)
+            board_location.data_offset = 0
+
 
             # Publish location of highest value in BGR
             self.board_location.publish(board_location)
