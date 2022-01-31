@@ -131,7 +131,7 @@ def detectColored_Markers(image):
 
     readings = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     # Create kernel (format - "BGR")
-    kernel_size = 5
+    # kernel_size = 5
     # print('Image Parameter')
     # print(image)
     # print('Inside Kernel_Runner Function')
@@ -241,8 +241,7 @@ def detectColored_Markers(image):
     # # print('max_val_G')
     # # print(max_val_G)
     # print(' ')
-    # print('min_loc_G')
-    # print(min_loc_G)
+    # print('min_loc_G', min_loc_G)
     # print('max_loc_G')
     # print(max_loc_G)
     #
@@ -255,13 +254,14 @@ def detectColored_Markers(image):
     #
     # # draw the bounding box on the image
     g_box_image = cv2.rectangle(image, (startX_G, startY_G), (endX_G, endY_G), (0, 255, 0), 3)
+    # print('endX_G',endX_G)
     
     # # show the output image - uncomment to show all 3 squares detected
     # if you want to see just red and blue, then use cv2.imshow('Red Detect',r_box_image) beneath the red square detection
-    # cv2.imshow("Green Detect", g_box_image)
+    cv2.imshow("Green Detect", g_box_image)
 
     # cv2.imwrite('res_match_template_GREEN_BoundingBox.tiff', g_box_image)
-    # cv2.waitKey(1)
+    cv2.waitKey(1)
 
     '''
         cv::TemplateMatchModes 
@@ -282,9 +282,22 @@ def detectColored_Markers(image):
     # print(center_B)
     # shapeDetect.drawAxis()
 
-    center_blue = max_loc_B
-    center_green = max_loc_G
-    center_red = max_loc_R
+    x_blue = (startX_B+endX_B)/2
+    y_blue = (startY_B+endY_B)/2
+    center_blue = [x_blue,y_blue]
+
+    x_red = (startX_R+endX_R)/2
+    y_red = (startY_R+endY_R)/2
+    center_red = [x_red,y_red]
+
+    x_green = (startX_G+endX_G)/2
+    y_green = (startY_G+endY_G)/2
+    center_green = [x_green,y_green]
+
+
+    print('Center Blue', center_blue)
+    print('Center Red', center_red)
+    print('Center Green',center_green)
 
     return center_blue, center_green, center_red
 
@@ -332,8 +345,8 @@ def calcFiducialCentroid(blue_center, green_center, red_center, rotMatrix):
 
     # Find Vectors
     # side_br = np.subtract(red_center,   blue_center)
-    x_midpoint = (red_center[0]+green_center[0]/2)
-    y_midpoint = (red_center[1]+green_center[1]/2)
+    x_midpoint = (red_center[0]+green_center[0])/2
+    y_midpoint = (red_center[1]+green_center[1])/2
     mazeCentroid = np.array([x_midpoint, y_midpoint])  
 
     side_br = np.subtract(blue_center,red_center)
@@ -353,12 +366,12 @@ def calcFiducialCentroid(blue_center, green_center, red_center, rotMatrix):
 def calcRotation(blue_center, green_center, red_center):
 
     # use point-slope formula
-    BR_slope = (float(blue_center[1]) - float(red_center[1])) / (float(blue_center[0]) - float(red_center[0]))
-    BG_slope = (float(blue_center[1]) - float(green_center[1])) / (float(blue_center[0]) - float(green_center[0]))
+    BR_slope = (float(blue_center[1]) - float(red_center[1])) / (float(blue_center[0]+1E-7) - float(red_center[0]))
+    # BG_slope = (float(blue_center[1]) - float(green_center[1])) / (float(blue_center[0]) - float(green_center[0]))
 
 
     # convert to radians
-    angle = math.degrees(math.atan(BR_slope))
+    angle = -1*math.degrees(math.atan(BR_slope))
 
     rot_matrix = np.array([[math.cos(radians(angle)), -math.sin(radians(angle)), 0],
                         [math.sin(radians(angle)), math.cos(radians(angle)), 0],
@@ -444,25 +457,35 @@ class board_publisher():
         board_rot = calcRotation(b,g,r)
         board_center, scale = calcFiducialCentroid(b,g,r,board_rot)
 
-        self.board_center_readingX = np.array([0,0,0,0,0,0,0,0,0])
-        self.board_center_readingY = np.array([0,0,0,0,0,0,0,0,0])
-        MAX_SAMPLES = 10
+        print('board_center',board_center)
 
-        self.board_center_readingX = np.append(self.board_center_readingX, board_center[0])
-        board_center_avgX = mean(self.board_center_readingX)
+        # self.board_center_readingX = np.array([0,0,0,0,0,0,0,0,0])
+        # self.board_center_readingY = np.array([0,0,0,0,0,0,0,0,0])
+        # MAX_SAMPLES = 10
 
-        self.board_center_readingY = np.append(self.board_center_readingY, board_center[1])
-        board_center_avgY = mean(self.board_center_readingY)
+        # self.board_center_readingX = np.append(self.board_center_readingX, board_center[0])
+        # board_center_avgX = mean(self.board_center_readingX)
+
+        # self.board_center_readingY = np.append(self.board_center_readingY, board_center[1])
+        # board_center_avgY = mean(self.board_center_readingY)
+
+        # print('Board center averageX:',board_center_avgX)
+        # print('Board center averageY:',board_center_avgY)
+
+
+        # if len(self.board_center_readingX) == MAX_SAMPLES:
+        #     self.board_center_readingX = np.delete(self.board_center_readingX,0)
+        #     self.board_center_readingY = np.delete(self.board_center_readingY,0)
+
+        board_center_avgX = board_center[0]
+        board_center_avgY = board_center[1]
 
         print('Board center averageX:',board_center_avgX)
         print('Board center averageY:',board_center_avgY)
 
-
-        if len(self.board_center_readingX) == MAX_SAMPLES:
-            self.board_center_readingX = np.delete(self.board_center_readingX,0)
-            self.board_center_readingY = np.delete(self.board_center_readingY,0)
-
         scaledCenter = [0, 0]
+
+        scale = 1.14/1280
 
         scaledCenter[0] = (board_center_avgX - 640) * scale
         scaledCenter[1] = (board_center_avgY - 360) * scale
