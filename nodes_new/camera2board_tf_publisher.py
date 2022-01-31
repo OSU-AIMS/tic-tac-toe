@@ -295,9 +295,9 @@ def detectColored_Markers(image):
     center_green = [x_green,y_green]
 
 
-    print('Center Blue', center_blue)
-    print('Center Red', center_red)
-    print('Center Green',center_green)
+    # print('Center Blue', center_blue)
+    # print('Center Red', center_red)
+    # print('Center Green',center_green)
 
     return center_blue, center_green, center_red
 
@@ -480,8 +480,8 @@ class board_publisher():
         board_center_avgX = board_center[0]
         board_center_avgY = board_center[1]
 
-        print('Board center averageX:',board_center_avgX)
-        print('Board center averageY:',board_center_avgY)
+        # print('Board center averageX:',board_center_avgX)
+        # print('Board center averageY:',board_center_avgY)
 
         scaledCenter = [0, 0]
 

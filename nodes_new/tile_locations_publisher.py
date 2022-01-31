@@ -22,7 +22,7 @@ import tf2_msgs.msg
 
 # ROS Data Types
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseArray
+from geometry_msgs.msg import PoseArray, Pose
 from transformations import *
 
 def prepare_tiles():
@@ -99,14 +99,22 @@ class tile_locations_publisher():
         tf_fixed2tiles = self.tf.convertPath2FixedFrame(matrix_tile_centers, tf_fixed2board)
 
         robot_poses = []
+        poses_msg = PoseArray()
+        pose_msg = Pose()
 
         for i in range(9):
             trans_rot = tf_fixed2tiles[i][0:3, 3:4]
             new_pose = [trans_rot[0][0], trans_rot[1][0], trans_rot[2][0], .707, -.707, 0, 0]
-            robot_poses.append(new_pose)
+            pose_msg.position.x = new_pose[0]
+            pose_msg.position.y = new_pose[1]
+            pose_msg.position.z = new_pose[2]
+            pose_msg.orientation.x = new_pose[3]
+            pose_msg.orientation.y = new_pose[4]
+            pose_msg.orientation.z = new_pose[5]
+            pose_msg.orientation.w = new_pose[6]
 
-        poses_msg = PoseArray()
-        poses_msg.poses = robot_poses
+            poses_msg.poses.append(pose_msg)
+
 
         self.tile_locations.publish(poses_msg)
         rospy.loginfo(poses_msg)

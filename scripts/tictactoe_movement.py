@@ -16,7 +16,9 @@ class TICTACTOE_MOVEMENT(object):
     """
 
     def __init__(self):
-        self.rc = moveManipulator()
+        self.rc = moveManipulator('mh5l')
+        self.rc.set_vel(0.1)
+        self.rc.set_accel(0.1)
         pass
 
     def openGripper(self):
@@ -26,8 +28,8 @@ class TICTACTOE_MOVEMENT(object):
         self.rc.send_io(1)    
 
     def scanPosition(self):
-        default_scan_joint_goal = ([-90, 0, 0, 0, 0, 0])
-        self.goto_joint_posn(default_scan_joint_goal)
+        # default_scan_joint_goal = ([-90, 0, 0, 0, 0, 0])
+        self.rc.goto_named_target('overlook-right')
 
     def xPickup(self, x_count):
         """
@@ -39,8 +41,8 @@ class TICTACTOE_MOVEMENT(object):
         """
 
         x_position = -0.11
-        x_index = x_count - 1
-        y_position = x_index*0.0354 + .5
+        x_index = x_count 
+        y_position = -(x_index*0.0354 + .5)
         z_position_hover = .1
         z_position = .02
 
@@ -56,14 +58,14 @@ class TICTACTOE_MOVEMENT(object):
 
     def placePiece(self,tile_robot_pose):
         tile_robot_pose_hover = tile_robot_pose
-        tile_robot_pose_hover.z = .1
-        self.rc.goto_Quant_Orient(tile_robot_pose_hover)
+        tile_robot_pose_hover.position.z = .1
+        self.rc.goto_Pose(tile_robot_pose_hover)
 
-        self.rc.goto_Quant_Orient(tile_robot_pose)
+        self.rc.goto_Pose(tile_robot_pose)
 
         self.openGripper()
 
-        self.rc.goto_Quant_Orient(tile_robot_pose_hover)
+        self.rc.goto_Pose(tile_robot_pose_hover)
 
         
     
