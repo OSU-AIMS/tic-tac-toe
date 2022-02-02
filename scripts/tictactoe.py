@@ -31,17 +31,28 @@ def main():
     try:
         movement.scanPosition()
         board = np.zeros((3,3))
-        countO = 0  # Number of O blocks
-        countX = 0  # Number of X blocks 
+        countO = 1  # Number of O blocks - Humans (human goes first, so count = 1)
+        countX = 0  # Number of X blocks - Robots
     	while True:
     		#FUNCTION CALLS
+            print('In While loop')
 
             # wait_for_Messagefrom circle_state
+            print('Beofore Circle Detect:')
             boardO, boardCountO = listener.circle_detect()
+            print('Passed boardO, boardCountO = listener.circle_detect()')
+            print('boardCountO',boardCountO)
+            print('count0',countO)
+            print('')
             while boardCountO != countO:
+                print('Inside while loop for counting Os')
+                print('boardCountO',boardCountO)
+                print('count0',countO)
                 boardO, boardCountO = listener.circle_detect()
 
             board = computer.combine_board(boardO,board)
+            print('After Computer.combine_board')
+            print('board:',board)
 
             # FIND AI MOVE
             board, pose_number = computer.ai_turn('X', 'O', board)

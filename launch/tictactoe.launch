@@ -21,8 +21,9 @@
     
     <!-- Launch actual code to test -->
     <node pkg="tic_tac_toe" type="camera2board_tf_publisher.py" name="camera2board_tf_publisher" output="screen" />
-    <!-- <node pkg="tic_tac_toe" type="circle_state_publisher.py" name="circle_state_publisher" output="screen" />
-    <node pkg="tic_tac_toe" type="tile_locations_publisher.py" name="tile_locations_publisher" output="screen" /> -->
+    <!-- Uncomment below to debug the individual publishers or run them separately in the terminal -->
+    <!-- <node pkg="tic_rostac_toe" type="circle_state_publisher.py" name="circle_state_publisher" output="screen" /> -->
+    <!-- <node pkg="tic_tac_toe" type="tile_locations_publisher.py" name="tile_locations_publisher" output="screen" /> -->
 
     <!-- Open RQT for analysis with a custom perspective -->
     <node name = "RQT_TestViewer" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" 

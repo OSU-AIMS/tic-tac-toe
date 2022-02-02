@@ -26,6 +26,20 @@ class TICTACTOE_COMPUTER(object):
 		[0, 0, 0],
 		[0, 0, 0], ]
 
+	def evaluate(self,state):
+	    """
+	    Function to heuristic evaluation of state.
+	    :param state: the state of the current board
+	    :return: +1 if the computer wins; -1 if the human wins; 0 draw
+	    """
+	    if self.wins(state, self.COMP):
+	        score = +1
+	    elif self.wins(state, self.HUMAN):
+	        score = -1
+	    else:
+	        score = 0
+
+	    return score
 	def Evaluate_Game(self,board):
 		'''
 		params:
@@ -95,6 +109,7 @@ class TICTACTOE_COMPUTER(object):
 				if score[2] < best[2]:
 					best = score  # min value
 
+		
 		return best
 
 	def empty_cells(self,state):
@@ -138,6 +153,7 @@ class TICTACTOE_COMPUTER(object):
 		else: # else apply minimax function
 			move = self.minimax(self.board, depth, self.COMP)
 			x, y = move[0], move[1]
+			print('IN TTT_computer: ai_turn- move:',move)
 
 		self.set_move(x, y, self.COMP) # checks valid move & says computer made the move
 		time.sleep(1)
@@ -151,6 +167,7 @@ class TICTACTOE_COMPUTER(object):
 
 		self.board[move[0]][move[1]] = 1
 
+		print('IN TTT_computer ai_turn - self.board',self.board)
 		return self.board, pose_number
 
 	def game_over(self,state):

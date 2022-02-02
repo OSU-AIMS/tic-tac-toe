@@ -114,7 +114,11 @@ class circle_state_publisher():
 				0,
 				0,
 				0,
-				0
+				0,
+				# camera2board.transform.rotation.w,
+				# camera2board.transform.rotation.x,
+				# camera2board.transform.rotation.y,
+				# camera2board.transform.rotation.z
 				]
 			board_tiles = prepare_tiles()
 

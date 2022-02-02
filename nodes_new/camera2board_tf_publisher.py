@@ -91,7 +91,7 @@ def detectBoard_contours(image):
         # [[scaledCenter[0]], [scaledCenter[1]], [-0.655]])
 
     # Find rotation of board on the table plane, only a z-axis rotation angle
-    z_orient = -shapeDetect.findAngle(boardPoints)
+    z_orient = shapeDetect.findAngle(boardPoints)
 
     # convert angle to a rotation matrix with rotation about z-axis
     board_rot = np.array([[math.cos(radians(z_orient)), -math.sin(radians(z_orient)), 0],
