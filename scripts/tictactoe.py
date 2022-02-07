@@ -35,7 +35,7 @@ def main():
         countX = 0  # Number of X blocks - Robots
     	while True:
     		#FUNCTION CALLS
-            print('In While loop')
+            print('In While True loop')
 
             # wait_for_Messagefrom circle_state
             print('Beofore Circle Detect:')
@@ -49,7 +49,9 @@ def main():
                 print('boardCountO',boardCountO)
                 print('count0',countO)
                 boardO, boardCountO = listener.circle_detect()
-
+            
+            print('Humans: -1 (O piece)')
+            print('Computer: 1 (X piece)')
             board = computer.combine_board(boardO,board)
             print('After Computer.combine_board')
             print('board:',board)

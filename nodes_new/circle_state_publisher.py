@@ -56,7 +56,9 @@ def findDis(pt1x, pt1y, pt2x, pt2y):
 def prepare_tiles():
 	# Values for 3D printed tictactoe board
 	centerxDist = 0.0635
-	centeryDist = -0.0635
+	# centeryDist = -0.0635
+	centeryDist = 0.0635 
+	# removing negative sign fixed board variable, so computer correctly stores location of O blocks
 
 	pieceHeight = 0.03
 
@@ -67,9 +69,12 @@ def prepare_tiles():
 	[6 7 8]
 	""" 
 	tf = transformations()
-	centers =[[-centerxDist ,centeryDist,pieceHeight],[0,centeryDist,pieceHeight],[centerxDist,centeryDist,pieceHeight],
-						[-centerxDist,0,pieceHeight],[0,0,pieceHeight],[centerxDist,0,pieceHeight],
-						[-centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[centerxDist,-centeryDist,pieceHeight]]
+	# centers =[[-centerxDist ,centeryDist,pieceHeight],[0,centeryDist,pieceHeight],[centerxDist,centeryDist,pieceHeight],
+	# 					[-centerxDist,0,pieceHeight],[0,0,pieceHeight],[centerxDist,0,pieceHeight],
+	# 					[-centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[centerxDist,-centeryDist,pieceHeight]]
+	centers =[[centerxDist ,centeryDist,pieceHeight],[0,centeryDist,pieceHeight],[-centerxDist,centeryDist,pieceHeight],
+						[centerxDist,0,pieceHeight],[0,0,pieceHeight],[-centerxDist,0,pieceHeight],
+						[centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[-centerxDist,-centeryDist,pieceHeight]]
 
 	tictactoe_center_list = np.array(centers,dtype=np.float)
 	rot_default = np.identity((3))
@@ -120,6 +125,8 @@ class circle_state_publisher():
 				# camera2board.transform.rotation.y,
 				# camera2board.transform.rotation.z
 				]
+			# 2/7: Still haven't fixed rotation of numbers printed on TTT board in RQT
+			
 			board_tiles = prepare_tiles()
 
 			tf_camera2board = self.tf.quant_pose_to_tf_matrix(camera2board_pose)
@@ -150,7 +157,12 @@ class circle_state_publisher():
 			# array for game board 0 -> empty tile, 1 -> X, -1 -> O
 			
 			centers, circles_img = self.shapeDetect.detectCircles(img, radius=10, tolerance=5)
+			# 2/7: currently having issues detecting 2 circles.
+			# TTT.py won't proceed b/c of this issue ^
+			# boardCount0 = 1 but the computer only detects 2
+			
 			closest_square = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+			# ^^^ Is this used anywhere?
 			
 			# for each circle found
 			for i in range(len(centers)):
@@ -176,9 +188,10 @@ class circle_state_publisher():
 					else:
 						print("Circle {} is not on the board".format(i))
 
-			# print('Physical Board: ', board)
-			# print('Board Computer sees:', boardCode)
-
+			print('Physical Board: ', board)
+			# 2/7: max number of circles recognized is 2. 
+			# Can recogniize 3 but there is flickering in detection
+			# 4 circles not recognized
 			for i in range(9):
 				annotated_img = cv2.putText(img, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
 							(0, 0, 0),
