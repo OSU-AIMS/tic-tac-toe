@@ -40,15 +40,16 @@ def main():
             # wait_for_Messagefrom circle_state
             print('Beofore Circle Detect:')
             boardO, boardCountO = listener.circle_detect()
-            print('Passed boardO, boardCountO = listener.circle_detect()')
-            print('boardCountO',boardCountO)
-            print('count0',countO)
+            # print('Passed boardO, boardCountO = listener.circle_detect()')
+            print('boardCountO: computer detected circles:',boardCountO)
+            print('count0: No. of Circles in reality:',countO)
             print('')
             while boardCountO != countO:
                 print('Inside while loop for counting Os')
                 print('boardCountO',boardCountO)
                 print('count0',countO)
                 boardO, boardCountO = listener.circle_detect()
+                # 2/9/2022-Issue: boardCount0 not detecting correct number of circles
             
             print('Humans: -1 (O piece)')
             print('Computer: 1 (X piece)')
@@ -66,9 +67,14 @@ def main():
             raw_input('To attempt to get pose {} <press enter>'.format(pose_number))
             movement.placePiece(place_pose)
 
+            raw_input('Return to scan position <press enter>')
+            movement.scanPosition()
+
             # Add +1 to O & X count 		
             countO += 1
             countX += 1
+
+            raw_input('Human turn: Place O <press enter>')
 
     		#Game over? ->  break
 

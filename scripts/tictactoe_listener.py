@@ -69,7 +69,7 @@ class TICTACTOE_LISTENER(object):
         
         # print('expected number of Os: ', countO)
       
-        boardCountO=0 
+        # boardCountO=0  # does this set boardCount back to 0 each time?
        
         board = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
         # print(board.data,'boardmsg')

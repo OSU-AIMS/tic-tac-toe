@@ -170,6 +170,7 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 		circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, 1, rows / 8,
 								   param1=100, param2=30,
 								   minRadius=radius - tolerance, maxRadius=radius + tolerance)
+		# original: param1 = 100, param2 = 30
 
 		'''
 		HoughCircles Parameters from OpenCV Documentation
@@ -183,9 +184,9 @@ class TOOLBOX_SHAPE_DETECTOR(object):
         
         minDist	Minimum distance between the centers of the detected circles. If the parameter is too small, multiple neighbor circles may be falsely detected in addition to a true one. If it is too large, some circles may be missed.
         
-        param1	First method-specific parameter. In case of HOUGH_GRADIENT , it is the higher threshold of the two passed to the Canny edge detector (the lower one is twice smaller).
+        param1	First method-specific parameter. In case of HOUGH_GRADIENT , it is the higher threshold of the two passed to the Canny edge detector (the lower one is twice smaller). Param 1 will set the sensitivity; how strong the edges of the circles need to be. Too high and it won't detect anything, too low and it will find too much clutter. 
         
-        param2	Second method-specific parameter. In case of HOUGH_GRADIENT , it is the accumulator threshold for the circle centers at the detection stage. The smaller it is, the more false circles may be detected. Circles, corresponding to the larger accumulator values, will be returned first.
+        param2	Second method-specific parameter. In case of HOUGH_GRADIENT , it is the accumulator threshold for the circle centers at the detection stage. The smaller it is, the more false circles may be detected. Circles, corresponding to the larger accumulator values, will be returned first. Param 2 will set how many edge points it needs to find to declare that it's found a circle. Again, too high will detect nothing, too low will declare anything to be a circle. The ideal value of param 2 will be related to the circumference of the circles.
 
         minRadius	Minimum circle radius.
 
@@ -195,6 +196,9 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 
 		if circles is not None:
 			circles = np.uint16(np.around(circles))
+
+			# print('circles[0,:]',circles[0,:])
+
 
 			for i in circles[0, :]:
 				
@@ -207,6 +211,9 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 				cv2.circle(circles_image, center, radius, (255, 0, 255), 3)
 
 				center_list.append(center)
+				# print('i',i)
+
+				# print('center_list',center_list)
 
 		return center_list, circles_image
 

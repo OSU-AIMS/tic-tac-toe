@@ -75,6 +75,7 @@ def prepare_tiles():
 	centers =[[centerxDist ,centeryDist,pieceHeight],[0,centeryDist,pieceHeight],[-centerxDist,centeryDist,pieceHeight],
 						[centerxDist,0,pieceHeight],[0,0,pieceHeight],[-centerxDist,0,pieceHeight],
 						[centerxDist,-centeryDist,pieceHeight],[0,-centeryDist,pieceHeight],[-centerxDist,-centeryDist,pieceHeight]]
+	#^ puts the +1(X) & -1(O) in the correct spot for the computer to store them.
 
 	tictactoe_center_list = np.array(centers,dtype=np.float)
 	rot_default = np.identity((3))
@@ -121,7 +122,7 @@ class circle_state_publisher():
 				0,
 				0,
 				# camera2board.transform.rotation.w,
-				# camera2board.transform.rotation.x,
+				# camera2board.transform.rotation.z,
 				# camera2board.transform.rotation.y,
 				# camera2board.transform.rotation.z
 				]
@@ -159,14 +160,19 @@ class circle_state_publisher():
 			centers, circles_img = self.shapeDetect.detectCircles(img, radius=10, tolerance=5)
 			# 2/7: currently having issues detecting 2 circles.
 			# TTT.py won't proceed b/c of this issue ^
-			# boardCount0 = 1 but the computer only detects 2
+
+			print('center in publisher',centers)
 			
 			closest_square = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 			# ^^^ Is this used anywhere?
 			
+			print('range(len(centers)',range(len(centers)))
 			# for each circle found
 			for i in range(len(centers)):
 				distanceFromCenter = findDis(centers[i][0], centers[i][1], xyList[4][0], xyList[4][1])
+				print('distanceFromCenter',distanceFromCenter)
+				print('at this i',i)
+				print('at this center',centers[i][0], centers[i][1])
 
 				if distanceFromCenter < 160:  # 100 * sqrt2
 					closest_index = None
@@ -179,7 +185,7 @@ class circle_state_publisher():
 							# any circle within this boundary is likely to be detected as a piece in one of the 9 tiles
 							closest = distance
 							closest_index = j
-					
+						# print('closest_index',closest_index)
 					if closest_index is not None:
 						board[closest_index] = -1
 						cv2.circle(img, centers[i], 15, (0, 200, 40), 7)
