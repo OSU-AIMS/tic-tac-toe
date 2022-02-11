@@ -31,7 +31,7 @@ def main():
     try:
         movement.scanPosition()
         board = np.zeros((3,3))
-        countO = 1  # Number of O blocks - Humans (human goes first, so count = 1)
+        countO = 0  # Number of O blocks - Humans (human goes first, so count = 1)
         countX = 0  # Number of X blocks - Robots
     	while True:
     		#FUNCTION CALLS

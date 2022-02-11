@@ -43,8 +43,8 @@ class TICTACTOE_MOVEMENT(object):
         x_position = -0.11
         x_index = x_count 
         y_position = -(x_index*0.0354 + .5)
-        z_position_hover = .1
-        z_position = .02
+        z_position_hover = 0
+        z_position = -.1
 
         self.openGripper()       
         pose_higher = [x_position, y_position, z_position_hover, .707, -.707, 0, 0]

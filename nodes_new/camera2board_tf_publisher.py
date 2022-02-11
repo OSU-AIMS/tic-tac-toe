@@ -492,7 +492,7 @@ class board_publisher():
 
         # Define 3x1 array of board translation (x, y, z) in meters
         boardTranslation = np.array(
-            [[.819], [scaledCenter[0]], [-scaledCenter[1]]])  
+            [[.8], [-scaledCenter[0]], [-scaledCenter[1]]])  
 
         y_neg90 = np.array([[ 0,  0, -1],
                             [0,  1,  0],

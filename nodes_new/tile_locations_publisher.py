@@ -33,7 +33,7 @@ def prepare_tiles():
     
     # Values for 3D printed tictactoe board
     centerxDist = 0.0635
-    centeryDist = 0.0635
+    centeryDist = -0.0635
 
     pieceHeight = 0.03
 
