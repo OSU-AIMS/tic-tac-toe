@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Launch File: Tests the board_tf_publisher NODE using a static image publisher. -->
 
 <launch>
 

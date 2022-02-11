@@ -33,7 +33,7 @@ def prepare_tiles():
     
     # Values for 3D printed tictactoe board
     centerxDist = 0.0635
-    centeryDist = -0.0635
+    centeryDist = 0.0635
 
     pieceHeight = 0.03
 
@@ -54,6 +54,7 @@ def prepare_tiles():
     new_list = []
 
     for vector in tictactoe_center_list:
+        # print(vector)
         item = np.matrix(vector)
         new_list.append( tf.generateTransMatrix(rot_default, item) )
 
@@ -97,21 +98,22 @@ class tile_locations_publisher():
         tf_fixed2board = self.tf.quant_pose_to_tf_matrix(fixed2board_pose)
 
         tf_fixed2tiles = self.tf.convertPath2FixedFrame(matrix_tile_centers, tf_fixed2board)
+        
 
         robot_poses = []
         poses_msg = PoseArray()
-        pose_msg = Pose()
 
         for i in range(9):
             trans_rot = tf_fixed2tiles[i][0:3, 3:4]
-            new_pose = [trans_rot[0][0], trans_rot[1][0], trans_rot[2][0], .707, -.707, 0, 0]
-            pose_msg.position.x = new_pose[0]
-            pose_msg.position.y = new_pose[1]
-            pose_msg.position.z = new_pose[2]
-            pose_msg.orientation.x = new_pose[3]
-            pose_msg.orientation.y = new_pose[4]
-            pose_msg.orientation.z = new_pose[5]
-            pose_msg.orientation.w = new_pose[6]
+            
+            pose_msg = Pose()
+            pose_msg.position.x = trans_rot[0][0]
+            pose_msg.position.y = trans_rot[1][0]
+            pose_msg.position.z = trans_rot[2][0]
+            pose_msg.orientation.x = .707
+            pose_msg.orientation.y = -.707
+            pose_msg.orientation.z = 0
+            pose_msg.orientation.w = 0
 
             poses_msg.poses.append(pose_msg)
 

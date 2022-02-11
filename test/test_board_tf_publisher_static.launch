@@ -6,7 +6,7 @@
     <!-- Opens a Static Image Publisher to stand in for real camera -->
     <!-- ns set to match RealSense namespace design. Explicitly matched for testing purposes -->
     <node pkg="image_publisher" type="image_publisher" name="color" ns="camera"
-        args="$(find tic_tac_toe)/test/iRS_sample_capture_contours_1280p.png" >
+        args="$(find tic_tac_toe)/test/iRS_sample_capture_color_blackback.png" >
         <param name="flip_horizontal" value="false" />
         <param name="flip_vertical" value="false" />
         <param name="frame_id" value="camera_link" />

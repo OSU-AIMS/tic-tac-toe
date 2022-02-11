@@ -27,6 +27,7 @@ import tf2_msgs.msg
 from std_msgs.msg import ByteMultiArray
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
+from geometry_msgs.msg import PoseArray
 
 # Custom Tools
 # from Realsense_tools import *
@@ -112,27 +113,29 @@ class circle_state_publisher():
 		:param data: Camera data input from subscriber
 		"""
 		try:
-			camera2board = self.tfBuffer.lookup_transform('ttt_board', 'camera_link', rospy.Time())
-			camera2board_pose = [ 
-				camera2board.transform.translation.x,
-				camera2board.transform.translation.y,
-				camera2board.transform.translation.z,
-				0,
-				0,
-				0,
-				0,
-				# camera2board.transform.rotation.w,
-				# camera2board.transform.rotation.z,
-				# camera2board.transform.rotation.y,
-				# camera2board.transform.rotation.z
-				]
-			# 2/7: Still haven't fixed rotation of numbers printed on TTT board in RQT
+			# camera2board = self.tfBuffer.lookup_transform('ttt_board', 'camera_link', rospy.Time())
+			# camera2board_pose = [ 
+			# 	camera2board.transform.translation.x,
+			# 	camera2board.transform.translation.y,
+			# 	camera2board.transform.translation.z,
+			# 	camera2board.transform.rotation.x,
+			# 	camera2board.transform.rotation.y,
+			# 	camera2board.transform.rotation.z,
+			# 	camera2board.transform.rotation.w]
+
+			# 	# 0,
+			# 	# 0,
+			# 	# 0,
+			# 	# 0
+			# # 2/7: Still haven't fixed rotation of numbers printed on TTT board in RQT
 			
-			board_tiles = prepare_tiles()
+			# board_tiles = prepare_tiles()
 
-			tf_camera2board = self.tf.quant_pose_to_tf_matrix(camera2board_pose)
+			# tf_camera2board = self.tf.quant_pose_to_tf_matrix(camera2board_pose)
 
-			tf_camera2tiles = self.tf.convertPath2FixedFrame(board_tiles,tf_camera2board)
+			# tf_camera2tiles = self.tf.convertPath2FixedFrame(board_tiles,tf_camera2board)
+
+			pose_data = rospy.wait_for_message("tile_locations",PoseArray,timeout = None)
 
 			xyList = [[] for i in range(9)]
 			scale = 1.14 / 1280
@@ -142,22 +145,25 @@ class circle_state_publisher():
 			img = cv_image.copy()
 
 			for i in range(9):
-				xyzCm = (tf_camera2tiles[i][0:2, 3:4])  # in cm
-				x = xyzCm[0] / scale + 640
-				y = xyzCm[1] / scale + 360  # in pixels
+				# xyzCm = (tf_camera2tiles[i][0:2, 3:4])  # in cm
+				x = pose_data.poses[i].position.x / scale + 640
+				y = pose_data.poses[i].position.y / scale + 360  # in pixels
 
 				xyList[i].append(int(x))
 				xyList[i].append(int(y))
-				cv2.putText(img, str(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
-							(0, 0, 0),
+				annotated_image = cv2.putText(img, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
+							(255, 255, 255),
 							2)
-
+			print(xyList)
+			cv2.imshow("annotated_img",annotated_image)
 			
 
 			board = [0,0,0,0,0,0,0,0,0]
 			# array for game board 0 -> empty tile, 1 -> X, -1 -> O
 			
 			centers, circles_img = self.shapeDetect.detectCircles(img, radius=10, tolerance=5)
+			# cv2.imshow("total circles",circles_img)
+			cv2.waitKey(0)
 			# 2/7: currently having issues detecting 2 circles.
 			# TTT.py won't proceed b/c of this issue ^
 
