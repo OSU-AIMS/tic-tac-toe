@@ -161,55 +161,69 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 
 		circles_image = cv_image.copy()
 
-		# grayscale and blur image
-		gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-		blur = cv2.medianBlur(gray, 5) # originally 5
+		# # grayscale and blur image
+		# gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+		# blur = cv2.medianBlur(gray, 5) # originally 5
 
-		rows = blur.shape[0] # 720 rows
-		# HoughCircles outputs (x,y, radius)
-		circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, 1, rows / 16,
-								   param1=30, param2=25,
-								   minRadius=radius - tolerance, maxRadius=radius + tolerance)
-		# original: param1 = 100, param2 = 30
+		# rows = blur.shape[0] # 720 rows
+		# # HoughCircles outputs (x,y, radius)
+		# circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, 1, rows / 16,
+		# 						   param1=30, param2=25,
+		# 						   minRadius=radius - tolerance, maxRadius=radius + tolerance)
+		# # original: param1 = 100, param2 = 30
 
-		'''
-		HoughCircles Parameters from OpenCV Documentation
-		image	8-bit, single-channel, grayscale input image.
+		image_ori = cv2.cvtColor(cv_image,cv2.COLOR_BGR2GRAY)
+		lower_bound = np.array([0,0,0])
 		
-		circles	Output vector of found circles. Each vector is encoded as 3 or 4 element floating-point vector (x,y,radius) or (x,y,radius,votes)
-		
-		method	Detection method, see HoughModes. Currently, the only implemented method is HOUGH_GRADIENT
-		
-		dp	Inverse ratio of the accumulator resolution to the image resolution. For example, if dp=1 , the accumulator has the same resolution as the input image. If dp=2 , the accumulator has half as big width and height.
-        
-        minDist	Minimum distance between the centers of the detected circles. If the parameter is too small, multiple neighbor circles may be falsely detected in addition to a true one. If it is too large, some circles may be missed.
-        
-        param1	First method-specific parameter. In case of HOUGH_GRADIENT , it is the higher threshold of the two passed to the Canny edge detector (the lower one is twice smaller). Param 1 will set the sensitivity; how strong the edges of the circles need to be. Too high and it won't detect anything, too low and it will find too much clutter. 
-        
-        param2	Second method-specific parameter. In case of HOUGH_GRADIENT , it is the accumulator threshold for the circle centers at the detection stage. The smaller it is, the more false circles may be detected. Circles, corresponding to the larger accumulator values, will be returned first. Param 2 will set how many edge points it needs to find to declare that it's found a circle. Again, too high will detect nothing, too low will declare anything to be a circle. The ideal value of param 2 will be related to the circumference of the circles.
-
-        minRadius	Minimum circle radius.
-
-        maxRadius	Maximum circle radius. If <= 0, uses the maximum image dimension. If < 0, returns centers without finding the radius.
-		'''
 		center_list = []
+		upper_bound = np.array([180,220,255])
+
+		image_color = cv_image
+		image = image_color
+
+		mask = cv2.inRange(image_color, lower_bound, upper_bound)
+		mask = cv2.bitwise_not(mask)
+		# cv2.imshow("gray",mask)
+
+		# mask = cv2.adaptiveThreshold(image_ori,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
+		#             cv2.THRESH_BINARY_INV,33,2)
+
+		kernel = np.ones((3, 3), np.uint8)
+
+		#Use erosion and dilation combination to eliminate false positives. 
+		mask = cv2.erode(mask, kernel, iterations=2)
+		mask = cv2.dilate(mask, kernel, iterations=1)
+
+		closing = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+		# cv2.imshow("gff",closing)
+		# cv2.waitKey(0)
+
+
+		contours = cv2.findContours(mask.copy(),cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
+		contours.sort(key=lambda x:cv2.boundingRect(x)[0])
+
+		circles = []
+		ii = 1
+		for c in contours:
+		    (x,y),r = cv2.minEnclosingCircle(c)
+		    center = (int(x),int(y))
+		    r = int(r)
+		    if r >= 8 and r<=10:
+		        cv2.circle(circles_image,center,r,(61,15,205),3)
+		        circles.append(center)
 
 		if circles is not None:
 			circles = np.uint16(np.around(circles))
+			print circles
 
-			# print('circles[0,:]',circles[0,:])
+			# print('circles[0,:]',circles[0])
 
 
-			for i in circles[0, :]:
+			for i in circles:
 				
 				# circle center
 				center = (i[0], i[1])
-				cv2.circle(circles_image, center, 1, (0, 100, 100), 3)
-
-				# circle outline
-				radius = i[2]
-				cv2.circle(circles_image, center, radius, (255, 0, 255), 3)
-
+				
 				center_list.append(center)
 				# print('i',i)
 
