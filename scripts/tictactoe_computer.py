@@ -237,6 +237,6 @@ class TICTACTOE_COMPUTER(object):
 						board[row][col] = -1
 					else:
 						print("Overlapping O and X!") 
-		return boardO    
+		return board    
 
 	

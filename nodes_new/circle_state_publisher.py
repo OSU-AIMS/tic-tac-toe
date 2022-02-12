@@ -140,27 +140,6 @@ class circle_state_publisher():
         :param data: Camera data input from subscriber
         """
         try:
-            # camera2board = self.tfBuffer.lookup_transform('ttt_board', 'camera_link', rospy.Time())
-            # camera2board_pose = [ 
-            #   camera2board.transform.translation.x,
-            #   camera2board.transform.translation.y,
-            #   camera2board.transform.translation.z,
-            #   camera2board.transform.rotation.x,
-            #   camera2board.transform.rotation.y,
-            #   camera2board.transform.rotation.z,
-            #   camera2board.transform.rotation.w]
-
-            #   # 0,
-            #   # 0,
-            #   # 0,
-            #   # 0
-            # # 2/7: Still haven't fixed rotation of numbers printed on TTT board in RQT
-            
-            # board_tiles = prepare_tiles()
-
-            # tf_camera2board = self.tf.quant_pose_to_tf_matrix(camera2board_pose)
-
-            # tf_camera2tiles = self.tf.convertPath2FixedFrame(board_tiles,tf_camera2board)
 
             pose_data = rospy.wait_for_message("tile_locations",PoseArray,timeout = None)
 
@@ -175,37 +154,22 @@ class circle_state_publisher():
             yList = []
 
             for j in range(9):
-                # xyzCm = (tf_camera2tiles[i][0:2, 3:4])  # in cm
-                # x = -(pose_data.poses[i].position.x)/scale + 640
-                # y = -(pose_data.poses[i].position.y)/ scale - 360  # in pixels
-
-                # xyList[i].append(int(x))
-                # xyList[i].append(int(y))
-
                 xList.append(pose_data.poses[j].position.x)
                 yList.append(pose_data.poses[j].position.y)
 
-                # annotated_image = cv2.putText(img, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
-                            # (255, 255, 255),
-                            # 2)
-            # print(xyList)
-            # cv2.imshow("annotated_img",annotated_image)
-            
-
+            # print('xList',xList)
+            # print('yList',yList)
             board = [0,0,0,0,0,0,0,0,0]
             # array for game board 0 -> empty tile, 1 -> X, -1 -> O
             
-            centers, circles_img = self.shapeDetect.detectCircles(img, radius=10, tolerance=5)
-            # cv2.imshow("total circles",circles_img)
-            # cv2.waitKey(0)
-            # 2/7: currently having issues detecting 2 circles.
-            # TTT.py won't proceed b/c of this issue ^
+            centers, circles_img = self.shapeDetect.detectCircles(img, radius=5, tolerance=10)
+           
+            try:
+                msg_img = self.bridge.cv2_to_imgmsg(circles_img, 'bgr8')
+            except CvBridgeError as e:
+                print(e)
 
-            # print('center in publisher',centers)
-            
-            # closest_square = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-            # ^^^ Is this used anywhere?
-            
+            self.circle_state_annotation.publish(msg_img)
 
             scaledCenter = [0, 0]
 
@@ -269,22 +233,14 @@ class circle_state_publisher():
                 circlesXlist.append(fixed2circle.transform.translation.x)
                 circlesYlist.append(fixed2circle.transform.translation.y)
 
+            
 
-
-
-
-
-            # print('range(len(centers)',range(len(centers)))
-            # for each circle found
             for i in range(len(centers)):
-                distanceFromCenter = findDis(circlesXlist[i], circlesYlist[i], xList[4], xList[4])
-                print('distanceFromCenter',distanceFromCenter)
-                print('at this i',i)
-                print('at this center',centers[i][0], centers[i][1])
+                distanceFromCenter = findDis(circlesXlist[i], circlesYlist[i], xList[4], yList[4])
 
                 if distanceFromCenter < .160:  # 100 * sqrt2 -now in meters
                     closest_index = None
-                    closest = 10000
+                    closest = 100
                     for j in range(9):
                         distance = findDis(circlesXlist[i], circlesYlist[i], xList[j], yList[j])
 
@@ -301,23 +257,7 @@ class circle_state_publisher():
                         print("Circle {} is in tile {}.".format(i, closest_index))
                     else:
                         print("Circle {} is not on the board".format(i))
-
-            print('Physical Board: ', board)
-            # 2/7: max number of circles recognized is 2. 
-            # Can recogniize 3 but there is flickering in detection
-            # 4 circles not recognized
-            # for i in range(9):
-            #   annotated_img = cv2.putText(img, str(i), (int(xyList[i][0]), int(xyList[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
-            #               (0, 0, 0),
-            #               2)
             
-            # try:
-                # msg_img = self.bridge.cv2_to_imgmsg(annotated_img, 'bgr8')
-            # except CvBridgeError as e:
-            #     print(e)
-
-            # Publish
-            # self.circle_state_annotation.publish(msg_img)
 
             msg_circle = ByteMultiArray()
             msg_circle.data = board

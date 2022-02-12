@@ -30,6 +30,7 @@ class TICTACTOE_MOVEMENT(object):
     def scanPosition(self):
         # default_scan_joint_goal = ([-90, 0, 0, 0, 0, 0])
         self.rc.goto_named_target('overlook-right')
+        self.openGripper()
 
     def xPickup(self, x_count):
         """
@@ -39,18 +40,19 @@ class TICTACTOE_MOVEMENT(object):
         :param y: Y position in meters
         :param z: Z position in meters.
         """
-
-        x_position = -0.11
+        #  Translation: [-0.346, 0.112, -0.064]
+        x_position = 0.112
         x_index = x_count 
-        y_position = -(x_index*0.0354 + .5)
-        z_position_hover = 0
-        z_position = -.1
+        y_position = -(x_index*0.0381 + .346)
+        z_position_hover = -.1
+        z_position = -.12
 
         self.openGripper()       
         pose_higher = [x_position, y_position, z_position_hover, .707, -.707, 0, 0]
         self.rc.goto_Quant_Orient(pose_higher)
 
         pose_lower = [x_position, y_position, z_position, .707, -.707, 0, 0]
+        raw_input("For x pickup lower <press enter>")
         self.rc.goto_Quant_Orient(pose_lower)
         self.closeGripper()             
         
@@ -58,9 +60,11 @@ class TICTACTOE_MOVEMENT(object):
 
     def placePiece(self,tile_robot_pose):
         tile_robot_pose_hover = tile_robot_pose
-        tile_robot_pose_hover.position.z = .1
+        tile_robot_pose_hover.position.z = 0
         self.rc.goto_Pose(tile_robot_pose_hover)
 
+        raw_input("For x place lower <press enter>")
+        tile_robot_pose.position.z = -.08
         self.rc.goto_Pose(tile_robot_pose)
 
         self.openGripper()

@@ -31,7 +31,7 @@ def main():
     try:
         movement.scanPosition()
         board = np.zeros((3,3))
-        countO = 0  # Number of O blocks - Humans (human goes first, so count = 1)
+        countO = 1  # Number of O blocks - Humans (human goes first, so count = 1)
         countX = 0  # Number of X blocks - Robots
     	while True:
     		#FUNCTION CALLS
@@ -59,6 +59,7 @@ def main():
 
             # FIND AI MOVE
             board, pose_number = computer.ai_turn('X', 'O', board)
+
             place_pose = listener.retrievePose(pose_number)
 
             # EXECUTE AI MOVE
@@ -69,6 +70,7 @@ def main():
 
             raw_input('Return to scan position <press enter>')
             movement.scanPosition()
+            computer.Evaluate_Game(board)
 
             # Add +1 to O & X count 		
             countO += 1

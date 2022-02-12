@@ -102,6 +102,8 @@ class tile_locations_publisher():
 
         robot_poses = []
         poses_msg = PoseArray()
+        poses_msg.header.frame_id = "base_link"
+        poses_msg.header.stamp = rospy.Time.now()
 
         for i in range(9):
             trans_rot = tf_fixed2tiles[i][0:3, 3:4]

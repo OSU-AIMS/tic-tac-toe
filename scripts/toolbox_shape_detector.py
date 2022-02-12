@@ -167,8 +167,8 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 
 		rows = blur.shape[0] # 720 rows
 		# HoughCircles outputs (x,y, radius)
-		circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, 1, rows / 8,
-								   param1=100, param2=30,
+		circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, 1, rows / 16,
+								   param1=30, param2=25,
 								   minRadius=radius - tolerance, maxRadius=radius + tolerance)
 		# original: param1 = 100, param2 = 30
 
