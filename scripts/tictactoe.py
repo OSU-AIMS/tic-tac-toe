@@ -44,15 +44,19 @@ def main():
             print('boardCountO: computer detected circles:',boardCountO)
             print('count0: No. of Circles in reality:',countO)
             print('')
+            print('Top of Board is Blue-Red Circle X-Axis')
+            print('Tile 0 is the Blue circle Origin')
             while boardCountO != countO:
                 print('Inside while loop for counting Os')
                 print('boardCountO',boardCountO)
                 print('count0',countO)
                 boardO, boardCountO = listener.circle_detect()
-                # 2/9/2022-Issue: boardCount0 not detecting correct number of circles
             
             print('Humans: -1 (O piece)')
             print('Computer: 1 (X piece)')
+            raw_input('Human turn: Place O <press enter>')
+            computer.Evaluate_Game(board)
+
             board = computer.combine_board(boardO,board)
             print('After Computer.combine_board')
             print('board:',board)
@@ -70,13 +74,15 @@ def main():
 
             raw_input('Return to scan position <press enter>')
             movement.scanPosition()
+            
             computer.Evaluate_Game(board)
 
             # Add +1 to O & X count 		
             countO += 1
             countX += 1
 
-            raw_input('Human turn: Place O <press enter>')
+            # raw_input('Human turn: Place O <press enter>')
+            # computer.wins(board,-1)
 
     		#Game over? ->  break
 

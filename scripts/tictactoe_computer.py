@@ -36,8 +36,10 @@ class TICTACTOE_COMPUTER(object):
 	        score = +1
 	    elif self.wins(state, self.HUMAN):
 	        score = -1
-	    else:
+	    elif self.wins(state, self.COMP):
 	        score = 0
+	    else:
+	    	return 
 
 	    return score
 	def Evaluate_Game(self,board):
@@ -48,32 +50,35 @@ class TICTACTOE_COMPUTER(object):
 		which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
 		Returns game which exits the while loop in main if Game = False
 		'''
-		depth = len(self.empty_cells(board))
+		depth = len(self.empty_cells(board)) 
+		# depth is the number of empty cells which doesn't mean that the computer or human didn't win already
+		# needs to change to a more specific 
 		winner = self.evaluate(board)
 
-		# print('Evaluate:', winner)
-		if depth == 0:
+		# print('In TTT_comp-Evaluete_Game: depth=',depth)
+		print('Evaluate:', winner)
+		# if depth == 0:
 
-			if winner == 1:
-				print('Game Over..\n Winner: A.I Computer\n\n\n')
-				game = False
-				exit()
+		if winner == 1:
+			print('Game Over..\n Winner: A.I Computer\n\n\n')
+			game = False
+			exit()
 
-			elif winner == -1:
-				print('Game Over..\n Winner: Human\n\n\n')
-				game = False
-				exit()
+		elif winner == -1:
+			print('Game Over..\n Winner: Human\n\n\n')
+			game = False
+			exit()
 
-			elif winner == 0:
-				print('Tie Game!\n\n\n')
-				game = False
-				exit()
+		elif winner == 0:
+			print('Tie Game!\n\n\n')
+			game = False
+			exit()
 
-			else:
-				print('The game continues..')
-				game = True
 		else:
+			print('The game continues..')
 			game = True
+		# else:
+		# 	game = True
 
 		return game
 

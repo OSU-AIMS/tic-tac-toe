@@ -64,7 +64,7 @@ class TICTACTOE_MOVEMENT(object):
         self.rc.goto_Pose(tile_robot_pose_hover)
 
         raw_input("For x place lower <press enter>")
-        tile_robot_pose.position.z = -.08
+        tile_robot_pose.position.z = -.13 # originally -0.08 - a bit too high. Piece bounced when dropped which can cause mis-detection of O
         self.rc.goto_Pose(tile_robot_pose)
 
         self.openGripper()
