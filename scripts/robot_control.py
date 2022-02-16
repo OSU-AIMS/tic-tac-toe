@@ -119,9 +119,9 @@ class moveManipulator(object):
         # Call Read Service to check current position
         read_status = read_single_io(10011).value
         if read_status:
-            print('Gripper is Closed')
+            # print('Gripper is Closed')
         else:
-            print('Gripper is Open')
+            # print('Gripper is Open')
 
         return read_status
 

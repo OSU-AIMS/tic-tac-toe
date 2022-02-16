@@ -176,7 +176,7 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 		lower_bound = np.array([0,0,0])
 		
 		center_list = []
-		upper_bound = np.array([180,220,255])
+		upper_bound = np.array([190,220,255])
 
 		image_color = cv_image
 		image = image_color
@@ -195,7 +195,7 @@ class TOOLBOX_SHAPE_DETECTOR(object):
 		mask = cv2.dilate(mask, kernel, iterations=1)
 
 		closing = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-		# cv2.imshow("gff",closing)
+		# cv2.imshow("end",closing)
 		# cv2.waitKey(0)
 
 

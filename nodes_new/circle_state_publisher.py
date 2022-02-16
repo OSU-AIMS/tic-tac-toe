@@ -238,13 +238,13 @@ class circle_state_publisher():
             for i in range(len(centers)):
                 distanceFromCenter = findDis(circlesXlist[i], circlesYlist[i], xList[4], yList[4])
 
-                if distanceFromCenter < .160:  # 100 * sqrt2 -now in meters
+                if distanceFromCenter < .150:  # 100 * sqrt2 -now in meters
                     closest_index = None
                     closest = 100
                     for j in range(9):
                         distance = findDis(circlesXlist[i], circlesYlist[i], xList[j], yList[j])
 
-                        if distance < .60 and distance < closest:
+                        if distance < .03 and distance < closest:
                             # this creates a boundary just outside the ttt board of 40 pixels away from each tile
                             # any circle within this boundary is likely to be detected as a piece in one of the 9 tiles
                             closest = distance
