@@ -74,16 +74,19 @@ class TICTACTOE_LISTENER(object):
         board = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
         # print(board.data,'boardmsg')
         board_np = np.array(board.data)
-        print('circle detect board_np',board_np)
-        print('circle detect board',board)
+        # print('circle detect board_np',board_np)
+        # print('circle detect board',board)
 
 
         boardCountO = np.count_nonzero(board_np==-1)
 
-        boardO = [[board_np[0],board_np[3],board_np[6]],
-                    [board_np[1],board_np[4],board_np[7]],
-                    [board_np[2],board_np[5],board_np[8]]] 
-        print('circle detect boardO',boardO)
+        boardO = [[board_np[0],board_np[1],board_np[2]],
+                    [board_np[3],board_np[4],board_np[5]],
+                    [board_np[6],board_np[7],board_np[8]]] 
+        # boardO = [[board_np[0],board_np[3],board_np[6]],
+        #             [board_np[1],board_np[4],board_np[7]],
+        #             [board_np[2],board_np[5],board_np[8]]] 
+        # print('circle detect boardO',boardO)
 
         return boardO, boardCountO
 

@@ -35,31 +35,30 @@ def main():
         countX = 0  # Number of X blocks - Robots
     	while True:
     		#FUNCTION CALLS
-            print('In While True loop')
 
             # wait_for_Messagefrom circle_state
-            print('Beofore Circle Detect:')
+            print('Before Circle Detect:')
             raw_input('Human turn: Place O <press enter>')
             boardO, boardCountO = listener.circle_detect()
+
             # print('Passed boardO, boardCountO = listener.circle_detect()')
             print('boardCountO: computer detected circles:',boardCountO)
             print('count0: No. of Circles in reality:',countO)
-            print('')
-            print('Top of Board is Blue-Red Circle X-Axis')
-            print('Tile 0 is the Blue circle Origin')
+            print('Top Left of Board is Green')
             while boardCountO != countO:
                 print('Inside while loop for counting Os')
                 print('boardCountO',boardCountO)
                 print('count0',countO)
                 boardO, boardCountO = listener.circle_detect()
             
-            print('Humans: -1 (O piece)')
-            print('Computer: 1 (X piece)')
-            computer.Evaluate_Game(board)
-
+            
             board = computer.combine_board(boardO,board)
             print('After Computer.combine_board')
-            print('board:',board)
+            print('Humans: -1 (O piece)')
+            print('Computer: 1 (X piece)')
+
+            computer.render(board)
+            computer.Evaluate_Game(board)
 
             # FIND AI MOVE
             board, pose_number = computer.ai_turn('X', 'O', board)
@@ -74,7 +73,8 @@ def main():
 
             raw_input('Return to scan position <press enter>')
             movement.scanPosition()
-            
+
+            computer.render(board)
             computer.Evaluate_Game(board)
 
             # Add +1 to O & X count 		
