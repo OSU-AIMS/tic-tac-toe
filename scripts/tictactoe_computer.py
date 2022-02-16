@@ -235,6 +235,8 @@ class TICTACTOE_COMPUTER(object):
 			return False
 
 	def combine_board(self,boardO,board):
+		print('TTT comp: board',board)
+		print('TTT comp: boardO',boardO)
 		for row in range(3):
 			for col in range(3):
 				if boardO[row][col] == -1:

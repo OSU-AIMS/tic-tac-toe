@@ -39,6 +39,7 @@ def main():
 
             # wait_for_Messagefrom circle_state
             print('Beofore Circle Detect:')
+            raw_input('Human turn: Place O <press enter>')
             boardO, boardCountO = listener.circle_detect()
             # print('Passed boardO, boardCountO = listener.circle_detect()')
             print('boardCountO: computer detected circles:',boardCountO)
@@ -54,7 +55,6 @@ def main():
             
             print('Humans: -1 (O piece)')
             print('Computer: 1 (X piece)')
-            raw_input('Human turn: Place O <press enter>')
             computer.Evaluate_Game(board)
 
             board = computer.combine_board(boardO,board)
