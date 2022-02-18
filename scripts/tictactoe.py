@@ -13,11 +13,46 @@ import numpy as np
 from tictactoe_computer import TICTACTOE_COMPUTER
 from tictactoe_movement import TICTACTOE_MOVEMENT
 from tictactoe_listener import TICTACTOE_LISTENER
+from tictactoe_newminimax import TicTacToe 
 
 import rospy
 import tf2_ros
 import tf2_msgs.msg
+import random
 
+def make_best_move(board, depth, player):
+    """
+    Controllor function to initialize minimax and keep track of optimal move choices
+
+    board - what board to calculate best move for
+    depth - how far down the tree to go
+    player - who to calculate best move for (Works ONLY for "O" right now)
+    """
+    neutralValue = 50
+    choices = []
+    for move in board.availableMoves():
+        board.makeMove(move, player)
+        moveValue = board.minimax(board, depth-1, changePlayer(player))
+        board.makeMove(move, " ")
+
+        if moveValue > neutralValue:
+            choices = [move]
+            break
+        elif moveValue == neutralValue:
+            choices.append(move)
+    print("choices: ", choices)
+
+    if len(choices) > 0:
+        return random.choice(choices)
+    else:
+        return random.choice(board.availableMoves())
+
+def changePlayer(player):
+    """Returns the opposite player given any player"""
+    if player == "X":
+        return "O"
+    else:
+        return "X"
 
 def main():
     #SETUP
@@ -25,6 +60,7 @@ def main():
     movement = TICTACTOE_MOVEMENT()
     computer = TICTACTOE_COMPUTER()
     listener = TICTACTOE_LISTENER()
+    ai_turn = TicTacToe()
 
 
     #MASTER LOOP
@@ -34,6 +70,7 @@ def main():
         countO = 1  # Number of O blocks - Humans (human goes first, so count = 1)
         countX = 0  # Number of X blocks - Robots
     	while True:
+            boardlist =[]
     		#FUNCTION CALLS
 
             # wait_for_Messagefrom circle_state
@@ -58,10 +95,54 @@ def main():
             print('Computer: 1 (X piece)')
 
             computer.render(board)
-            # computer.Evaluate_Game(board)
+            computer.Evaluate_Game(board) # this was commented out earlier? Why?
 
             # FIND AI MOVE
-            board, pose_number = computer.ai_turn('X', 'O', board)
+            # board, pose_number = computer.ai_turn('X', 'O', board)
+            # boardlist = [board[0][0],board[0][1],board[0][2],board[1][0],board[1][1],board[1][2],board[2][0],board[2][1],board[2][2]]
+            for row in range(3):
+                for col in range(3):
+                    if board[row][col] == -1:
+                        boardlist.append("O")
+                    elif board[row][col] == 1:
+                        boardlist.append("X")
+                    else:
+                        boardlist.append(" ")
+            print("boardlist",boardlist)
+            ai_turn.board = boardlist
+            pose_number = make_best_move(ai_turn,-1,"O" )
+
+            if pose_number == 0:
+                boardlist[0]= 'X'
+                board[0][0] = 1
+            elif pose_number == 1:
+                boardlist[1] = 'X'
+                board[0][1] = 1
+            elif pose_number == 2:
+                boardlist[2] = 'X'
+                board[0][2] = 1
+            elif pose_number == 3:
+                boardlist[3] = 'X'
+                board[1][0] = 1
+            elif pose_number == 4:
+                boardlist[4] = 'X'
+                board[1][1] = 1
+            elif pose_number == 5:
+                boardlist[5] = 'X'
+                board[1][2] = 1
+            elif pose_number == 6:
+                boardlist[6] = 'X'
+                board[2][0] = 1
+            elif pose_number == 7:
+                boardlist[7] = 'X'
+                board[2][1] = 1
+            elif pose_number == 8:
+                boardlist[8] = 'X'
+                board[2][2] = 1
+            else:
+                print "no"
+
+
 
             place_pose = listener.retrievePose(pose_number)
 
