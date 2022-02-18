@@ -58,7 +58,7 @@ def main():
             print('Computer: 1 (X piece)')
 
             computer.render(board)
-            computer.Evaluate_Game(board)
+            # computer.Evaluate_Game(board)
 
             # FIND AI MOVE
             board, pose_number = computer.ai_turn('X', 'O', board)

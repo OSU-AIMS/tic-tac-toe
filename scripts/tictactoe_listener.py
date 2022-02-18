@@ -87,6 +87,7 @@ class TICTACTOE_LISTENER(object):
         #             [board_np[1],board_np[4],board_np[7]],
         #             [board_np[2],board_np[5],board_np[8]]] 
         # print('circle detect boardO',boardO)
+        boardO = np.array(boardO)
 
         return boardO, boardCountO
 

@@ -13,6 +13,44 @@ import platform
 import time
 from os import system
 
+# infinity = np.inf
+# HUMAN = -1
+# COMP =  +1
+# def minimax(state, depth, player):
+#     """
+#     AI function that choice the best move
+#     :param state: current state of the board
+#     :param depth: node index in the tree (0 <= depth <= 9),
+#     but never nine in this case (see iaturn() function)
+#     :param player: an human or a computer
+#     :return: a list with [the best row, best col, best score]
+#     """
+#     if player == COMP:
+#         best = [-1, -1, -infinity]
+#     else:
+#         best = [-1, -1, infinity]
+
+#     if depth == 0 or computer.game_over(state):
+#         score = computer.evaluate(state)
+#         return [-1, -1, score]
+
+#     for cell in computer.empty_cells(state):
+#         x, y = cell[0], cell[1]
+#         state[x][y] = player
+#         score = computer.minimax(state, depth - 1, -player)
+#         state[x][y] = 0
+#         score[0], score[1] = x, y
+
+#         if player == COMP:
+#             if score[2] > best[2]:
+#                 best = score  # max value
+#         else:
+#             if score[2] < best[2]:
+#                 best = score  # min value
+
+    
+#     return best
+
 class TICTACTOE_COMPUTER(object):
     """
     Class is a collection of shape detection tools based in opencv Image tools. Function image inputs require opencv image types.
@@ -140,7 +178,9 @@ class TICTACTOE_COMPUTER(object):
         :param h_choice: human's choice X or O
         :return:
         """
+        print('ai_turn: before self.board',self.board)
         self.board = board
+        print('ai_turn: after self.board',self.board)
         depth = len(self.empty_cells(self.board))
         if depth == 0 or self.game_over(self.board):
             self.Evaluate_Game(self.board)
@@ -265,6 +305,8 @@ class TICTACTOE_COMPUTER(object):
                 if boardO[row][col] == -1:
                     if board[row][col] == 0:
                         board[row][col] = -1
+                    elif board[row][col] == -1:
+                    	print('Previous O detected')
                     else:
                         print("Overlapping O and X!") 
         return board    
