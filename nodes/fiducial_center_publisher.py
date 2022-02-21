@@ -52,9 +52,16 @@ def kernel_runner(image):
     CWD = dirname(abspath(__file__)) # Control Working Directory - goes to script location
     RESOURCES = join(CWD,'image_kernels') # combine script location with folder name
     # blue_square = 'blue_square_crop.tiff'  - Used for Static Image and other images at the same depth & focal Length
+
+    # Uncomment below to use kernels made from screenshots
     blue_square = 'blue-circle-square.tiff'
     red_square = 'red-circle-square.tiff'
     green_square = 'green-circle-square.tiff'
+
+    # Uncomment below to use kernels made from ImageJ
+    # blue_square = 'BlueCircle_imageJ.tif'
+    # red_square = 'RedCircle_imageJ.tif'
+    # green_square = 'GreenCircle_imageJ.tif'
 
     kernel_b = cv2.imread(join(RESOURCES,blue_square)) # combine folder name with picture name inside folder
     

@@ -43,6 +43,7 @@ class TicTacToe:
         for i in range(0, len(self.board)):
             if self.board[i] == " ":
                 moves.append(i)
+        # print('TTT_newminimaxavailableMoves: moves-',moves)
         return moves
 
     def getMoves(self, player):
@@ -56,6 +57,8 @@ class TicTacToe:
     def makeMove(self, position, player):
         """Make a move on the board"""
         self.board[position] = player
+        # print('TTT_newminimax: position',position)
+        # print('TTT_newminimax: self.board[position]',self.board[position])
 
     def checkWin(self):
         """Return the player that wins the game"""

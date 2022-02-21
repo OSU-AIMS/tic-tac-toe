@@ -33,7 +33,10 @@ def make_best_move(board, depth, player):
     for move in board.availableMoves():
         board.makeMove(move, player)
         moveValue = board.minimax(board, depth-1, changePlayer(player))
+        print('moveValue',moveValue)
+        print('move',move)
         board.makeMove(move, " ")
+        # print('board.makeMove',board.makeMove)
 
         if moveValue > neutralValue:
             choices = [move]
@@ -41,11 +44,16 @@ def make_best_move(board, depth, player):
         elif moveValue == neutralValue:
             choices.append(move)
     print("choices: ", choices)
+    print("len(choices): ", len(choices))
 
     if len(choices) > 0:
+        print('random.choice(choices)',random.choice(choices))
         return random.choice(choices)
     else:
         return random.choice(board.availableMoves())
+        print('random.choice(board.availableMoves())',random.choice(board.availableMoves()))
+
+
 
 def changePlayer(player):
     """Returns the opposite player given any player"""
@@ -100,7 +108,7 @@ def main():
             # FIND AI MOVE
             # board, pose_number = computer.ai_turn('X', 'O', board)
             # boardlist = [board[0][0],board[0][1],board[0][2],board[1][0],board[1][1],board[1][2],board[2][0],board[2][1],board[2][2]]
-            for row in range(3):
+            for row in range(3): # range(3) = range(0,3)
                 for col in range(3):
                     if board[row][col] == -1:
                         boardlist.append("O")
@@ -109,7 +117,8 @@ def main():
                     else:
                         boardlist.append(" ")
             print("boardlist",boardlist)
-            ai_turn.board = boardlist
+            ai_turn.board = boardlist # sets board variable in ai_turn to boardList
+            # print('ai_turn.board',ai_turn.board) # being read correctly
             pose_number = make_best_move(ai_turn,-1,"O" )
 
             if pose_number == 0:
