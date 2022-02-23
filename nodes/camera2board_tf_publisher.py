@@ -192,15 +192,20 @@ def calcRotation(blue_center, green_center, red_center):
     # use point-slope formula
     BR_slope = (float(blue_center[1]) - float(red_center[1])) / (float(blue_center[0]+1E-7) - float(red_center[0]))
     # BG_slope = (float(blue_center[1]) - float(green_center[1])) / (float(blue_center[0]) - float(green_center[0]))
+    # GR_slope = (float(green_center[1])-float(red_center[1])) / (float(green_center[0]+1E-7)-float(red_center[0]))
 
 
     # convert to radians
     angle = -1*math.degrees(math.atan(BR_slope))
 
+
     rot_matrix = np.array([[math.cos(radians(angle)), -math.sin(radians(angle)), 0],
                         [math.sin(radians(angle)), math.cos(radians(angle)), 0],
-                        [0, 0, 1]])
-    
+                        [0, 0, 1]]) 
+    # rot_matrix = np.array([[math.cos(radians(angle)), math.sin(radians(angle)), 0],
+    #                     [-math.sin(radians(angle)), math.cos(radians(angle)), 0],
+    #                     [0, 0, 1]]) # Correct Rotation Matrix about the z-axis
+
     return rot_matrix
 
 

@@ -95,30 +95,32 @@ class TicTacToe:
         player - what player to analyze best move for (currently setup up ONLY for "O")
         """
         if depth == 0 or node.gameOver():
-            if node.checkWin() == "X":
+            if node.checkWin() == "X": # originally "X"
                 return 0
-            elif node.checkWin() == "O":
+            elif node.checkWin() == "O": # originally "O"
                 return 100
             else:
                 return 50
 
         if player == "O":
-            bestValue = 0
+            bestValue = 0 # Originally 0
             for move in node.availableMoves():
                 node.makeMove(move, player)
+                # print('TTT_NewMiniMax- node.makeMove(move, player)',node.makeMove(move, player)) - returns None - as it should
                 moveValue = self.minimax(node, depth-1, changePlayer(player))
                 node.makeMove(move, " ")
                 bestValue = max(bestValue, moveValue)
-            return bestValue
+            return bestValue, moveValue # originally returns only bestValue
         
         if player == "X":
-            bestValue = 100
+            bestValue = 100 # Originally 100
             for move in node.availableMoves():
                 node.makeMove(move, player)
+                # print('TTT_NewMiniMax- node.makeMove(move, player)',node.makeMove(move, player)) - returns None - as it should
                 moveValue = self.minimax(node, depth-1, changePlayer(player))
                 node.makeMove(move, " ")
                 bestValue = min(bestValue, moveValue)
-            return bestValue
+            return bestValue, moveValue # originally returns only bestValue
 
 def changePlayer(player):
     """Returns the opposite player given any player"""
@@ -138,6 +140,7 @@ def make_best_move(board, depth, player):
     neutralValue = 50
     choices = []
     for move in board.availableMoves():
+        print('board.availableMoves: ',board.availableMoves)
         board.makeMove(move, player)
         print("board", board)
         moveValue = board.minimax(board, depth-1, changePlayer(player))
@@ -158,14 +161,14 @@ def make_best_move(board, depth, player):
 
 
 
-#Actual game
+# #Actual game
 if __name__ == '__main__':
     game = TicTacToe()
     game.show()
 
     while game.gameOver() == False:
-        person_move = int(input("You are X: Choose number from 1-9: "))
-        game.makeMove(person_move-1, "X")
+        person_move = int(input("You are O: Choose number from 1-9: "))
+        game.makeMove(person_move-1, "O")
         game.show()
 
         if game.gameOver() == True:
@@ -174,7 +177,7 @@ if __name__ == '__main__':
         print("Computer choosing move...")
         ai_move = make_best_move(game, -1, "O")
         print ai_move
-        game.makeMove(ai_move, "O")
+        game.makeMove(ai_move, "X")
         game.show()
 
     print("Game Over. " + game.whoWon() + " Wins")

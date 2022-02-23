@@ -31,12 +31,16 @@ def make_best_move(board, depth, player):
     neutralValue = 50
     choices = []
     for move in board.availableMoves():
-        board.makeMove(move, player)
-        moveValue = board.minimax(board, depth-1, changePlayer(player))
-        print('moveValue',moveValue)
-        print('move',move)
-        board.makeMove(move, " ")
-        # print('board.makeMove',board.makeMove)
+
+        board.makeMove(move, player) # returns None - which is fine
+        print('TTT.py - board.makeMove(move, player)',board.makeMove(move, player))
+
+        bestValue, moveValue = board.minimax(board, depth-1, changePlayer(player))
+        print('TTT.py - bestValue',bestValue)
+        print('TTT.py - moveValue',moveValue)
+
+        board.makeMove(move, " ") # Returns None - which is fine
+        print('TTT.py - board.makeMove(move, " ")',board.makeMove(move, " "))
 
         if moveValue > neutralValue:
             choices = [move]
@@ -44,7 +48,7 @@ def make_best_move(board, depth, player):
         elif moveValue == neutralValue:
             choices.append(move)
     print("choices: ", choices)
-    print("len(choices): ", len(choices))
+    # print("len(choices): ", len(choices))
 
     if len(choices) > 0:
         print('random.choice(choices)',random.choice(choices))
@@ -103,7 +107,7 @@ def main():
             print('Computer: 1 (X piece)')
 
             computer.render(board)
-            computer.Evaluate_Game(board) # this was commented out earlier? Why?
+            # computer.Evaluate_Game(board) # this was commented out earlier? Why?
 
             # FIND AI MOVE
             # board, pose_number = computer.ai_turn('X', 'O', board)
@@ -118,6 +122,7 @@ def main():
                         boardlist.append(" ")
             print("boardlist",boardlist)
             ai_turn.board = boardlist # sets board variable in ai_turn to boardList
+            
             # print('ai_turn.board',ai_turn.board) # being read correctly
             pose_number = make_best_move(ai_turn,-1,"O" )
 

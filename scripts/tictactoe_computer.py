@@ -212,8 +212,8 @@ class TICTACTOE_COMPUTER(object):
 
         self.board[move[0]][move[1]] = 1
 
-        print('IN TTT_computer ai_turn - expected board:')
-        print self.board
+        print('IN TTT_computer ai_turn - expected board:',self.board)
+        # print self.board
         return self.board, pose_number
 
     def game_over(self,state):
