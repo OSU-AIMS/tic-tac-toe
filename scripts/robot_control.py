@@ -59,8 +59,8 @@ class moveManipulator(object):
                                                             queue_size=20)
         self.group_names = self.robot.get_group_names()
 
-        self.move_group.MoveGroupCommander.set_planning_time(20)
-        self.move_group.MoveGroupCommander.set_num_planning_attempts(40)
+        self.move_group.set_planning_time(20)
+        self.move_group.set_num_planning_attempts(40)
 
     def set_vel(self,max_vel):
         self.move_group.set_max_velocity_scaling_factor(max_vel)
@@ -147,9 +147,9 @@ class moveManipulator(object):
             Stop to prevent residual motion
             Clear goal from target list.
         """
-        self.move_group.MoveGroupCommander.set_goal_joint_tolerance(joint_tol)
-        self.move_group.MoveGroupCommander.set_goal_orientation_tolerance(position_tol)
-        self.move_group.MoveGroupCommander.set_goal_position_tolerance(orientation_tol)
+        self.move_group.set_goal_joint_tolerance(joint_tol)
+        self.move_group.set_goal_orientation_tolerance(position_tol)
+        self.move_group.set_goal_position_tolerance(orientation_tol)
 
         self.move_group.set_pose_target(pose_goal)
         plan = self.move_group.go(wait=True)
