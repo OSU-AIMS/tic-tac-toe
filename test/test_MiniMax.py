@@ -40,10 +40,12 @@ class TicTacToe:
     def availableMoves(self):
         """Return empty spaces on the board"""
         moves = []
+        print('availableMoves: self.board',self.board)
         for i in range(0, len(self.board)):
             if self.board[i] == " ":
                 moves.append(i)
-        # print('TTT_newminimaxavailableMoves: moves-',moves)
+        # print('availableMoves:moves',moves)
+        # print('availableMoves: self.board',self.board)
         return moves
 
     def getMoves(self, player):
@@ -57,8 +59,6 @@ class TicTacToe:
     def makeMove(self, position, player):
         """Make a move on the board"""
         self.board[position] = player
-        # print('TTT_newminimax: position',position)
-        # print('TTT_newminimax: self.board[position]',self.board[position])
 
     def checkWin(self):
         """Return the player that wins the game"""
@@ -95,32 +95,30 @@ class TicTacToe:
         player - what player to analyze best move for (currently setup up ONLY for "O")
         """
         if depth == 0 or node.gameOver():
-            if node.checkWin() == "X": # originally "X"
+            if node.checkWin() == "X":
                 return 0
-            elif node.checkWin() == "O": # originally "O"
+            elif node.checkWin() == "O":
                 return 100
             else:
                 return 50
 
         if player == "O":
-            bestValue = 0 # Originally 0
+            bestValue = 0
             for move in node.availableMoves():
                 node.makeMove(move, player)
-                # print('TTT_NewMiniMax- node.makeMove(move, player)',node.makeMove(move, player)) - returns None - as it should
                 moveValue = self.minimax(node, depth-1, changePlayer(player))
                 node.makeMove(move, " ")
                 bestValue = max(bestValue, moveValue)
-            return bestValue, moveValue # originally returns only bestValue
+            return bestValue
         
         if player == "X":
-            bestValue = 100 # Originally 100
+            bestValue = 100
             for move in node.availableMoves():
                 node.makeMove(move, player)
-                # print('TTT_NewMiniMax- node.makeMove(move, player)',node.makeMove(move, player)) - returns None - as it should
                 moveValue = self.minimax(node, depth-1, changePlayer(player))
                 node.makeMove(move, " ")
                 bestValue = min(bestValue, moveValue)
-            return bestValue, moveValue # originally returns only bestValue
+            return bestValue
 
 def changePlayer(player):
     """Returns the opposite player given any player"""
@@ -140,9 +138,8 @@ def make_best_move(board, depth, player):
     neutralValue = 50
     choices = []
     for move in board.availableMoves():
-        print('board.availableMoves: ',board.availableMoves)
         board.makeMove(move, player)
-        print("board", board)
+        print("board.board", board.board)
         moveValue = board.minimax(board, depth-1, changePlayer(player))
         board.makeMove(move, " ")
 
@@ -161,7 +158,7 @@ def make_best_move(board, depth, player):
 
 
 
-# #Actual game
+#Actual game
 if __name__ == '__main__':
     game = TicTacToe()
     game.show()
@@ -175,9 +172,10 @@ if __name__ == '__main__':
             break
 
         print("Computer choosing move...")
-        ai_move = make_best_move(game, -1, "O")
-        print ai_move
+        ai_move = make_best_move(game, -1, "X")
+        print(ai_move)
         game.makeMove(ai_move, "X")
+        # print('game.makeMove(ai_move, "O")',game.makeMove(ai_move, "X"))
         game.show()
 
     print("Game Over. " + game.whoWon() + " Wins")

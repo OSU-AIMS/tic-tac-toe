@@ -198,7 +198,7 @@ class TICTACTOE_COMPUTER(object):
         else: # else apply minimax function
             move = self.minimax(self.board, depth, self.COMP)
             x, y = move[0], move[1]
-            print 'IN TTT_computer: ai_turn: {}'.format((move[0],move[1]))
+            print('IN TTT_computer: ai_turn: {}'.format((move[0],move[1])))
 
         self.set_move(x, y, self.COMP) # checks valid move & says computer made the move
         time.sleep(1)
@@ -291,7 +291,7 @@ class TICTACTOE_COMPUTER(object):
         print('\n' + str_line)
 
         for row in state:
-            print '|',
+            print('|'),
             for cell in row:
                 symbol = chars[cell]
                 print("{} |".format(symbol)),
@@ -306,7 +306,7 @@ class TICTACTOE_COMPUTER(object):
                     if board[row][col] == 0:
                         board[row][col] = -1
                     elif board[row][col] == -1:
-                    	print('Previous O detected')
+                        print('Previous O detected')
                     else:
                         print("Overlapping O and X!") 
         return board    
