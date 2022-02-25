@@ -49,27 +49,29 @@ class TICTACTOE_MOVEMENT(object):
 
         self.openGripper()       
         pose_higher = [x_position, y_position, z_position_hover, .707, -.707, 0, 0]
-        self.rc.goto_Quant_Orient(pose_higher)
+        self.rc.goto_Pose(pose_higher)
 
         pose_lower = [x_position, y_position, z_position, .707, -.707, 0, 0]
         raw_input("For x pickup lower <press enter>")
-        self.rc.goto_Quant_Orient(pose_lower)
+        self.rc.goto_Pose(pose_lower)
         self.closeGripper()             
         
-        self.rc.goto_Quant_Orient(pose_higher)
+        self.rc.goto_Pose_w_tolerance(pose_higher, joint_tol=10, position_tol=10, orientation_tol=10)
 
     def placePiece(self,tile_robot_pose):
         tile_robot_pose_hover = tile_robot_pose
         tile_robot_pose_hover.position.z = 0
-        self.rc.goto_Pose(tile_robot_pose_hover)
+        
+        self.rc.goto_Pose_w_tolerance(tile_robot_pose_hover, joint_tol=10, position_tol=10, orientation_tol=10)
 
         raw_input("For x place lower <press enter>")
         tile_robot_pose.position.z = -.13 # originally -0.08 - a bit too high. Piece bounced when dropped which can cause mis-detection of O
-        self.rc.goto_Pose(tile_robot_pose)
+        self.rc.goto_Pose_w_tolerance(tile_robot_pose, joint_tol=10, position_tol=10, orientation_tol=10)
 
         self.openGripper()
 
-        self.rc.goto_Pose(tile_robot_pose_hover)
+        self.rc.goto_Pose_w_tolerance(tile_robot_pose_hover, joint_tol=10, position_tol=10, orientation_tol=10)
+
 
         
     

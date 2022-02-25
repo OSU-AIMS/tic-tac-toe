@@ -59,6 +59,9 @@ class moveManipulator(object):
                                                             queue_size=20)
         self.group_names = self.robot.get_group_names()
 
+        self.move_group.MoveGroupCommander.set_planning_time(20)
+        self.move_group.MoveGroupCommander.set_num_planning_attempts(40)
+
     def set_vel(self,max_vel):
         self.move_group.set_max_velocity_scaling_factor(max_vel)
 
@@ -125,75 +128,34 @@ class moveManipulator(object):
 
         return read_status
 
-    def goto_Pose(self,posemsg):
-        pose_goal = posemsg
+    def goto_Pose(self, pose_goal):
+        """
+            Set pose_goal.
+            Plan and execute.
+            Stop to prevent residual motion
+            Clear goal from target list.
+        """
         self.move_group.set_pose_target(pose_goal)
-
-        ## Call the planner to compute the plan and execute it.
         plan = self.move_group.go(wait=True)
-
-        # Calling `stop()` ensures that there is no residual movement
         self.move_group.stop()
-
-        # It is always good to clear your targets after planning with poses.
-        # Note: there is no equivalent function for clear_joint_value_targets()
         self.move_group.clear_pose_targets()
 
-    def goto_Quant_Orient(self,pose):
-        ## GOTO Pose Using Cartesian + Quaternion Pose
+    def goto_Pose_w_tolerance(self, pose_goal, joint_tol=0, position_tol=0, orientation_tol=0):
+        """
+            Set pose_goal.
+            Plan and execute.
+            Stop to prevent residual motion
+            Clear goal from target list.
+        """
+        self.move_group.MoveGroupCommander.set_goal_joint_tolerance(joint_tol)
+        self.move_group.MoveGroupCommander.set_goal_orientation_tolerance(position_tol)
+        self.move_group.MoveGroupCommander.set_goal_position_tolerance(orientation_tol)
 
-        # Get Current Orientation in Quanternion Format
-        # http://docs.ros.org/en/api/geometry_msgs/html/msg/Pose.html
-        #q_poseCurrent = self.move_group.get_current_pose().pose.orientation
-        #print(q_poseCurrent)
-
-        # Using Quaternion's for Angle
-        # Conversion from Euler(rotx,roty,rotz) to Quaternion(x,y,z,w)
-        # Euler Units: RADIANS
-        # http://docs.ros.org/en/melodic/api/tf/html/python/transformations.html
-        # http://wiki.ros.org/tf2/Tutorials/Quaternions
-        # http://docs.ros.org/en/api/geometry_msgs/html/msg/Quaternion.html
-
-        if isinstance(pose, list):
-          pose_goal = geometry_msgs.msg.Pose()
-          pose_goal.position.x = pose[0]
-          pose_goal.position.y = pose[1]
-          pose_goal.position.z = pose[2]
-
-        # Convert Euler Orientation Request to Quanternion
-        if isinstance(pose, list) and len(pose) == 6:
-          # Assuming Euler-based Pose List
-          q_orientGoal = quaternion_from_euler(pose[3],pose[4],pose[5],axes='sxyz')
-          pose_goal.orientation.x = q_orientGoal[0]
-          pose_goal.orientation.y = q_orientGoal[1]
-          pose_goal.orientation.z = q_orientGoal[2]
-          pose_goal.orientation.w = q_orientGoal[3]
-
-        if isinstance(pose, list) and len(pose) == 7:
-          # Assuming Quant-based Pose List
-          q_orientGoal = pose[-4:]
-          pose_goal.orientation.x = q_orientGoal[0]
-          pose_goal.orientation.y = q_orientGoal[1]
-          pose_goal.orientation.z = q_orientGoal[2]
-          pose_goal.orientation.w = q_orientGoal[3]
-
-        else:
-          #Assuming type is already in message format
-          pose_goal = pose
         self.move_group.set_pose_target(pose_goal)
-
-        ## Call the planner to compute the plan and execute it.
         plan = self.move_group.go(wait=True)
-
-        # Calling `stop()` ensures that there is no residual movement
         self.move_group.stop()
-
-        # It is always good to clear your targets after planning with poses.
-        # Note: there is no equivalent function for clear_joint_value_targets()
         self.move_group.clear_pose_targets()
 
-        # For testing:
-        current_pose = self.move_group.get_current_pose().pose
-        #return all_close(pose_goal, current_pose, 0.01)
+
 
 
