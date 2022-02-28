@@ -59,9 +59,9 @@ def kernel_runner(image):
     green_square = 'green-circle-square.tiff'
 
     # Uncomment below to use kernels made from ImageJ
-    # blue_square = 'BlueCircle_imageJ.tif'
-    # red_square = 'RedCircle_imageJ.tif'
-    # green_square = 'GreenCircle_imageJ.tif'
+    # blue_square = 'BlueCircle_imageJ.tiff'
+    # red_square = 'RedCircle_imageJ.tiff'
+    # green_square = 'GreenCircle_imageJ.tiff'
 
     kernel_b = cv2.imread(join(RESOURCES,blue_square)) # combine folder name with picture name inside folder
     
