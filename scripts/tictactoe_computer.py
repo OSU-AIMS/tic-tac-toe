@@ -70,11 +70,14 @@ class TICTACTOE_COMPUTER(object):
         :param state: the state of the current board
         :return: +1 if the computer wins; -1 if the human wins; 0 draw
         """
-        if self.wins(state, self.COMP):
+        # depth is the number of empty cells which doesn't mean that the computer or human didn't win already
+        depth = len(self.empty_cells(state)) 
+        # print('depth',depth)
+        if self.wins(state, self.COMP): # if comp won
             score = +1
-        elif self.wins(state, self.HUMAN):
+        elif self.wins(state, self.HUMAN): # if human won
             score = -1
-        elif self.wins(state, self.COMP):
+        elif depth == 0:  # if neither comp nor human & no empty cells left, then score = 0 --> tie
             score = 0
         else:
             return 
@@ -88,7 +91,7 @@ class TICTACTOE_COMPUTER(object):
         which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
         Returns game which exits the while loop in main if Game = False
         '''
-        depth = len(self.empty_cells(board)) 
+        # depth = len(self.empty_cells(board)) 
         # depth is the number of empty cells which doesn't mean that the computer or human didn't win already
         # needs to change to a more specific 
         winner = self.evaluate(board)
@@ -120,7 +123,7 @@ class TICTACTOE_COMPUTER(object):
 
         return game
 
-    def minimax(self,state, depth, player):
+    def minimax(self,state, depth, player): # not using anymore. See ttt.py script
         """
         AI function that choice the best move
         :param state: current state of the board
