@@ -1,3 +1,4 @@
+#Script from https://github.com/aschmid1/TicTacToeAI/blob/master/tictactoe.py
 import random
 random.seed()
 
@@ -141,7 +142,7 @@ def negamax_move(b, p, alpha, beta, depth = 8):
     # Handle call where board is full
     if not getPossibleMoves(b):
         print("Invalid call to negamax_move with full board")
-        return None, 0
+        return -1, 0 # originally None, 0
     
     best_move = []
     
@@ -196,7 +197,7 @@ def competent_move(b, p):
         rand = random.randint(0, len(moves)-1)
         return moves[rand]
     else:
-        return None
+        return -1 # originally None
 
 # Selects the next move for the given player.
 # Input: Board. Player "O" or "X".

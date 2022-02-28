@@ -6,7 +6,7 @@ random.seed()
 # Output: None.
 def printBoard(b):
     for r in range(3):
-        print "[", b[r][0], b[r][1], b[r][2], "]"
+        print("[", b[r][0], b[r][1], b[r][2], "]")
 
 # Creates a copy of the given board.
 # Input: Board.
@@ -140,7 +140,7 @@ def negamax_move(b, p, alpha, beta, depth = 8):
     [The outcome of the scoring scheme is similar to scoring with 1 and 0]"""
     # Handle call where board is full
     if not getPossibleMoves(b):
-        print "Invalid call to negamax_move with full board"
+        print("Invalid call to negamax_move with full board")
         return None, 0
     
     best_move = []
@@ -232,7 +232,7 @@ def computerVsComputer():
     while turns < 9 and not hasWon(board, "X") and not hasWon(board, "O"):
         m = move(board, player)
         if m == None or board[m[0]][m[1]] != " ":
-            print "Invalid move", m, "by player", player, "on this board:"
+            print("Invalid move", m, "by player", player, "on this board:")
             printBoard(board)
             return
         board[m[0]][m[1]] = player
@@ -242,11 +242,11 @@ def computerVsComputer():
         turns = turns + 1
     # Finish the game.
     if hasWon(board, "O"):
-        print "O wins."
+        print("O wins.")
     elif hasWon(board, "X"):
-        print "X wins."
+        print("X wins.")
     else:
-        print "Draw."
+        print("Draw.")
 
 # If the user ran this file directly, then this code will be executed.
 # If the user imported this file, then this code will not be executed.

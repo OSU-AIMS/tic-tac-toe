@@ -15,7 +15,7 @@ from tictactoe_computer import TICTACTOE_COMPUTER
 from tictactoe_movement import TICTACTOE_MOVEMENT
 from tictactoe_listener import TICTACTOE_LISTENER
 
-import test_TTT_game_script as ai_turn
+import tictactoe_minimax as ai_turn
 #^^Script from https://github.com/aschmid1/TicTacToeAI/blob/master/tictactoe.py
 
 
@@ -32,8 +32,6 @@ def main():
     movement = TICTACTOE_MOVEMENT()
     computer = TICTACTOE_COMPUTER()
     listener = TICTACTOE_LISTENER()
-    # ai_turn = TicTacToe()
-
 
     #MASTER LOOP
     try:
@@ -74,10 +72,6 @@ def main():
             computer.render(board)
             computer.Evaluate_Game(board) # this was commented out earlier? Why?
 
-            # FIND AI MOVE
-            # board, pose_number = computer.ai_turn('X', 'O', board)
-            # boardlist = [board[0][0],board[0][1],board[0][2],board[1][0],board[1][1],board[1][2],board[2][0],board[2][1],board[2][2]]
-
             for row in range(3): # range(3) = range(0,3)
                 for col in range(3):
                     if board[row][col] == -1:
@@ -86,7 +80,8 @@ def main():
                         boardMatrix[row][col] = ("X")
                     else:
                         boardMatrix[row][col] = (" ")
-      
+
+            # FIND AI MOVE    
             # Note: ai_turn.move is high difficulty. Only able to tie or I suck at tic-tac-toe
             # Note: ai_turn.competent_move is low difficulty. easier to beat
             m = ai_turn.move(boardMatrix,"X") 
@@ -126,11 +121,6 @@ def main():
             # Add +1 to O & X count 		
             countO += 1
             countX += 1
-
-            # raw_input('Human turn: Place O <press enter>')
-            # computer.wins(board,-1)
-
-    		#Game over? ->  break
 
     except rospy.ROSInterruptException:
         exit()
