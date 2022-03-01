@@ -13,35 +13,35 @@ import math
 import cv2
 
 def getContours(cv_image):
-		"""
-		OpenCV based function that finds contours on an image
-		@param original_frame: Image that will be analyzed for contours
-		@return: contours output from cv2 findContours function
-		"""
+	"""
+	OpenCV based function that finds contours on an image
+	@param original_frame: Image that will be analyzed for contours
+	@return: contours output from cv2 findContours function
+	"""
 
-		# Copy original image 
-		cv_image = cv_image.copy()
+	# Copy original image 
+	cv_image = cv_image.copy()
 
-		# grayscale image
-		img_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+	# grayscale image
+	img_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
 
-		# apply gaussian blur
-		img_blur = cv2.GaussianBlur(img_gray, (7, 7), 0)
+	# apply gaussian blur
+	img_blur = cv2.GaussianBlur(img_gray, (7, 7), 0)
 
-		# apply canny
-		img_canny = cv2.Canny(img_blur, 100, 200)
+	# apply canny
+	img_canny = cv2.Canny(img_blur, 100, 200)
 
-		# Dilate and Erode Image: results in threshold image
-		kernel = np.ones((3, 3))
-		img_dilate = cv2.dilate(img_canny, kernel, iterations=1)
-		img_thresh = cv2.erode(img_dilate, kernel, iterations=1)
+	# Dilate and Erode Image: results in threshold image
+	kernel = np.ones((3, 3))
+	img_dilate = cv2.dilate(img_canny, kernel, iterations=1)
+	img_thresh = cv2.erode(img_dilate, kernel, iterations=1)
 
-		# Finds all contours on image (using threshold image)
-		contours, _ = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		# cv2.drawContours(cv_image, contours, -1, (0,255,0), 3)
-		# cv2.imshow("test",cv_image)
-		# cv2.waitKey(0)
-		return contours
+	# Finds all contours on image (using threshold image)
+	contours, _ = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+	# cv2.drawContours(cv_image, contours, -1, (0,255,0), 3)
+	# cv2.imshow("test",cv_image)
+	# cv2.waitKey(0)
+	return contours
 
 def momentCenter(contour):
 	moments = cv2.moments(contour)
