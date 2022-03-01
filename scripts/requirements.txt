@@ -1,0 +1,92 @@
+# list of requirements 
+os
+sys
+cv2
+time
+math
+rospy
+types
+numpy
+pyhon  == 2.7
+opencv == 4.2
+random
+std_msgs
+platform
+cv_bridge
+motoman_msgs
+pyrealsense2
+moveit_msgs.msg
+sensor_msgs.msg
+moveit_commander
+geometry_msgs.msg
+matplotlib.pyplot as plt
+moveit_commander.conversions
+--------------------------------------------------------
+TTT_computer:
+import numpy as np
+from random import choice
+import platform
+import time
+from os import system
+
+robot_control:
+import sys
+import rospy
+import moveit_commander
+import moveit_msgs.msg
+import geometry_msgs.msg
+from moveit_commander.conversions import pose_to_list
+from motoman_msgs.srv import ReadSingleIO, WriteSingleIO
+
+TTT_listener:
+## IMPORTS
+import tf2_ros
+import tf2_msgs.msg 
+
+
+from std_msgs.msg import ByteMultiArray
+
+
+
+TTT_minimax:
+import random
+random.seed()
+
+TTT_movement:
+
+
+TTT.py:
+from types import NoneType
+
+
+
+toolbox_depth_vision:
+## IMPORTS
+import pyrealsense2 as rs
+
+from cv_bridge import CvBridge, CvBridgeError
+
+
+
+toolbox_shape_detector:
+
+import math
+import cv2
+
+camera_info_server:
+
+from tic_tac_toe.srv import LoadCameraInfo
+
+from sensor_msgs.msg import CameraInfo
+
+
+camera2board_tf_publisher:
+
+
+
+
+
+
+
+
+
