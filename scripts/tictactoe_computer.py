@@ -13,43 +13,6 @@ import platform
 import time
 from os import system
 
-# infinity = np.inf
-# HUMAN = -1
-# COMP =  +1
-# def minimax(state, depth, player):
-#     """
-#     AI function that choice the best move
-#     :param state: current state of the board
-#     :param depth: node index in the tree (0 <= depth <= 9),
-#     but never nine in this case (see iaturn() function)
-#     :param player: an human or a computer
-#     :return: a list with [the best row, best col, best score]
-#     """
-#     if player == COMP:
-#         best = [-1, -1, -infinity]
-#     else:
-#         best = [-1, -1, infinity]
-
-#     if depth == 0 or computer.game_over(state):
-#         score = computer.evaluate(state)
-#         return [-1, -1, score]
-
-#     for cell in computer.empty_cells(state):
-#         x, y = cell[0], cell[1]
-#         state[x][y] = player
-#         score = computer.minimax(state, depth - 1, -player)
-#         state[x][y] = 0
-#         score[0], score[1] = x, y
-
-#         if player == COMP:
-#             if score[2] > best[2]:
-#                 best = score  # max value
-#         else:
-#             if score[2] < best[2]:
-#                 best = score  # min value
-
-    
-#     return best
 
 class TICTACTOE_COMPUTER(object):
     """
@@ -91,14 +54,7 @@ class TICTACTOE_COMPUTER(object):
         which refers to this repo: https://github.com/Cledersonbc/tic-tac-toe-minimax
         Returns game which exits the while loop in main if Game = False
         '''
-        # depth = len(self.empty_cells(board)) 
-        # depth is the number of empty cells which doesn't mean that the computer or human didn't win already
-        # needs to change to a more specific 
         winner = self.evaluate(board)
-
-        # print('In TTT_comp-Evaluete_Game: depth=',depth)
-        # print('Evaluate:', winner)
-        # if depth == 0:
 
         if winner == 1:
             print('Game Over..\n Winner: A.I Computer\n\n\n')
@@ -118,8 +74,6 @@ class TICTACTOE_COMPUTER(object):
         else:
             print('The game continues..')
             game = True
-        # else:
-        #   game = True
 
         return game
 
@@ -188,11 +142,6 @@ class TICTACTOE_COMPUTER(object):
         if depth == 0 or self.game_over(self.board):
             self.Evaluate_Game(self.board)
             
-
-        # clean()
-        #print(f'Computer turn [{c_choice}]')
-        #render(self.board, c_choice, h_choice)
-
         if depth == 9: # if board is blank, randomly choose a spot
             print('Board is Blank')
             x = choice([0, 1, 2])
@@ -216,7 +165,6 @@ class TICTACTOE_COMPUTER(object):
         self.board[move[0]][move[1]] = 1
 
         print('IN TTT_computer ai_turn - expected board:',self.board)
-        # print self.board
         return self.board, pose_number
 
     def game_over(self,state):
@@ -287,7 +235,7 @@ class TICTACTOE_COMPUTER(object):
         chars = {
             -1: 'O',
             +1: 'X',
-            0: ' '
+             0: ' '
         }
         str_line = '-------------'
 

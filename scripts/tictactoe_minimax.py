@@ -1,4 +1,9 @@
-#Script from https://github.com/aschmid1/TicTacToeAI/blob/master/tictactoe.py
+'''
+Script from https://github.com/aschmid1/TicTacToeAI/blob/master/tictactoe.py
+- has 2 move functions
+: competent move: basic functionality using minimax
+: move: uses minimax + alpha/beta pruning to arrive at decision faster
+'''
 import random
 random.seed()
 

@@ -66,10 +66,6 @@ class TICTACTOE_LISTENER(object):
         :param count0: int; number of O blocks expected
         :return boardO: 3x3 representation of which tiles have O's
         '''
-        
-        # print('expected number of Os: ', countO)
-      
-        # boardCountO=0  # does this set boardCount back to 0 each time?
        
         board = rospy.wait_for_message("circle_board_state", ByteMultiArray, timeout=None)
         # print(board.data,'boardmsg')
