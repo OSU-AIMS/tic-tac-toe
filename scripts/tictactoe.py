@@ -8,7 +8,6 @@
 
 import os
 import sys
-from types import NoneType
 import numpy as np 
 
 from tictactoe_computer import TICTACTOE_COMPUTER
