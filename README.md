@@ -8,8 +8,17 @@ The Tic-Tac-Toe project is a sample package for using a 6-axis robotic arm to pl
 
 Note: This repository was designed for ROS Melodic. It has not been tested on other distributions. Specifically designed for the Motoman MH5L robot as supported by the ROS-Industrial program.
 
+## Installation
 
-### Prerequisites
+### Python and Dependencies
+This repository is only tested to work with **Python 2.7.17**.
+
+Install requirements with pip:
+```bash
+pip install --upgrade -r requirements.txt
+```
+
+### ROS Prerequisites
   - **ROS Melodic:** For obtaining and configuring ROS follow the installation instructions for [full-desktop Melodic installation](http://wiki.ros.org/melodic/Installation/Ubuntu).
   - **Catkin workspace:** Create a clean [catkin-tools](https://catkin-tools.readthedocs.io/en/latest/index.html) workspace.
   - **MoveIt 1:** For installation instructions see [MoveIt's webpage](https://moveit.ros.org/install/).
@@ -19,10 +28,12 @@ Note: This repository was designed for ROS Melodic. It has not been tested on ot
   - [tic-tac-toe](https://github.com/osu-aims/tic-tac-toe)
   - [aims-robots-all](https://github.com/osu-aims/aims-robots-all)
 
-## Installation
+### Create Workspace
+
   1. Create a catkin compatible workspace ```$ mkdir -p catkin_ws/src```
   2. Clone the repositories listed above into the src folder
   3. Build and source workspace 
+
      ```
      catkin init
      catkin build
@@ -38,7 +49,6 @@ If the build fails, it occurs usually to missing package dependencies or missing
 sudo apt-get update ros-melodic-[package-name]
 # separate the package name words with a '-'
 ```
-If a package is not found it is probably a third-party dependency, google the name of the package and search for installation instructions:
 
 ## Usage
 
@@ -46,7 +56,7 @@ If a package is not found it is probably a third-party dependency, google the na
 roslaunch tictactoe tictactoe.launch
 rosrun tictactoe tictactoe.py
 ```
-
+The first command launches connection to robot and starts several ROS publishers. The second is the tictactoe master script. By default the player goes first using O pieces and follow along in the terminal to continue the game.
 
 
 
