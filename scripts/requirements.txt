@@ -1,0 +1,22 @@
+# list of requirements 
+os == Linux
+sys == Ubuntu 18 LTS
+time
+math
+rospy == 3.0.2
+types
+numpy == 1.13.3
+pyhon == 2.7.17
+opencv == 4.2
+random
+std_msgs == 3.0.2
+platform
+cv_bridge
+matplotlib == 2.1.1
+motoman_msgs == 3.0.2
+pyrealsense2 == 2.41.0.2666
+moveit_msgs.msg == 3.0.2
+sensor_msgs.msg == 3.0.2
+moveit_commander 
+geometry_msgs.msg == 3.0.2
+moveit_commander.conversions
