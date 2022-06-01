@@ -5,18 +5,16 @@
 <launch>
 
     <!-- Parameters -->
-    <arg name="sim" default="true"/>
-    <arg name="robot_ip" unless="$(arg sim)"/>
-    <arg name="controller" unless="$(arg sim)" default="fs100" />
+    <arg name="sim_robot" />
+    <arg name="ip_address" unless="$(arg sim_robot)" default="mh5l.aims.lan" />
 
     <!-- Launch Physical Robot w/ Lab Connection Defaults -->
-    <include file="$(find robot_with_camera_config)/launch/moveit_planning_execution.launch" >
-        <arg name="sim" value="$(arg sim)"/>
-        <arg name="robot_ip" unless="$(arg sim)" value="$(arg robot_ip)" />
-        <arg name="controller" unless="$(arg sim)" value="$(arg controller)" />
+    <include file="$(find aims_wc2_pgn64_moveit_config)/launch/moveit_planning_execution.launch" >
+        <arg name="sim" value="$(arg sim_robot)" />
+        <arg name="robot_ip" unless="$(arg sim_robot)" value="$(arg ip_address)" />
     </include>
 
-    <!-- TF Listener & Publisher for the Transform between Origin and Camera -->
-    <!-- <include file="$(find tic_tac_toe)/launch/camera_transform.launch" /> -->
+    <!-- Add Camera link tf -->
+    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0.34445 0.0175 -0.1151 0 1.5707963 0 link_4_r camera_link 100" />
 
 </launch>

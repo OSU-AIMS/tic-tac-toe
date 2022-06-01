@@ -9,9 +9,22 @@
 
     <!-- Launch Camera Topics -->
     <include file="$(find realsense2_camera)/launch/rs_camera.launch" >
-        <arg name="align_depth" value="true"/>
-        <arg name="enable_pointcloud" value="true"/>
-        <!-- <arg name="mode" value="manual"/> -->
+        <arg name="initial_reset"     value="true" />
+
+        <arg name="enable_color"      value="true"/>
+        <arg name="color_width"       value="640"/>
+        <arg name="color_height"      value="480"/>
+        <arg name="color_fps"         value="30"/>
+
+        <arg name="enable_depth"      value="true"/>
+        <arg name="depth_width"       value="640"/>
+        <arg name="depth_height"      value="480"/>
+        <arg name="depth_fps"         value="30"/>
+
+        <arg name="align_depth"       value="true"/>
+
+        <arg name="enable_pointcloud" value="false"/>
+        <arg name="enable_sync"       value="true"/>
     </include>
 
     <!-- Load Intel Realsense "Camera_Info" topic into ROS Parameter Server -->

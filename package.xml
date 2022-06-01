@@ -7,6 +7,7 @@
         <p>PROJECT: "Robotic Tic Tac Toe"</p>
     </description>
     <author>LuisMartinez</author>
+    <author>A.C. Buynak</author>
     <maintainer email="luiscmartinez18@gmail.com">LuisMartinez</maintainer>
     <license>Apache 2.0</license>
 
@@ -19,11 +20,14 @@
 
     <test_depend>roslaunch</test_depend>
 
-    <exec_depend>mh5l_table</exec_depend>
     <exec_depend>motoman_mh5_support</exec_depend>
+    <exec_depend>aims_wc2_pgn64_moveit_config</exec_depend>
+    <exec_depend>realsense2_camera</exec_depend>
+    <exec_depend>tf</exec_depend>
+
     <exec_depend>joint_state_publisher</exec_depend>
-    <exec_depend>motoman_driver</exec_depend>
     <exec_depend>robot_state_publisher</exec_depend>
+
     <exec_depend>moveit_visual_tools</exec_depend>
     <exec_depend>rviz</exec_depend>
     <exec_depend>xacro</exec_depend>

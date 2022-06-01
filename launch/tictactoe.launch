@@ -2,27 +2,25 @@
 
 <launch>
 
+    <!-- State Control Arguments -->
+    <arg name="sim" value="false" />
+
+    <!-- Launch Vision System (RealSense Camera) -->
+    <include file="$(find tic_tac_toe)/launch/t2_vision.launch" />
+
     <!-- Launch Physical Robot w/ Lab Connection Defaults -->
-    <include file="$(find aims_wc2_pgn64_moveit_config)/launch/moveit_planning_execution.launch" >
-        <arg name="sim" default="false"/>
-        <arg name="robot_ip" default="10.10.10.200" />
+    <include file="$(find tic_tac_toe)/launch/t2_robot.launch" >
+        <arg name="sim_robot" value="$(arg sim)"/>
+        <arg name="ip_address" unless="$(arg sim)" default="mh5l.aims.lan" />
     </include>
 
-    <!-- Launch Camera Topics -->
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch" >
-        <arg name="align_depth" value="true"/>
-        <arg name="enable_pointcloud" value="true"/>
-        <!-- <arg name="mode" value="manual"/> -->
-    </include>
 
-    <!-- Add Camera link tf -->
-    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0.34445 0.0175 -0.1151 0 1.5707963 0 link_4_r camera_link 100" />   
-    
     <!-- Launch actual code to test -->
     <node pkg="tic_tac_toe" type="camera2board_tf_publisher.py" name="camera2board_tf_publisher"  />
     <!-- Comment below to debug the individual publishers or run them separately in the terminal -->
     <node pkg="tic_tac_toe" type="circle_state_publisher.py" name="circle_state_publisher"  />
     <node pkg="tic_tac_toe" type="tile_locations_publisher.py" name="tile_locations_publisher"  />
+
 
     <!-- Open RQT for analysis with a custom perspective -->
     <node name = "RQT_TestViewer" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" 
